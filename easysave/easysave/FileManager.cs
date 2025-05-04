@@ -13,11 +13,17 @@ namespace easysave
             CreateDirectory(targetPath, name);
             try
             {
-                System.IO.File.Copy(sourcePath, targetPath, true);
+                foreach (string file in System.IO.Directory.GetFiles(sourcePath))
+                {
+                    string fileName = System.IO.Path.GetFileName(file);
+                    string destFile = System.IO.Path.Combine(targetPath, name);
+                    destFile = System.IO.Path.Combine(destFile, fileName);
+                    System.IO.File.Copy(file, destFile, true);
+                }
             }
             catch (Exception e)
             {
-                Console.WriteLine("Error copying file: " + e.Message);
+                Console.WriteLine("Error copying directory: " + e.Message);
             }
         }
         public static int GetFileSize(string filePath)

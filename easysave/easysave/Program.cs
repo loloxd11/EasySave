@@ -51,6 +51,7 @@ public class Program
 
     static void AddJob()
     {
+        Console.Clear();
         Console.WriteLine("===== Ajouter un job =====");
         Console.WriteLine("=============================");
         Console.Write("Nom de votre backup : ");
@@ -101,6 +102,45 @@ public class Program
 
     static void AfficherLancerJob()
     {
+        Console.Clear();
+        Console.WriteLine("===== Exécuter un job =====");
+        Console.WriteLine("Entrez un numéro entre 0 et 4 pour un job, ou 5 pour tous les jobs.");
+        Console.WriteLine("=============================");
 
+        manager.ListBackups();
+
+        Console.WriteLine("=============================");
+        Console.Write("Votre choix : ");
+        string input = Console.ReadLine();
+
+        if (!int.TryParse(input, out int choix))
+        {
+            Console.WriteLine("Entrée invalide. Veuillez entrer un chiffre.");
+            return;
+        }
+
+        List<int> indexes = new();
+
+        if (choix == 5)
+        {
+            // Crée une liste de tous les index disponibles
+            indexes = Enumerable.Range(0, manager.MaxBackups).ToList();
+        }
+        else if (choix >= 0 && choix < manager.MaxBackups)
+        {
+            indexes.Add(choix);
+        }
+        else
+        {
+            Console.WriteLine("Numéro de job invalide.");
+            return;
+        }
+        // debug print la liste des index
+        Console.WriteLine("Index de sauvegarde sélectionnés : " + string.Join(", ", indexes));
+
+        manager.Backup(indexes);
     }
+
+
+
 }
