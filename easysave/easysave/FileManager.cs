@@ -10,14 +10,28 @@ namespace easysave
     {
         public static void CopyFile(string sourcePath, string targetPath, string name)
         {
+            string targetDirectory = System.IO.Path.Combine(targetPath, name);
             CreateDirectory(targetPath, name);
+
             try
             {
-                foreach (string file in System.IO.Directory.GetFiles(sourcePath))
+                // Copier tous les fichiers dans le répertoire source
+                foreach (string file in System.IO.Directory.GetFiles(sourcePath, "*.*", System.IO.SearchOption.AllDirectories))
                 {
-                    string fileName = System.IO.Path.GetFileName(file);
-                    string destFile = System.IO.Path.Combine(targetPath, name);
-                    destFile = System.IO.Path.Combine(destFile, fileName);
+                    // Obtenir le chemin relatif du fichier par rapport au répertoire source
+                    string relativePath = System.IO.Path.GetRelativePath(sourcePath, file);
+
+                    // Construire le chemin complet dans le répertoire cible
+                    string destFile = System.IO.Path.Combine(targetDirectory, relativePath);
+
+                    // Créer les sous-dossiers nécessaires dans le répertoire cible
+                    string destDirectory = System.IO.Path.GetDirectoryName(destFile)!;
+                    if (!System.IO.Directory.Exists(destDirectory))
+                    {
+                        System.IO.Directory.CreateDirectory(destDirectory);
+                    }
+
+                    // Copier le fichier
                     System.IO.File.Copy(file, destFile, true);
                 }
             }
@@ -47,5 +61,6 @@ namespace easysave
                 System.IO.Directory.CreateDirectory(directoryPath);
             }
         }
+
     }
 }

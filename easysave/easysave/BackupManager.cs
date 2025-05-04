@@ -45,7 +45,7 @@ namespace BackupManager
                     Console.WriteLine("Job not found");
                     break;
                 }
-                RemoveBackupJob(backups[i].Name);
+                RemoveBackupJob(i);
 
             }
 
@@ -56,20 +56,20 @@ namespace BackupManager
             backups.Add(backup);
         }
 
-        public void RemoveBackupJob(string name)
+        public void RemoveBackupJob(int Index)
         {
             try
             {
-                backups.Remove(backups.FirstOrDefault(b => b.Name.Equals(name, StringComparison.OrdinalIgnoreCase))!);
-                Console.WriteLine($"Backup job '{name}' removed successfully.");
+                backups.Remove(backups[Index]);
+                Console.WriteLine($"removed successfully.");
             }
             catch (InvalidOperationException)
             {
-                Console.WriteLine($"Backup job '{name}' not found.");
+                Console.WriteLine($"Not found.");
             }
             catch (ArgumentNullException)
             {
-                Console.WriteLine($"Backup job '{name}' not found.");
+                Console.WriteLine($"Not found.");
             }
 
         }
@@ -81,6 +81,22 @@ namespace BackupManager
                 Console.WriteLine($"Backup {i}: {backups[i].Name} - {backups[i].SourcePath} -> {backups[i].TargetPath}");
             }
         }
+
+        public void UpdateBackupJob(int index, string name, string newSourcePath, string newTargetPath, bool newType)
+        {
+            if (index < 0 || index >= backups.Count)
+            {
+                Console.WriteLine("Index out of range.");
+                return;
+            }
+            backups[index].SetSourcePath(newSourcePath);
+            backups[index].SetTargetPath(newTargetPath);
+            backups[index].SetType(newType);
+            backups[index].SetName(name);
+            Console.WriteLine($"Backup job '{name}' updated successfully.");
+
+        }
+
 
     }
 }

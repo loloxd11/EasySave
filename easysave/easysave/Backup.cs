@@ -14,5 +14,22 @@ internal class Backup
 
     public Backup(string sourcePath, string targetPath, bool type, string name)
         => (SourcePath, TargetPath, Type, Name) = (sourcePath, targetPath, type, name);
+
+    public void SetSourcePath(string sourcePath)
+    {
+        SourcePath = sourcePath;
+    }
+    public void SetTargetPath(string targetPath)
+    {
+        TargetPath = targetPath;
+    }
+    public void SetType(bool type)
+    {
+        Type = type;
+    }
+    public void SetName(string name)
+    {
+        Name = name;
+    }
 }
 
