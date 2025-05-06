@@ -165,7 +165,7 @@ public class Program
     {
         Console.Clear();
         Console.WriteLine("===== Exécuter une backup =====");
-        Console.WriteLine("Entrez un numéro entre 0 et 4 pour un job, ou 5 pour toutes les backups.");
+        Console.WriteLine($"Entrez un numéro entre 0 et 4 pour un job, ou {manager.MaxBackups} pour toutes les backups.");
         Console.WriteLine("=============================");
 
         manager.ListBackups();
@@ -182,10 +182,10 @@ public class Program
 
         List<int> indexes = new()!;
 
-        if (choix == 5)
+        if (choix == manager.MaxBackups)
         {
             // Crée une liste de tous les index disponibles
-            indexes = Enumerable.Range(0, manager.MaxBackups).ToList();
+            indexes = Enumerable.Range(0, manager.GetBackupLength()).ToList();
         }
         else if (choix >= 0 && choix < manager.MaxBackups)
         {

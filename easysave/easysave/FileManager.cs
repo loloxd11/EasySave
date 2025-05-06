@@ -53,7 +53,7 @@ namespace easysave
             }
         }
 
-        private static void CreateDirectory(string path, string name)
+        public static void CreateDirectory(string path, string name)
         {
             string directoryPath = System.IO.Path.Combine(path, name);
             if (!System.IO.Directory.Exists(directoryPath))

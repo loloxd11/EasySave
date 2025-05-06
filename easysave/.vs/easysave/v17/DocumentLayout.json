@@ -3,20 +3,20 @@
   "WorkspaceRootPath": "C:\\Users\\kazma\\source\\repos\\loloxd11\\EasySave\\easysave\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{6BC033B9-4A8F-40B1-B2FC-B0412F04CC2B}|easysave\\easysave.csproj|c:\\users\\kazma\\source\\repos\\loloxd11\\easysave\\easysave\\easysave\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6BC033B9-4A8F-40B1-B2FC-B0412F04CC2B}|easysave\\easysave.csproj|solutionrelative:easysave\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{6BC033B9-4A8F-40B1-B2FC-B0412F04CC2B}|easysave\\easysave.csproj|c:\\users\\kazma\\source\\repos\\loloxd11\\easysave\\easysave\\easysave\\backupmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{6BC033B9-4A8F-40B1-B2FC-B0412F04CC2B}|easysave\\easysave.csproj|solutionrelative:easysave\\backupmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6BC033B9-4A8F-40B1-B2FC-B0412F04CC2B}|easysave\\easysave.csproj|c:\\users\\kazma\\source\\repos\\loloxd11\\easysave\\easysave\\easysave\\backup.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6BC033B9-4A8F-40B1-B2FC-B0412F04CC2B}|easysave\\easysave.csproj|solutionrelative:easysave\\backup.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{6BC033B9-4A8F-40B1-B2FC-B0412F04CC2B}|easysave\\easysave.csproj|c:\\users\\kazma\\source\\repos\\loloxd11\\easysave\\easysave\\easysave\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6BC033B9-4A8F-40B1-B2FC-B0412F04CC2B}|easysave\\easysave.csproj|solutionrelative:easysave\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{6BC033B9-4A8F-40B1-B2FC-B0412F04CC2B}|easysave\\easysave.csproj|c:\\users\\kazma\\source\\repos\\loloxd11\\easysave\\easysave\\easysave\\filemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{6BC033B9-4A8F-40B1-B2FC-B0412F04CC2B}|easysave\\easysave.csproj|solutionrelative:easysave\\filemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6BC033B9-4A8F-40B1-B2FC-B0412F04CC2B}|easysave\\easysave.csproj|c:\\users\\kazma\\source\\repos\\loloxd11\\easysave\\easysave\\easysave\\backup.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6BC033B9-4A8F-40B1-B2FC-B0412F04CC2B}|easysave\\easysave.csproj|solutionrelative:easysave\\backup.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -26,7 +26,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Bookmark",
@@ -38,52 +38,52 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\kazma\\source\\repos\\loloxd11\\EasySave\\easysave\\easysave\\Program.cs",
               "RelativeDocumentMoniker": "easysave\\Program.cs",
               "ToolTip": "C:\\Users\\kazma\\source\\repos\\loloxd11\\EasySave\\easysave\\easysave\\Program.cs",
               "RelativeToolTip": "easysave\\Program.cs",
-              "ViewState": "AgIAAIUAAAAAAAAAAADwv54AAAApAAAAAAAAAA==",
+              "ViewState": "AgIAAKUAAAAAAAAAAAAowLsAAAA+AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-05-04T12:36:36.467Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
               "Title": "BackupManager.cs",
               "DocumentMoniker": "C:\\Users\\kazma\\source\\repos\\loloxd11\\EasySave\\easysave\\easysave\\BackupManager.cs",
               "RelativeDocumentMoniker": "easysave\\BackupManager.cs",
               "ToolTip": "C:\\Users\\kazma\\source\\repos\\loloxd11\\EasySave\\easysave\\easysave\\BackupManager.cs",
               "RelativeToolTip": "easysave\\BackupManager.cs",
-              "ViewState": "AgIAACsAAAAAAAAAAAAowEMAAAAlAAAAAAAAAA==",
+              "ViewState": "AgIAACMAAAAAAAAAAAAgwDYAAABkAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-05-04T12:41:29.356Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 2,
               "Title": "FileManager.cs",
               "DocumentMoniker": "C:\\Users\\kazma\\source\\repos\\loloxd11\\EasySave\\easysave\\easysave\\FileManager.cs",
               "RelativeDocumentMoniker": "easysave\\FileManager.cs",
               "ToolTip": "C:\\Users\\kazma\\source\\repos\\loloxd11\\EasySave\\easysave\\easysave\\FileManager.cs",
               "RelativeToolTip": "easysave\\FileManager.cs",
-              "ViewState": "AgIAAAMAAAAAAAAAAAAAABwAAABDAAAAAAAAAA==",
+              "ViewState": "AgIAAA0AAAAAAAAAAAAQwAoAAABVAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-05-04T13:21:27.788Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "Backup.cs",
               "DocumentMoniker": "C:\\Users\\kazma\\source\\repos\\loloxd11\\EasySave\\easysave\\easysave\\Backup.cs",
               "RelativeDocumentMoniker": "easysave\\Backup.cs",
               "ToolTip": "C:\\Users\\kazma\\source\\repos\\loloxd11\\EasySave\\easysave\\easysave\\Backup.cs",
               "RelativeToolTip": "easysave\\Backup.cs",
-              "ViewState": "AgIAAAMAAAAAAAAAAAAQwB0AAAAXAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB0AAAAXAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-05-04T12:45:27.398Z",
               "EditorCaption": ""

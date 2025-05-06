@@ -37,23 +37,43 @@ namespace BackupManager
         {
             foreach (int i in BackupsNbr)
             {
-                try {
-                    FileManager.CopyFile(backups[i].SourcePath, backups[i].TargetPath, backups[i].Name);
+                try
+                {
+                    IBackupStrategy strategy;
+
+                    // Choisir la stratégie en fonction du type de sauvegarde
+                    if (backups[i].Type) // true = différentielle
+                    {
+                        strategy = new DifferentialBackupStrategy();
+                    }
+                    else // false = complète
+                    {
+                        strategy = new CompleteBackupStrategy();
+                    }
+
+                    // Exécuter la stratégie
+                    strategy.Execute(backups[i].SourcePath, backups[i].TargetPath, backups[i].Name);
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("Job not found");
+                    Console.WriteLine($"Erreur lors de l'exécution du job de sauvegarde: {e.Message}");
                     break;
                 }
-                RemoveBackupJob(i);
-
             }
-
         }
         public void AddBackupJob(string sourcePath, string targetPath, bool type, string name)
         {
             Backup backup = new Backup(sourcePath, targetPath, type, name);
             backups.Add(backup);
+        }
+
+        public int GetBackupLength()
+        {
+            if (backups.Count > 0)
+            {
+                return backups.Count; 
+            }
+            return 0;
         }
 
         public void RemoveBackupJob(int Index)
@@ -96,6 +116,8 @@ namespace BackupManager
             Console.WriteLine($"Backup job '{name}' updated successfully.");
 
         }
+
+
 
 
     }
