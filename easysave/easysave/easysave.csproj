@@ -7,4 +7,10 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Reference Include="LogLibrary">
+      <HintPath>..\..\ClassLibraryProjects\LogLibrary\bin\Release\net8.0\LogLibrary.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>
