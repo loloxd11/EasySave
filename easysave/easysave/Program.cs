@@ -25,17 +25,8 @@ namespace EasySave
                     bool exit = false;
                     while (!exit)
                     {
-                        cli.DisplayMenu();
-
-                        string command = Console.ReadLine();
-                        if (command?.ToLower() == "exit")
-                        {
-                            exit = true;
-                        }
-                        else
-                        {
-                            cli.ProcessCommand(command);
-                        }
+                        cli.Start();
+                        exit = true;
                     }
                 }
             }
@@ -90,7 +81,7 @@ namespace EasySave
                 }
                 else
                 {
-                    cli.ProcessCommand(command);
+                   
                 }
             }
         }

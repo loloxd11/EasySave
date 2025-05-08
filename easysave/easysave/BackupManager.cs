@@ -106,10 +106,9 @@ namespace EasySave
             return true;
         }
 
-        public bool RemoveBackupJob(string name)
+        public bool RemoveBackupJob(int index)
         {
-            int index = backupJobs.FindIndex(job => job.Name == name);
-            if (index >= 0)
+            if (index >= 0 && index < backupJobs.Count)
             {
                 backupJobs.RemoveAt(index);
                 SaveBackupJobsToConfig();

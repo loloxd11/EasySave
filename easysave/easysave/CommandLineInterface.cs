@@ -23,203 +23,235 @@ namespace EasySave
             }
         }
 
-        public void ProcessCommand(string command)
+        public void Start()
         {
-            if (string.IsNullOrWhiteSpace(command))
+            bool exit = false;
+
+            while (!exit)
             {
+                DisplayMainMenu();
+                string choice = Console.ReadLine();
+
+                switch (choice)
+                {
+                    case "1":
+                        AddBackupMenu();
+                        break;
+                    case "2":
+                        UpdateOrRemoveBackupMenu();
+                        break;
+                    case "3":
+                        ExecuteBackupMenu();
+                        break;
+                    case "4":
+                        ListBackups();
+                        break;
+                    case "5":
+                        ChangeLanguageMenu();
+                        break;
+                    case "6":
+                        exit = true;
+                        Console.WriteLine(languageManager.GetTranslation("MenuExit"));
+                        break;
+                    default:
+                        Console.WriteLine(languageManager.GetTranslation("UnknownCommand"));
+                        break;
+                }
+            }
+        }
+
+        private void DisplayMainMenu()
+        {
+            Console.WriteLine("===== EasySave =====");
+            Console.WriteLine("1. " + languageManager.GetTranslation("MenuAddJob"));
+            Console.WriteLine("2. " + languageManager.GetTranslation("MenuUpdateJob"));
+            Console.WriteLine("3. " + languageManager.GetTranslation("MenuExecuteJob"));
+            Console.WriteLine("4. " + languageManager.GetTranslation("MenuListJobs"));
+            Console.WriteLine("5. " + languageManager.GetTranslation("MenuChangeLanguage"));
+            Console.WriteLine("6. " + languageManager.GetTranslation("MenuExit"));
+            Console.WriteLine("=============================");
+            Console.Write("Votre choix : ");
+        }
+
+        private void AddBackupMenu()
+        {
+            Console.Clear();
+            Console.WriteLine("=========== "+languageManager.GetTranslation("MenuAddJob")+ " ===========");
+            Console.Write(languageManager.GetTranslation("PromptJobName"));
+            string name = Console.ReadLine();
+
+            Console.Write(languageManager.GetTranslation("PromptJobSrc"));
+            string source = Console.ReadLine();
+
+            Console.Write(languageManager.GetTranslation("PromptJobDst"));
+            string target = Console.ReadLine();
+
+            Console.Write(languageManager.GetTranslation("PromptJobType"));
+            string typeInput = Console.ReadLine();
+
+            if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(source) || string.IsNullOrWhiteSpace(target) || !int.TryParse(typeInput, out int type) || (type != 0 && type != 1))
+            {
+                Console.WriteLine(languageManager.GetTranslation("InvalidInput"));
                 return;
             }
 
-            // Diviser la commande par espaces, mais respecter les paramètres entre guillemets
-            string[] parts = SplitCommand(command);
-            string mainCommand = parts.Length > 0 ? parts[0].ToLower() : "";
+            BackupType backupType = type == 0 ? BackupType.Complete : BackupType.Differential;
+            bool success = backupManager.AddBackupJob(name, source, target, backupType);
 
-            switch (mainCommand)
+            if (success)
             {
-                case "add":
-                    if (parts.Length >= 5)
-                    {
-                        string name = parts[1];
-                        string source = parts[2];
-                        string target = parts[3];
-                        if (Enum.TryParse<BackupType>(parts[4], true, out BackupType type))
-                        {
-                            bool success = backupManager.AddBackupJob(name, source, target, type);
-                            if (success)
-                            {
-                                Console.WriteLine(languageManager.GetTranslation("JobAdded"));
-                            }
-                        }
-                        else
-                        {
-                            Console.WriteLine(languageManager.GetTranslation("InvalidBackupType"));
-                        }
-                    }
-                    else
-                    {
-                        Console.WriteLine(languageManager.GetTranslation("AddUsage"));
-                    }
-                    break;
-
-                case "remove":
-                    if (parts.Length >= 2)
-                    {
-                        string name = parts[1];
-                        bool success = backupManager.RemoveBackupJob(name);
-                        if (success)
-                        {
-                            Console.WriteLine(languageManager.GetTranslation("JobRemoved"));
-                        }
-                        else
-                        {
-                            Console.WriteLine(languageManager.GetTranslation("JobNotFound"));
-                        }
-                    }
-                    else
-                    {
-                        Console.WriteLine(languageManager.GetTranslation("RemoveUsage"));
-                    }
-                    break;
-
-                case "update":
-                    if (parts.Length >= 6 && int.TryParse(parts[1], out int index))
-                    {
-                        string name = parts[2];
-                        string source = parts[3];
-                        string target = parts[4];
-                        if (Enum.TryParse<BackupType>(parts[5], true, out BackupType type))
-                        {
-                            bool success = backupManager.UpdateBackupJob(index - 1, name, source, target, type);
-                            if (success)
-                            {
-                                Console.WriteLine(languageManager.GetTranslation("JobUpdated"));
-                            }
-                        }
-                        else
-                        {
-                            Console.WriteLine(languageManager.GetTranslation("InvalidBackupType"));
-                        }
-                    }
-                    else
-                    {
-                        Console.WriteLine(languageManager.GetTranslation("UpdateUsage"));
-                    }
-                    break;
-
-                case "list":
-                    DisplayJobsList();
-                    break;
-
-                case "execute":
-                    if (parts.Length >= 2)
-                    {
-                        try
-                        {
-                            List<int> indices = new List<int>();
-                            string jobParam = parts[1];
-
-                            // Gérer une plage (ex: "1-3")
-                            if (jobParam.Contains("-"))
-                            {
-                                string[] range = jobParam.Split('-');
-                                if (range.Length == 2 && int.TryParse(range[0], out int start) && int.TryParse(range[1], out int end))
-                                {
-                                    for (int i = start; i <= end; i++)
-                                    {
-                                        indices.Add(i - 1); // Conversion en index 0-based
-                                    }
-                                }
-                            }
-                            // Gérer des travaux spécifiques (ex: "1;3;5")
-                            else if (jobParam.Contains(";"))
-                            {
-                                string[] jobs = jobParam.Split(';');
-                                foreach (string job in jobs)
-                                {
-                                    if (int.TryParse(job, out int idx))
-                                    {
-                                        indices.Add(idx - 1); // Conversion en index 0-based
-                                    }
-                                }
-                            }
-                            // Gérer un seul numéro de travail
-                            else if (int.TryParse(jobParam, out int idx))
-                            {
-                                indices.Add(idx - 1); // Conversion en index 0-based
-                            }
-
-                            backupManager.ExecuteBackupJob(indices);
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine($"{languageManager.GetTranslation("ExecuteError")}: {ex.Message}");
-                        }
-                    }
-                    else
-                    {
-                        Console.WriteLine(languageManager.GetTranslation("ExecuteUsage"));
-                    }
-                    break;
-
-                case "lang":
-                case "language":
-                    if (parts.Length >= 2)
-                    {
-                        ChangeLanguage(parts[1]);
-                    }
-                    else
-                    {
-                        Console.WriteLine(languageManager.GetTranslation("LanguageUsage"));
-                    }
-                    break;
-
-                case "help":
-                    DisplayHelp();
-                    break;
-
-                default:
-                    Console.WriteLine(languageManager.GetTranslation("UnknownCommand"));
-                    DisplayHelp();
-                    break;
+                Console.WriteLine(languageManager.GetTranslation("JobAdded"));
+            }
+            else
+            {
+                Console.WriteLine(languageManager.GetTranslation("JobNameExists"));
             }
         }
 
-        public void DisplayMenu()
+        private void UpdateOrRemoveBackupMenu()
         {
-            Console.WriteLine("\n==== EasySave Outil de Sauvegarde ====");
-            DisplayJobsList();
-            Console.WriteLine("\n" + languageManager.GetTranslation("MenuCommands"));
-            Console.WriteLine("1. add <nom> <source> <cible> <type>: " + languageManager.GetTranslation("MenuAddJob"));
-            Console.WriteLine("2. remove <nom>: " + languageManager.GetTranslation("MenuRemoveJob"));
-            Console.WriteLine("3. update <index> <nom> <source> <cible> <type>: " + languageManager.GetTranslation("MenuUpdateJob"));
-            Console.WriteLine("4. list: " + languageManager.GetTranslation("MenuListJobs"));
-            Console.WriteLine("5. execute <index>: " + languageManager.GetTranslation("MenuExecuteJob"));
-            Console.WriteLine("6. language <en|fr>: " + languageManager.GetTranslation("MenuChangeLanguage"));
-            Console.WriteLine("7. help: " + languageManager.GetTranslation("MenuHelp"));
-            Console.WriteLine("8. exit: " + languageManager.GetTranslation("MenuExit"));
-            Console.Write("\n> ");
+            Console.Clear();
+            Console.WriteLine("====="+ languageManager.GetTranslation("AddOrDeletetTitle")+ "=====");
+            ListBackups();
+
+            Console.Write(languageManager.GetTranslation("PromptAddOrDelete"));
+            string input = Console.ReadLine();
+
+            if (!int.TryParse(input, out int index) || index < 1 || index > backupManager.ListBackups().Count)
+            {
+                Console.WriteLine(languageManager.GetTranslation("InvalidJobIndex"));
+                return;
+            }
+
+            Console.WriteLine("1. " + languageManager.GetTranslation("MenuUpdateJob"));
+            Console.WriteLine("2. " + languageManager.GetTranslation("MenuRemoveJob"));
+            Console.Write("Votre choix : ");
+            string choice = Console.ReadLine();
+
+            if (choice == "1")
+            {
+                UpdateBackup(index - 1);
+            }
+            else if (choice == "2")
+            {
+                RemoveBackup(index - 1);
+            }
+            else
+            {
+                Console.WriteLine(languageManager.GetTranslation("UnknownCommand"));
+            }
         }
 
-        public void DisplayJobsList()
+        private void UpdateBackup(int index)
         {
-            List<BackupJob> jobs = backupManager.ListBackups();
-            Console.WriteLine("\n-- " + languageManager.GetTranslation("BackupJobs") + " --");
+            Console.Clear();
+            Console.WriteLine("=====" + languageManager.GetTranslation("MenuUpdateJob") + "=====");
+            Console.Write(languageManager.GetTranslation("PromptJobName"));
+            string name = Console.ReadLine();
 
-            if (jobs.Count == 0)
+            Console.Write(languageManager.GetTranslation("PromptJobSrc"));
+            string source = Console.ReadLine();
+
+            Console.Write(languageManager.GetTranslation("PromptJobDst"));
+            string target = Console.ReadLine();
+
+            Console.Write(languageManager.GetTranslation("PromptJobType"));
+            string typeInput = Console.ReadLine();
+
+            if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(source) || string.IsNullOrWhiteSpace(target) || !int.TryParse(typeInput, out int type) || (type != 0 && type != 1))
+            {
+                Console.WriteLine(languageManager.GetTranslation("InvalidInput"));
+                return;
+            }
+
+            BackupType backupType = type == 0 ? BackupType.Complete : BackupType.Differential;
+            bool success = backupManager.UpdateBackupJob(index, name, source, target, backupType);
+
+            if (success)
+            {
+                Console.WriteLine(languageManager.GetTranslation("JobUpdated"));
+            }
+            else
+            {
+                Console.WriteLine(languageManager.GetTranslation("JobNotFound"));
+            }
+        }
+
+        private void RemoveBackup(int index)
+        {
+            Console.Clear();
+            Console.WriteLine(languageManager.GetTranslation("HelpRemoveJob"));
+            bool success = backupManager.RemoveBackupJob(index);
+
+            if (success)
+            {
+                Console.WriteLine(languageManager.GetTranslation("JobRemoved"));
+            }
+            else
+            {
+                Console.WriteLine(languageManager.GetTranslation("JobNotFound"));
+            }
+        }
+
+        private void ExecuteBackupMenu()
+        {
+            Console.Clear();
+            Console.WriteLine("====="+ languageManager.GetTranslation("MenuExecuteJob") + "=====");
+            ListBackups();
+
+            Console.Write(languageManager.GetTranslation("PromptExecuteJobIndex"));
+            string input = Console.ReadLine();
+
+            List<int> indices = new List<int>();
+
+            if (input.ToLower() == "all")
+            {
+                indices = new List<int>();
+                for (int i = 0; i < backupManager.ListBackups().Count; i++)
+                {
+                    indices.Add(i);
+                }
+            }
+            else if (int.TryParse(input, out int index) && index >= 1 && index <= backupManager.ListBackups().Count)
+            {
+                indices.Add(index - 1);
+            }
+            else
+            {
+                Console.WriteLine(languageManager.GetTranslation("InvalidJobIndex"));
+                return;
+            }
+
+            backupManager.ExecuteBackupJob(indices);
+            Console.WriteLine(languageManager.GetTranslation("ExecutingJob"));
+        }
+
+        private void ListBackups()
+        {
+            Console.Clear();
+            Console.WriteLine("====="+ languageManager.GetTranslation("ListJobs") + "=====");
+            var backups = backupManager.ListBackups();
+
+            if (backups.Count == 0)
             {
                 Console.WriteLine(languageManager.GetTranslation("NoJobsDefined"));
                 return;
             }
 
-            for (int i = 0; i < jobs.Count; i++)
+            for (int i = 0; i < backups.Count; i++)
             {
-                BackupJob job = jobs[i];
+                var job = backups[i];
                 Console.WriteLine($"{i + 1}. {job.Name} ({job.Type}): {job.SourcePath} -> {job.TargetPath}");
             }
         }
 
-        public void ChangeLanguage(string language)
+        private void ChangeLanguageMenu()
         {
+            Console.Clear();
+            Console.WriteLine("====="+ languageManager.GetTranslation("MenuChangeLanguage") + "=====");
+            Console.WriteLine(languageManager.GetTranslation("PromptChangeLanguage"));
+            string language = Console.ReadLine();
+
             if (language.ToLower() == "en" || language.ToLower() == "fr")
             {
                 languageManager.SetLanguage(language.ToLower());
@@ -232,55 +264,5 @@ namespace EasySave
             }
         }
 
-        private void DisplayHelp()
-        {
-            Console.WriteLine("\n-- " + languageManager.GetTranslation("Help") + " --");
-            Console.WriteLine("add <nom> <source> <cible> <type>: " + languageManager.GetTranslation("HelpAddJob"));
-            Console.WriteLine("remove <nom>: " + languageManager.GetTranslation("HelpRemoveJob"));
-            Console.WriteLine("update <index> <nom> <source> <cible> <type>: " + languageManager.GetTranslation("HelpUpdateJob"));
-            Console.WriteLine("list: " + languageManager.GetTranslation("HelpListJobs"));
-            Console.WriteLine("execute <index>: " + languageManager.GetTranslation("HelpExecuteJob"));
-            Console.WriteLine("execute <debut-fin>: " + languageManager.GetTranslation("HelpExecuteRange"));
-            Console.WriteLine("execute <index1;index2;...>: " + languageManager.GetTranslation("HelpExecuteMultiple"));
-            Console.WriteLine("language <en|fr>: " + languageManager.GetTranslation("HelpChangeLanguage"));
-            Console.WriteLine("help: " + languageManager.GetTranslation("HelpDisplayHelp"));
-            Console.WriteLine("exit: " + languageManager.GetTranslation("HelpExit"));
-        }
-
-        private string[] SplitCommand(string command)
-        {
-            List<string> parts = new List<string>();
-            string currentPart = "";
-            bool inQuotes = false;
-
-            for (int i = 0; i < command.Length; i++)
-            {
-                char c = command[i];
-
-                if (c == '"')
-                {
-                    inQuotes = !inQuotes;
-                }
-                else if (c == ' ' && !inQuotes)
-                {
-                    if (!string.IsNullOrEmpty(currentPart))
-                    {
-                        parts.Add(currentPart);
-                        currentPart = "";
-                    }
-                }
-                else
-                {
-                    currentPart += c;
-                }
-            }
-
-            if (!string.IsNullOrEmpty(currentPart))
-            {
-                parts.Add(currentPart);
-            }
-
-            return parts.ToArray();
-        }
     }
 }

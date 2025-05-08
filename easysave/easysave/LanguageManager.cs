@@ -98,6 +98,15 @@ namespace EasySave
                 defaultTranslations = new Dictionary<string, string>
                 {
                     { "MaxBackupJobsReached", "Le nombre maximum de travaux de sauvegarde a été atteint (5)." },
+                    { "AddOrDeletetTitle", "Modifier ou Supprimer une sauvegarde" },
+                    { "PromptAddOrDelete", "Entrez le numéro de la sauvegarde à modifier ou supprimer : " },
+                    { "PromptExecuteJobIndex" ,"Entrez le numéro de la sauvegarde à exécuter ou 'all' pour toutes : "},
+                    { "YourChoice", "Votre choix : " },
+                    { "PromptJobName", "Nom de la sauvegarde : " },
+                    { "ListJobs", "Liste des sauvegardes" },
+                    { "PromptJobSrc", "Chemin source : " },
+                    { "PromptJobDst", "Chemin cible : " },
+                    { "PromptJobType", "Type de sauvegarde (0 pour complète, 1 pour différentielle) : " },
                     { "SourceDirNotFound", "Le répertoire source n'existe pas." },
                     { "TargetDirCreateFailed", "Impossible de créer le répertoire cible" },
                     { "JobNameExists", "Un travail avec ce nom existe déjà." },
@@ -123,23 +132,13 @@ namespace EasySave
                     { "MenuListJobs", "Lister les travaux de sauvegarde" },
                     { "MenuExecuteJob", "Exécuter un travail de sauvegarde" },
                     { "MenuChangeLanguage", "Changer de langue" },
+                    { "PromptChangeLanguage","Entrez 'en' pour anglais ou 'fr' pour français : " },
                     { "MenuHelp", "Afficher l'aide" },
                     { "MenuExit", "Quitter" },
                     { "BackupJobs", "Travaux de sauvegarde" },
                     { "NoJobsDefined", "Aucun travail de sauvegarde défini" },
                     { "LanguageChanged", "Langue changée avec succès" },
                     { "InvalidLanguage", "Langue invalide. Utilisez 'en' ou 'fr'" },
-                    { "Help", "Aide" },
-                    { "HelpAddJob", "Ajoute un nouveau travail de sauvegarde" },
-                    { "HelpRemoveJob", "Supprime un travail de sauvegarde existant" },
-                    { "HelpUpdateJob", "Met à jour un travail de sauvegarde existant" },
-                    { "HelpListJobs", "Liste tous les travaux de sauvegarde" },
-                    { "HelpExecuteJob", "Exécute un travail de sauvegarde spécifique" },
-                    { "HelpExecuteRange", "Exécute une plage de travaux de sauvegarde" },
-                    { "HelpExecuteMultiple", "Exécute plusieurs travaux de sauvegarde spécifiques" },
-                    { "HelpChangeLanguage", "Change la langue de l'application" },
-                    { "HelpDisplayHelp", "Affiche ce message d'aide" },
-                    { "HelpExit", "Quitte l'application" }
                 };
             }
             else // English is default
@@ -147,6 +146,15 @@ namespace EasySave
                 defaultTranslations = new Dictionary<string, string>
                 {
                     { "MaxBackupJobsReached", "Maximum number of backup jobs reached (5)." },
+                    { "AddOrDeletetTitle", "Modify or Delete a backup" },
+                    { "PromptAddOrDelete", "Enter the number of the backup to modify or delete: " },
+                    { "PromptExecuteJobIndex", "Enter the number of the backup to execute or 'all' for all: " },
+                    { "YourChoice", "Your choice: " },
+                    { "PromptJobName", "Backup name: " },
+                    { "ListJobs", "List of backups" },
+                    { "PromptJobSrc", "Source path: " },
+                    { "PromptJobDst", "Target path: " },
+                    { "PromptJobType", "Backup type (0 for complete, 1 for differential): " },
                     { "SourceDirNotFound", "Source directory does not exist." },
                     { "TargetDirCreateFailed", "Failed to create target directory" },
                     { "JobNameExists", "A job with this name already exists." },
@@ -172,23 +180,13 @@ namespace EasySave
                     { "MenuListJobs", "List backup jobs" },
                     { "MenuExecuteJob", "Execute a backup job" },
                     { "MenuChangeLanguage", "Change language" },
+                    { "PromptChangeLanguage", "Enter 'en' for English or 'fr' for French: " },
                     { "MenuHelp", "Display help" },
                     { "MenuExit", "Exit" },
                     { "BackupJobs", "Backup jobs" },
                     { "NoJobsDefined", "No backup jobs defined" },
                     { "LanguageChanged", "Language changed successfully" },
                     { "InvalidLanguage", "Invalid language. Use 'en' or 'fr'" },
-                    { "Help", "Help" },
-                    { "HelpAddJob", "Adds a new backup job" },
-                    { "HelpRemoveJob", "Removes an existing backup job" },
-                    { "HelpUpdateJob", "Updates an existing backup job" },
-                    { "HelpListJobs", "Lists all backup jobs" },
-                    { "HelpExecuteJob", "Executes a specific backup job" },
-                    { "HelpExecuteRange", "Executes a range of backup jobs" },
-                    { "HelpExecuteMultiple", "Executes multiple specific backup jobs" },
-                    { "HelpChangeLanguage", "Changes the application language" },
-                    { "HelpDisplayHelp", "Displays this help message" },
-                    { "HelpExit", "Exits the application" }
                 };
             }
 
