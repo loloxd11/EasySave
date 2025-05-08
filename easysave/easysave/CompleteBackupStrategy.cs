@@ -42,11 +42,13 @@ namespace EasySave
 
                 remainingSize = totalSize;
 
-                // Créer un objet BackupJob temporaire pour suivre la progression
-                // Dans une implémentation réelle, cela serait lié à la tâche BackupJob réelle
+                // Créer un objet BackupJob pour suivre la progression
                 BackupJob job = new BackupJob(name, source, target, BackupType.Complete, this);
                 job.TotalFiles = totalFiles;
                 job.TotalSize = totalSize;
+
+                // Attacher notre LogManager comme observateur
+                job.AttachObserver(logManager);
 
                 // Traiter chaque fichier
                 foreach (string sourceFile in files)
@@ -62,9 +64,6 @@ namespace EasySave
                         Directory.CreateDirectory(targetDirectory);
                     }
 
-                    // Mettre à jour les informations du fichier courant
-                    job.UpdateCurrentFile(sourceFile, targetFile);
-
                     // Copier le fichier et mesurer le temps
                     Stopwatch stopwatch = new Stopwatch();
                     stopwatch.Start();
@@ -74,6 +73,9 @@ namespace EasySave
                         File.Copy(sourceFile, targetFile, true);
                         stopwatch.Stop();
                         job.LastFileTime = stopwatch.ElapsedMilliseconds;
+
+                        // Mettre à jour les informations du fichier courant et déclencher la journalisation
+                        job.UpdateCurrentFile(sourceFile, targetFile);
                     }
                     catch (Exception ex)
                     {

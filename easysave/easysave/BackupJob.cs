@@ -16,7 +16,7 @@ namespace EasySave
         private long totalSize;
         private int progression;
         private AbstractBackupStrategy backupStrategy;
-        private float lastFileTime;
+        private long lastFileTime;
 
         public string Name { get => name; }
         public string SourcePath { get => sourcePath; }
@@ -26,7 +26,7 @@ namespace EasySave
         public int TotalFiles { get => totalFiles; set => totalFiles = value; }
         public long TotalSize { get => totalSize; set => totalSize = value; }
         public int Progression { get => progression; set => progression = value; }
-        public float LastFileTime { get => lastFileTime; set => lastFileTime = value; }
+        public long LastFileTime { get => lastFileTime; set => lastFileTime = value; }
         public string CurrentSourceFile { get; private set; }
         public string CurrentTargetFile { get; private set; }
         public int RemainingFiles { get; private set; }

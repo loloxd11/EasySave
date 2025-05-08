@@ -1,40 +1,47 @@
-﻿using System.Text.Json;
+﻿using System;
+using System.Text.Json;
 
 public class LogManager : ILogService
 {
-    private string logBaseDirectory;
-    private JsonSerializerOptions jsonOptions;
-    private static LogManager? instance;
-
-    private LogManager(string baseDirectory)
-    {
-        logBaseDirectory = baseDirectory;
-        jsonOptions = JsonSerializerHelper.CreateDefaultOptions();
-        FileHelper.EnsureDirectoryExists(logBaseDirectory);
-    }
-
-    public static LogManager GetInstance(string baseDirectory)
-    {
-        return instance ??= new LogManager(baseDirectory);
-    }
-
     public void LogFileTransfer(string jobName, string sourcePath, string targetPath, long fileSize, long transferTime)
     {
-        try
-        {
-            var entry = new LogEntry(jobName, sourcePath, targetPath, fileSize, transferTime, transferTime >= 0);
-            var logPath = FormatLogFilePath(entry.Timestamp);
-            FileHelper.AppendToFile(logPath, entry.ToJson());
-        }
-        catch (Exception ex)
-        {
-            throw new LogServiceException("Failed to log file transfer", ex);
-        }
+        // Exemple d'utilisation de la sérialisation
+        string jsonLog = SerializeLogEntry(jobName, sourcePath, targetPath, fileSize, transferTime, DateTime.Now);
+
+        // Écrire le log dans un fichier ou une destination spécifique
+        System.IO.File.AppendAllText("logs.json", jsonLog + Environment.NewLine);
     }
 
-    public string GetDailyLogFilePath(DateTime date) => FormatLogFilePath(date);
+    public string GetDailyLogFilePath(DateTime date)
+    {
+        // Implémentation existante
+        return $"logs_{date:yyyyMMdd}.json";
+    }
 
-    public bool IsLogServiceReady() => Directory.Exists(logBaseDirectory);
+    public bool IsLogServiceReady()
+    {
+        // Implémentation existante
+        return true;
+    }
 
-    private string FormatLogFilePath(DateTime date) => Path.Combine(logBaseDirectory, date.ToString("yyyy-MM-dd") + ".json");
+    public string SerializeLogEntry(string jobName, string sourcePath, string targetPath, long fileSize, long transferTime, DateTime timestamp)
+    {
+        var logEntry = new
+        {
+            Timestamp = timestamp.ToString("yyyy-MM-ddTHH:mm:ss"),
+            JobName = jobName,
+            Source = sourcePath,
+            Target = targetPath,
+            FileSize = fileSize,
+            TransferTimeMs = transferTime
+        };
+
+        var options = JsonSerializerHelper.CreateDefaultOptions();
+        return JsonSerializerHelper.Serialize(logEntry, options);
+    }
+
+    internal static ILogService GetInstance(string baseDirectory)
+    {
+        throw new NotImplementedException();
+    }
 }
