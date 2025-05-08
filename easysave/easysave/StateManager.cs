@@ -18,7 +18,6 @@ namespace EasySave
 
         public void Update(BackupJob job, string action)
         {
-            Console.WriteLine($"Mise à jour de l'état pour le job {job.Name} : {action}");  
             // Mettre à jour l'état pour cette tâche
             if (action == "create"){
                 InitializeJobState(job);

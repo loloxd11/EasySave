@@ -101,7 +101,6 @@ namespace EasySave
             {
             
                 observer.Update(this, action);
-                Console.WriteLine($"fin {action}");
             }
         }
 
