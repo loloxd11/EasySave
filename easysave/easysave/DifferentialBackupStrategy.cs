@@ -43,10 +43,13 @@ namespace EasySave
 
                 remainingSize = totalSize;
 
-                // Créer un objet BackupJob temporaire pour suivre la progression
+                // Créer un objet BackupJob pour suivre la progression
                 BackupJob job = new BackupJob(name, source, target, BackupType.Differential, this);
                 job.TotalFiles = totalFiles;
                 job.TotalSize = totalSize;
+
+                // Attacher notre LogManager comme observateur
+                job.AttachObserver(logManager);
 
                 // Traiter chaque fichier
                 foreach (string sourceFile in files)
@@ -62,9 +65,6 @@ namespace EasySave
                         Directory.CreateDirectory(targetDirectory);
                     }
 
-                    // Mettre à jour les informations du fichier courant
-                    job.UpdateCurrentFile(sourceFile, targetFile);
-
                     // Vérifier si nous devons copier le fichier (s'il n'existe pas ou a été modifié)
                     bool needsCopy = !File.Exists(targetFile) || !CompareFiles(sourceFile, targetFile);
 
@@ -79,6 +79,9 @@ namespace EasySave
                             File.Copy(sourceFile, targetFile, true);
                             stopwatch.Stop();
                             job.LastFileTime = stopwatch.ElapsedMilliseconds;
+
+                            // Mettre à jour les informations du fichier courant et déclencher la journalisation
+                            job.UpdateCurrentFile(sourceFile, targetFile);
                         }
                         catch (Exception ex)
                         {
@@ -89,7 +92,7 @@ namespace EasySave
                     }
                     else
                     {
-                        // Le fichier n'a pas besoin d'être copié, donc mettre le temps à 0
+                        // Le fichier n'a pas besoin d'être copié, donc ne pas l'enregistrer dans les logs
                         job.LastFileTime = 0;
                     }
 
