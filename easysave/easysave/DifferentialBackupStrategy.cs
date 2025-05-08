@@ -15,22 +15,26 @@ namespace EasySave
         {
         }
 
-        public override bool Execute(string source, string target, string name)
+        public override bool Execute(BackupJob job)
         {
             try
             {
+                // Définir les variables 'source' et 'target' à partir du job  
+                string source = job.SourcePath;
+                string target = job.TargetPath;
+
                 if (!Directory.Exists(source))
                 {
                     throw new DirectoryNotFoundException($"Le répertoire source n'existe pas: {source}");
                 }
 
-                // Créer le répertoire cible s'il n'existe pas
+                // Créer le répertoire cible s'il n'existe pas  
                 if (!Directory.Exists(target))
                 {
                     Directory.CreateDirectory(target);
                 }
 
-                // Obtenir tous les fichiers du répertoire source et des sous-répertoires
+                // Obtenir tous les fichiers du répertoire source et des sous-répertoires  
                 List<string> files = ScanDirectory(source);
 
                 int totalFiles = files.Count;
@@ -38,7 +42,7 @@ namespace EasySave
                 long totalSize = 0;
                 long remainingSize = 0;
 
-                // Calculer la taille totale
+                // Calculer la taille totale  
                 foreach (string file in files)
                 {
                     totalSize += GetFileSize(file);
@@ -46,34 +50,30 @@ namespace EasySave
 
                 remainingSize = totalSize;
 
-                // Créer un objet BackupJob pour suivre la progression
-                BackupJob job = new BackupJob(name, source, target, BackupType.Differential, this);
+                // Créer un objet BackupJob pour suivre la progression  
                 job.TotalFiles = totalFiles;
                 job.TotalSize = totalSize;
 
-                // Attacher notre LogManager comme observateur
-                job.AttachObserver(logManager);
-
-                // Traiter chaque fichier
+                // Traiter chaque fichier  
                 foreach (string sourceFile in files)
                 {
-                    // Calculer le chemin relatif
+                    // Calculer le chemin relatif  
                     string relativePath = sourceFile.Substring(source.Length).TrimStart('\\', '/');
                     string targetFile = Path.Combine(target, relativePath);
 
-                    // Créer le répertoire cible s'il n'existe pas
+                    // Créer le répertoire cible s'il n'existe pas  
                     string targetDirectory = Path.GetDirectoryName(targetFile);
                     if (!Directory.Exists(targetDirectory))
                     {
                         Directory.CreateDirectory(targetDirectory);
                     }
 
-                    // Vérifier si nous devons copier le fichier (s'il n'existe pas ou a été modifié)
+                    // Vérifier si nous devons copier le fichier (s'il n'existe pas ou a été modifié)  
                     bool needsCopy = !File.Exists(targetFile) || !CompareFiles(sourceFile, targetFile);
 
                     if (needsCopy)
                     {
-                        // Copier le fichier et mesurer le temps
+                        // Copier le fichier et mesurer le temps  
                         Stopwatch stopwatch = new Stopwatch();
                         stopwatch.Start();
 
@@ -83,23 +83,23 @@ namespace EasySave
                             stopwatch.Stop();
                             job.LastFileTime = stopwatch.ElapsedMilliseconds;
 
-                            // Mettre à jour les informations du fichier courant et déclencher la journalisation
+                            // Mettre à jour les informations du fichier courant et déclencher la journalisation  
                             job.UpdateCurrentFile(sourceFile, targetFile);
                         }
                         catch (Exception ex)
                         {
                             stopwatch.Stop();
-                            job.LastFileTime = -1; // Un temps négatif indique une erreur
+                            job.LastFileTime = -1; // Un temps négatif indique une erreur  
                             Console.WriteLine($"Erreur lors de la copie du fichier {sourceFile}: {ex.Message}");
                         }
                     }
                     else
                     {
-                        // Le fichier n'a pas besoin d'être copié, donc ne pas l'enregistrer dans les logs
+                        // Le fichier n'a pas besoin d'être copié, donc ne pas l'enregistrer dans les logs  
                         job.LastFileTime = 0;
                     }
 
-                    // Mettre à jour la progression
+                    // Mettre à jour la progression  
                     long fileSize = GetFileSize(sourceFile);
                     remainingFiles--;
                     remainingSize -= fileSize;
@@ -113,8 +113,7 @@ namespace EasySave
                 Console.WriteLine($"Erreur lors de l'exécution de la sauvegarde différentielle: {ex.Message}");
                 return false;
             }
-        }
-            
+        }            
 
         private bool CompareFiles(string sourcePath, string targetPath)
         {

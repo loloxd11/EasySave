@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace EasySave
 {
@@ -93,6 +94,16 @@ namespace EasySave
             {
                 Console.WriteLine(languageManager.GetTranslation("InvalidInput"));
                 return;
+            }
+
+            if (source.StartsWith("\"") && source.EndsWith("\""))
+            {
+                source = source.Trim('"');
+            }
+
+            if (target.StartsWith("\"") && target.EndsWith("\""))
+            {
+                target = target.Trim('"');
             }
 
             BackupType backupType = type == 0 ? BackupType.Complete : BackupType.Differential;

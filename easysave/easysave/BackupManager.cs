@@ -96,7 +96,7 @@ namespace EasySave
             job.AttachObserver(logManager);
 
             // Initialiser l'état de la tâche
-            stateManager.InitializeJobState(job);
+            job.NotifyObservers("create");
 
             backupJobs.Add(job);
 
@@ -193,6 +193,7 @@ namespace EasySave
                         BackupJob job = backupJobs[index];
                         Console.WriteLine($"{languageManager.GetTranslation("ExecutingJob")}: {job.Name}");
                         job.Execute();
+                        job.NotifyObservers("end");
                     }
                     catch (Exception ex)
                     {

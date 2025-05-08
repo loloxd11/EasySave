@@ -15,7 +15,7 @@ namespace EasySave
             this.logManager = logManager;
         }
 
-        public abstract bool Execute(string source, string target, string name);
+        public abstract bool Execute(BackupJob job);
 
         public int CalculateTotalFiles(string source)
         {
@@ -81,6 +81,36 @@ namespace EasySave
             {
                 return 0;
             }
+        }
+        public long CalculateTotalSize(string source)
+        {
+            if (!Directory.Exists(source))
+            {
+                return 0;
+            }
+
+            long size = 0;
+
+            try
+            {
+                // Calculer la taille de tous les fichiers dans le répertoire
+                foreach (string file in Directory.GetFiles(source))
+                {
+                    size += GetFileSize(file);
+                }
+
+                // Calculer récursivement la taille dans les sous-répertoires
+                foreach (string subdirectory in Directory.GetDirectories(source))
+                {
+                    size += CalculateTotalSize(subdirectory);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erreur lors du calcul de la taille totale: {ex.Message}");
+            }
+
+            return size;
         }
     }
 }
