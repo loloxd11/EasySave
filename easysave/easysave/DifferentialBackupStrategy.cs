@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Security.Cryptography;
 using System.Diagnostics;
+using Octokit;
+using Microsoft.Extensions.DependencyModel;
 
 namespace EasySave
 {
@@ -111,29 +114,40 @@ namespace EasySave
                 return false;
             }
         }
+            
 
         private bool CompareFiles(string sourcePath, string targetPath)
         {
-            // D'abord vérifier si les fichiers ont des tailles différentes
-            FileInfo sourceInfo = new FileInfo(sourcePath);
-            FileInfo targetInfo = new FileInfo(targetPath);
+            // Comparer les hash des fichiers
+            string sourceHash = ComputeFileHash(sourcePath);
+            string targetHash = ComputeFileHash(targetPath);
 
-            if (sourceInfo.Length != targetInfo.Length)
+            return sourceHash == targetHash;
+        }
+
+        private string ComputeFileHash(string filePath)
+        {
+            using (var sha256 = SHA256.Create())
+            using (var stream = File.OpenRead(filePath))
             {
-                return false;
+                byte[] hash = sha256.ComputeHash(stream);
+                return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+            }
+        }
+
+        private bool AreFilesModified(string sourceFilePath, string targetFilePath)
+        {
+            // Vérifie si les fichiers existent  
+            if (!File.Exists(sourceFilePath) || !File.Exists(targetFilePath))
+            {
+                return true; // Considérer comme modifié si l'un des fichiers n'existe pas  
             }
 
-            // Ensuite comparer les dates de dernière modification
-            if (sourceInfo.LastWriteTime != targetInfo.LastWriteTime)
-            {
-                return false;
-            }
+            // Compare les hash des fichiers  
+            string sourceHash = ComputeFileHash(sourceFilePath);
+            string targetHash = ComputeFileHash(targetFilePath);
 
-            // Pour une comparaison plus approfondie, on pourrait aussi comparer le contenu
-            // des fichiers en utilisant un algorithme de hachage, mais cela pourrait être
-            // trop lent pour les gros fichiers
-            // Cette approche plus simple est basée sur la taille du fichier et la date de modification
-            return true;
+            return !sourceHash.Equals(targetHash, StringComparison.OrdinalIgnoreCase);
         }
     }
 }
