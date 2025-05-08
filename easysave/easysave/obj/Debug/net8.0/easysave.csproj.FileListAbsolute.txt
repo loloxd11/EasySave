@@ -1,0 +1,15 @@
+C:\Users\kazma\source\repos\loloxd11\EasySave\easysave\easysave\bin\Debug\net8.0\easysave.exe
+C:\Users\kazma\source\repos\loloxd11\EasySave\easysave\easysave\bin\Debug\net8.0\easysave.deps.json
+C:\Users\kazma\source\repos\loloxd11\EasySave\easysave\easysave\bin\Debug\net8.0\easysave.runtimeconfig.json
+C:\Users\kazma\source\repos\loloxd11\EasySave\easysave\easysave\bin\Debug\net8.0\easysave.dll
+C:\Users\kazma\source\repos\loloxd11\EasySave\easysave\easysave\bin\Debug\net8.0\easysave.pdb
+C:\Users\kazma\source\repos\loloxd11\EasySave\easysave\easysave\obj\Debug\net8.0\easysave.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\kazma\source\repos\loloxd11\EasySave\easysave\easysave\obj\Debug\net8.0\easysave.AssemblyInfoInputs.cache
+C:\Users\kazma\source\repos\loloxd11\EasySave\easysave\easysave\obj\Debug\net8.0\easysave.AssemblyInfo.cs
+C:\Users\kazma\source\repos\loloxd11\EasySave\easysave\easysave\obj\Debug\net8.0\easysave.csproj.CoreCompileInputs.cache
+C:\Users\kazma\source\repos\loloxd11\EasySave\easysave\easysave\obj\Debug\net8.0\easysave.sourcelink.json
+C:\Users\kazma\source\repos\loloxd11\EasySave\easysave\easysave\obj\Debug\net8.0\easysave.dll
+C:\Users\kazma\source\repos\loloxd11\EasySave\easysave\easysave\obj\Debug\net8.0\refint\easysave.dll
+C:\Users\kazma\source\repos\loloxd11\EasySave\easysave\easysave\obj\Debug\net8.0\easysave.pdb
+C:\Users\kazma\source\repos\loloxd11\EasySave\easysave\easysave\obj\Debug\net8.0\easysave.genruntimeconfig.cache
+C:\Users\kazma\source\repos\loloxd11\EasySave\easysave\easysave\obj\Debug\net8.0\ref\easysave.dll
