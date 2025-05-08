@@ -1,124 +1,241 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using easysave;
+using System.IO;
 
-//Create a backupmanager using the singleton pattern
-namespace BackupManager
+namespace EasySave
 {
-    internal class Manager
+    public class BackupManager
     {
-        private static Manager _instance;
-        private static readonly object _padlock = new object();
-        public int MaxBackups { get; private set; } // Maximum number of backups
+        private static BackupManager instance;
+        private List<BackupJob> backupJobs;
+        private LanguageManager languageManager;
+        private ConfigManager configManager;
 
-        private List<Backup> backups = new List<Backup>();
-        public static Manager Instance
+        private BackupManager()
         {
-            get
+            backupJobs = new List<BackupJob>();
+            languageManager = LanguageManager.GetInstance();
+            configManager = ConfigManager.GetInstance();
+
+            // Créer le répertoire pour les fichiers de log et d'état s'ils n'existent pas
+            string logDirectory = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "EasySave", "Logs");
+
+            if (!Directory.Exists(logDirectory))
             {
-                lock (_padlock)
-                {
-                    if (_instance == null)
-                    {
-                        _instance = new Manager();
-                    }
-                    return _instance;
-                }
+                Directory.CreateDirectory(logDirectory);
             }
         }
-        private Manager()
+
+        public static BackupManager GetInstance()
         {
-            MaxBackups = 5; // Set the maximum number of backups
+            if (instance == null)
+            {
+                instance = new BackupManager();
+            }
+            return instance;
         }
-        public void Backup(List<int> BackupsNbr)
+
+        public bool AddBackupJob(string name, string source, string target, BackupType type)
         {
-            foreach (int i in BackupsNbr)
+            // Vérifier si nous avons déjà 5 tâches de sauvegarde
+            if (backupJobs.Count >= 5)
+            {
+                Console.WriteLine(languageManager.GetTranslation("MaxBackupJobsReached"));
+                return false;
+            }
+
+            // Valider les répertoires source et cible
+            if (!Directory.Exists(source))
+            {
+                Console.WriteLine(languageManager.GetTranslation("SourceDirNotFound"));
+                return false;
+            }
+
+            // Créer le répertoire cible s'il n'existe pas
+            if (!Directory.Exists(target))
             {
                 try
                 {
-                    IBackupStrategy strategy;
-
-                    // Choisir la stratégie en fonction du type de sauvegarde
-                    if (backups[i].Type) // true = différentielle
-                    {
-                        strategy = new DifferentialBackupStrategy();
-                    }
-                    else // false = complète
-                    {
-                        strategy = new CompleteBackupStrategy();
-                    }
-
-                    // Exécuter la stratégie
-                    strategy.Execute(backups[i].SourcePath, backups[i].TargetPath, backups[i].Name);
+                    Directory.CreateDirectory(target);
                 }
-                catch (Exception e)
+                catch (Exception ex)
                 {
-                    Console.WriteLine($"Erreur lors de l'exécution du job de sauvegarde: {e.Message}");
-                    break;
+                    Console.WriteLine($"{languageManager.GetTranslation("TargetDirCreateFailed")}: {ex.Message}");
+                    return false;
+                }
+            }
+
+            // Vérifier si une tâche avec le même nom existe déjà
+            if (backupJobs.Exists(job => job.Name == name))
+            {
+                Console.WriteLine(languageManager.GetTranslation("JobNameExists"));
+                return false;
+            }
+
+            // Créer la stratégie de sauvegarde appropriée
+            AbstractBackupStrategy strategy = CreateBackupStrategy(type);
+
+            // Créer et ajouter la tâche de sauvegarde
+            BackupJob job = new BackupJob(name, source, target, type, strategy);
+
+            // Configurer les observateurs pour la tâche
+            string stateFilePath = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "EasySave", "state.json");
+
+            string logDirectory = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "EasySave", "Logs");
+
+            StateManager stateManager = new StateManager(stateFilePath);
+            LogManager logManager = new LogManager(logDirectory);
+
+            job.AttachObserver(stateManager);
+            job.AttachObserver(logManager);
+
+            // Initialiser l'état de la tâche
+            stateManager.InitializeJobState(job);
+
+            backupJobs.Add(job);
+
+            // Enregistrer la liste de tâches de sauvegarde mise à jour dans la configuration
+            SaveBackupJobsToConfig();
+
+            return true;
+        }
+
+        public bool RemoveBackupJob(string name)
+        {
+            int index = backupJobs.FindIndex(job => job.Name == name);
+            if (index >= 0)
+            {
+                backupJobs.RemoveAt(index);
+                SaveBackupJobsToConfig();
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool UpdateBackupJob(int index, string name, string source, string target, BackupType type)
+        {
+            if (index < 0 || index >= backupJobs.Count)
+            {
+                return false;
+            }
+
+            // Valider les répertoires source et cible
+            if (!Directory.Exists(source))
+            {
+                Console.WriteLine(languageManager.GetTranslation("SourceDirNotFound"));
+                return false;
+            }
+
+            // Créer le répertoire cible s'il n'existe pas
+            if (!Directory.Exists(target))
+            {
+                try
+                {
+                    Directory.CreateDirectory(target);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"{languageManager.GetTranslation("TargetDirCreateFailed")}: {ex.Message}");
+                    return false;
+                }
+            }
+
+            // Vérifier si une tâche avec le même nom existe déjà (sauf pour la tâche actuelle)
+            if (backupJobs.Exists(job => job.Name == name && backupJobs.IndexOf(job) != index))
+            {
+                Console.WriteLine(languageManager.GetTranslation("JobNameExists"));
+                return false;
+            }
+
+            // Créer la stratégie de sauvegarde appropriée
+            AbstractBackupStrategy strategy = CreateBackupStrategy(type);
+
+            // Mettre à jour la tâche de sauvegarde
+            BackupJob job = backupJobs[index];
+
+            // Créer une nouvelle tâche avec les paramètres mis à jour
+            BackupJob updatedJob = new BackupJob(name, source, target, type, strategy);
+
+            // Copier les observateurs de l'ancienne tâche vers la nouvelle tâche
+            foreach (var observer in job.Observers)
+            {
+                updatedJob.AttachObserver(observer);
+            }
+
+            // Remplacer l'ancienne tâche par la nouvelle
+            backupJobs[index] = updatedJob;
+
+            // Enregistrer la liste de tâches de sauvegarde mise à jour dans la configuration
+            SaveBackupJobsToConfig();
+
+            return true;
+        }
+
+        public List<BackupJob> ListBackups()
+        {
+            return backupJobs;
+        }
+
+        public void ExecuteBackupJob(List<int> backupIndices)
+        {
+            foreach (int index in backupIndices)
+            {
+                if (index >= 0 && index < backupJobs.Count)
+                {
+                    try
+                    {
+                        BackupJob job = backupJobs[index];
+                        Console.WriteLine($"{languageManager.GetTranslation("ExecutingJob")}: {job.Name}");
+                        job.Execute();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"{languageManager.GetTranslation("ErrorExecutingJob")}: {ex.Message}");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"{languageManager.GetTranslation("InvalidJobIndex")}: {index + 1}");
                 }
             }
         }
-        public void AddBackupJob(string sourcePath, string targetPath, bool type, string name)
-        {
-            Backup backup = new Backup(sourcePath, targetPath, type, name);
-            backups.Add(backup);
-        }
 
-        public int GetBackupLength()
+        private AbstractBackupStrategy CreateBackupStrategy(BackupType type)
         {
-            if (backups.Count > 0)
-            {
-                return backups.Count; 
-            }
-            return 0;
-        }
+            string stateFilePath = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "EasySave", "state.json");
 
-        public void RemoveBackupJob(int Index)
-        {
-            try
-            {
-                backups.Remove(backups[Index]);
-                Console.WriteLine($"removed successfully.");
-            }
-            catch (InvalidOperationException)
-            {
-                Console.WriteLine($"Not found.");
-            }
-            catch (ArgumentNullException)
-            {
-                Console.WriteLine($"Not found.");
-            }
+            string logDirectory = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "EasySave", "Logs");
 
-        }
+            StateManager stateManager = new StateManager(stateFilePath);
+            LogManager logManager = new LogManager(logDirectory);
 
-        public void ListBackups()
-        {
-            for (int i = 0; i < backups.Count; i++)
+            switch (type)
             {
-                Console.WriteLine($"Backup {i}: {backups[i].Name} - {backups[i].SourcePath} -> {backups[i].TargetPath}");
+                case BackupType.Complete:
+                    return new CompleteBackupStrategy(stateManager, logManager);
+                case BackupType.Differential:
+                    return new DifferentialBackupStrategy(stateManager, logManager);
+                default:
+                    return new CompleteBackupStrategy(stateManager, logManager);
             }
         }
 
-        public void UpdateBackupJob(int index, string name, string newSourcePath, string newTargetPath, bool newType)
+        private void SaveBackupJobsToConfig()
         {
-            if (index < 0 || index >= backups.Count)
-            {
-                Console.WriteLine("Index out of range.");
-                return;
-            }
-            backups[index].SetSourcePath(newSourcePath);
-            backups[index].SetTargetPath(newTargetPath);
-            backups[index].SetType(newType);
-            backups[index].SetName(name);
-            Console.WriteLine($"Backup job '{name}' updated successfully.");
-
+            // Cette méthode sérialiserait les tâches de sauvegarde dans la configuration
+            // L'implémentation dépend de la façon dont vous souhaitez stocker la configuration
+            // Par exemple, sous forme de JSON dans un fichier de configuration
         }
-
-
-
-
     }
 }
