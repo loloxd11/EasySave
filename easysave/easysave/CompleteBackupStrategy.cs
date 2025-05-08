@@ -11,14 +11,17 @@ namespace EasySave
         {
         }
 
-        public override bool Execute(string source, string target, string name)
+        public override bool Execute(BackupJob job)
         {
             try
             {
-                if (!Directory.Exists(source))
+                if (!Directory.Exists(job.SourcePath))
                 {
-                    throw new DirectoryNotFoundException($"Le répertoire source n'existe pas: {source}");
+                    throw new DirectoryNotFoundException($"Le répertoire source n'existe pas: {job.SourcePath}");
                 }
+
+                string source = job.SourcePath;
+                string target = job.TargetPath;
 
                 // Créer le répertoire cible s'il n'existe pas
                 if (!Directory.Exists(target))
@@ -42,13 +45,9 @@ namespace EasySave
 
                 remainingSize = totalSize;
 
-                // Créer un objet BackupJob pour suivre la progression
-                BackupJob job = new BackupJob(name, source, target, BackupType.Complete, this);
+                // Mettre à jour les propriétés du job
                 job.TotalFiles = totalFiles;
                 job.TotalSize = totalSize;
-
-                // Attacher notre LogManager comme observateur
-                job.AttachObserver(logManager);
 
                 // Traiter chaque fichier
                 foreach (string sourceFile in files)
