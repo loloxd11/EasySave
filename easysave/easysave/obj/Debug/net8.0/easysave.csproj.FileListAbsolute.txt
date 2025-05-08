@@ -32,3 +32,7 @@ C:\Users\lecle\source\repos\loloxd11\EasySave\easysave\easysave\obj\Debug\net8.0
 C:\Users\lecle\source\repos\loloxd11\EasySave\easysave\easysave\obj\Debug\net8.0\easysave.pdb
 C:\Users\lecle\source\repos\loloxd11\EasySave\easysave\easysave\obj\Debug\net8.0\easysave.genruntimeconfig.cache
 C:\Users\lecle\source\repos\loloxd11\EasySave\easysave\easysave\obj\Debug\net8.0\ref\easysave.dll
+C:\Users\kazma\source\repos\loloxd11\EasySave\easysave\easysave\obj\Debug\net8.0\easysave.csproj.AssemblyReference.cache
+C:\Users\kazma\source\repos\loloxd11\EasySave\easysave\easysave\bin\Debug\net8.0\LogLibrary.dll
+C:\Users\kazma\source\repos\loloxd11\EasySave\easysave\easysave\bin\Debug\net8.0\LogLibrary.pdb
+C:\Users\kazma\source\repos\loloxd11\EasySave\easysave\easysave\obj\Debug\net8.0\easysave.csproj.Up2Date
