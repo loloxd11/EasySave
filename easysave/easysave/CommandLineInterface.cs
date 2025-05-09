@@ -191,7 +191,6 @@ namespace EasySave
         private void RemoveBackup(int index)
         {
             Console.Clear();
-            Console.WriteLine(languageManager.GetTranslation("HelpRemoveJob"));
             bool success = backupManager.RemoveBackupJob(index);
 
             if (success)
