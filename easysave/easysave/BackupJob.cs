@@ -59,19 +59,22 @@ namespace EasySave
 
                 // Calculer le nombre total de fichiers et la taille
                 totalFiles = backupStrategy.CalculateTotalFiles(sourcePath);
+                totalSize = backupStrategy.CalculateTotalSize(sourcePath);
                 RemainingFiles = totalFiles;
+                RemainingSize = totalSize;
 
                 // Notifier les observateurs que la tâche a démarré
                 NotifyObservers("start");
 
                 // Exécuter la stratégie de sauvegarde
-                bool result = backupStrategy.Execute(sourcePath, targetPath, name);
+                bool result = backupStrategy.Execute(this);
 
                 // Mettre à jour l'état en fonction du résultat
                 state = result ? JobState.Completed : JobState.Error;
 
                 // Notifier les observateurs que la tâche est terminée
                 NotifyObservers("finish");
+
 
                 return result;
             }
@@ -96,6 +99,7 @@ namespace EasySave
         {
             foreach (var observer in observers)
             {
+            
                 observer.Update(this, action);
             }
         }
@@ -119,5 +123,8 @@ namespace EasySave
             // Notifier les observateurs de la mise à jour du fichier
             NotifyObservers("file");
         }
+
+
+
     }
 }

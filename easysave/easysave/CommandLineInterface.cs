@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace EasySave
 {
@@ -95,6 +96,16 @@ namespace EasySave
                 return;
             }
 
+            if (source.StartsWith("\"") && source.EndsWith("\""))
+            {
+                source = source.Trim('"');
+            }
+
+            if (target.StartsWith("\"") && target.EndsWith("\""))
+            {
+                target = target.Trim('"');
+            }
+
             BackupType backupType = type == 0 ? BackupType.Complete : BackupType.Differential;
             bool success = backupManager.AddBackupJob(name, source, target, backupType);
 
@@ -180,7 +191,6 @@ namespace EasySave
         private void RemoveBackup(int index)
         {
             Console.Clear();
-            Console.WriteLine(languageManager.GetTranslation("HelpRemoveJob"));
             bool success = backupManager.RemoveBackupJob(index);
 
             if (success)

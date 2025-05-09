@@ -19,25 +19,41 @@ namespace EasySave
         public void Update(BackupJob job, string action)
         {
             // Mettre à jour l'état pour cette tâche
+            if (action == "create"){
+                InitializeJobState(job);
+            }
+            else if (action == "end")
+            {
+                FinalizeJobState(job);
+            }
+            else
+            {
+                UpdateJobState(job);
+            }
+
+        }
+
+        public void UpdateJobState(BackupJob job)
+        {
             JobStateInfo jobState = GetOrCreateJobState(job.Name);
 
             jobState.Name = job.Name;
             jobState.State = job.State.ToString();
             jobState.LastUpdated = DateTime.Now;
 
-            if (job.State == JobState.Active)
-            {
-                jobState.TotalFiles = job.TotalFiles;
-                jobState.TotalSize = job.TotalSize;
-                jobState.FilesRemaining = job.RemainingFiles;
-                jobState.SizeRemaining = job.RemainingSize;
-                jobState.Progression = job.Progression;
-                jobState.CurrentSourceFile = job.CurrentSourceFile;
-                jobState.CurrentTargetFile = job.CurrentTargetFile;
-            }
+            // Mettre à jour ces valeurs quelle que soit l'état du job
+            jobState.TotalFiles = job.TotalFiles;
+            jobState.TotalSize = job.TotalSize;
+            jobState.FilesRemaining = job.RemainingFiles;
+            jobState.SizeRemaining = job.RemainingSize;
+            jobState.Progression = job.Progression;
+            jobState.CurrentSourceFile = job.CurrentSourceFile;
+            jobState.CurrentTargetFile = job.CurrentTargetFile;
+
 
             // Enregistrer l'état mis à jour dans le fichier
             SaveStateFile();
+
         }
 
         public void InitializeJobState(BackupJob job)
@@ -64,9 +80,15 @@ namespace EasySave
 
             jobState.State = job.State.ToString();
             jobState.LastUpdated = DateTime.Now;
+            jobState.TotalFiles = job.TotalFiles;
+            jobState.TotalSize = job.TotalSize;
             jobState.Progression = (job.State == JobState.Completed) ? 100 : job.Progression;
             jobState.FilesRemaining = 0;
             jobState.SizeRemaining = 0;
+
+            // Mettre à jour les fichiers actuels (même s'ils sont null)
+            jobState.CurrentSourceFile = null;
+            jobState.CurrentTargetFile = null;
 
             SaveStateFile();
         }
