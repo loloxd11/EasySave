@@ -91,7 +91,7 @@ namespace EasySave
                 }
                 else
                 {
-                    Console.WriteLine("Commande non reconnue. Utilisez un format valide : numéro, plage (1-3) ou liste (1;2;3)");
+                    Console.WriteLine("Commande non reconnue. Utilisez un format valide : numéro, plage (1-3) ou liste (1,2,3)");
                 }
             }
         }
