@@ -3,61 +3,34 @@
   "WorkspaceRootPath": "C:\\Users\\lecle\\source\\repos\\loloxd11\\EasySave\\easysave\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{6BC033B9-4A8F-40B1-B2FC-B0412F04CC2B}|easysave\\easysave.csproj|c:\\users\\lecle\\source\\repos\\loloxd11\\easysave\\easysave\\easysave\\differentialbackupstrategy.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6BC033B9-4A8F-40B1-B2FC-B0412F04CC2B}|easysave\\easysave.csproj|solutionrelative:easysave\\differentialbackupstrategy.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{6BC033B9-4A8F-40B1-B2FC-B0412F04CC2B}|easysave\\easysave.csproj|c:\\users\\lecle\\source\\repos\\loloxd11\\easysave\\easysave\\easysave\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6BC033B9-4A8F-40B1-B2FC-B0412F04CC2B}|easysave\\easysave.csproj|solutionrelative:easysave\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6BC033B9-4A8F-40B1-B2FC-B0412F04CC2B}|easysave\\easysave.csproj|c:\\users\\lecle\\source\\repos\\loloxd11\\easysave\\easysave\\easysave\\logmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6BC033B9-4A8F-40B1-B2FC-B0412F04CC2B}|easysave\\easysave.csproj|solutionrelative:easysave\\logmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6BC033B9-4A8F-40B1-B2FC-B0412F04CC2B}|easysave\\easysave.csproj|c:\\users\\lecle\\source\\repos\\loloxd11\\easysave\\easysave\\easysave\\interfaces.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6BC033B9-4A8F-40B1-B2FC-B0412F04CC2B}|easysave\\easysave.csproj|solutionrelative:easysave\\interfaces.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\lecle\\Downloads\\2020-12-17 (1).json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\lecle\\AppData\\Roaming\\EasySave\\state.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6BC033B9-4A8F-40B1-B2FC-B0412F04CC2B}|easysave\\easysave.csproj|c:\\users\\lecle\\source\\repos\\loloxd11\\easysave\\easysave\\easysave\\backupjob.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6BC033B9-4A8F-40B1-B2FC-B0412F04CC2B}|easysave\\easysave.csproj|solutionrelative:easysave\\backupjob.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{6BC033B9-4A8F-40B1-B2FC-B0412F04CC2B}|easysave\\easysave.csproj|c:\\users\\lecle\\source\\repos\\loloxd11\\easysave\\easysave\\easysave\\configmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6BC033B9-4A8F-40B1-B2FC-B0412F04CC2B}|easysave\\easysave.csproj|solutionrelative:easysave\\configmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{6BC033B9-4A8F-40B1-B2FC-B0412F04CC2B}|easysave\\easysave.csproj|c:\\users\\lecle\\source\\repos\\loloxd11\\easysave\\easysave\\easysave\\backupmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{6BC033B9-4A8F-40B1-B2FC-B0412F04CC2B}|easysave\\easysave.csproj|solutionrelative:easysave\\backupmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6BC033B9-4A8F-40B1-B2FC-B0412F04CC2B}|easysave\\easysave.csproj|c:\\users\\lecle\\source\\repos\\loloxd11\\easysave\\easysave\\easysave\\abstractbackupstrategy.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6BC033B9-4A8F-40B1-B2FC-B0412F04CC2B}|easysave\\easysave.csproj|solutionrelative:easysave\\abstractbackupstrategy.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6BC033B9-4A8F-40B1-B2FC-B0412F04CC2B}|easysave\\easysave.csproj|c:\\users\\lecle\\source\\repos\\loloxd11\\easysave\\easysave\\easysave\\completebackupstrategy.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6BC033B9-4A8F-40B1-B2FC-B0412F04CC2B}|easysave\\easysave.csproj|solutionrelative:easysave\\completebackupstrategy.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6BC033B9-4A8F-40B1-B2FC-B0412F04CC2B}|easysave\\easysave.csproj|c:\\users\\lecle\\source\\repos\\loloxd11\\easysave\\easysave\\easysave\\commandlineinterface.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6BC033B9-4A8F-40B1-B2FC-B0412F04CC2B}|easysave\\easysave.csproj|solutionrelative:easysave\\commandlineinterface.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6BC033B9-4A8F-40B1-B2FC-B0412F04CC2B}|easysave\\easysave.csproj|c:\\users\\lecle\\source\\repos\\loloxd11\\easysave\\easysave\\easysave\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6BC033B9-4A8F-40B1-B2FC-B0412F04CC2B}|easysave\\easysave.csproj|solutionrelative:easysave\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{6BC033B9-4A8F-40B1-B2FC-B0412F04CC2B}|easysave\\easysave.csproj|c:\\users\\lecle\\source\\repos\\loloxd11\\easysave\\easysave\\easysave\\backupjob.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6BC033B9-4A8F-40B1-B2FC-B0412F04CC2B}|easysave\\easysave.csproj|solutionrelative:easysave\\backupjob.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\lecle\\AppData\\Roaming\\EasySave\\config.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6BC033B9-4A8F-40B1-B2FC-B0412F04CC2B}|easysave\\easysave.csproj|c:\\users\\lecle\\source\\repos\\loloxd11\\easysave\\easysave\\easysave\\statemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6BC033B9-4A8F-40B1-B2FC-B0412F04CC2B}|easysave\\easysave.csproj|solutionrelative:easysave\\statemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{6BC033B9-4A8F-40B1-B2FC-B0412F04CC2B}|easysave\\easysave.csproj|c:\\users\\lecle\\source\\repos\\loloxd11\\easysave\\easysave\\easysave\\abstractbackupstrategy.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6BC033B9-4A8F-40B1-B2FC-B0412F04CC2B}|easysave\\easysave.csproj|solutionrelative:easysave\\abstractbackupstrategy.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6BC033B9-4A8F-40B1-B2FC-B0412F04CC2B}|easysave\\easysave.csproj|c:\\users\\lecle\\source\\repos\\loloxd11\\easysave\\easysave\\easysave\\languagemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6BC033B9-4A8F-40B1-B2FC-B0412F04CC2B}|easysave\\easysave.csproj|solutionrelative:easysave\\languagemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\lecle\\AppData\\Roaming\\EasySave\\state.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6BC033B9-4A8F-40B1-B2FC-B0412F04CC2B}|easysave\\easysave.csproj|c:\\users\\lecle\\source\\repos\\loloxd11\\easysave\\easysave\\easysave\\configmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6BC033B9-4A8F-40B1-B2FC-B0412F04CC2B}|easysave\\easysave.csproj|solutionrelative:easysave\\configmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{6BC033B9-4A8F-40B1-B2FC-B0412F04CC2B}|easysave\\easysave.csproj|c:\\users\\lecle\\source\\repos\\loloxd11\\easysave\\easysave\\easysave\\commandlineinterface.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6BC033B9-4A8F-40B1-B2FC-B0412F04CC2B}|easysave\\easysave.csproj|solutionrelative:easysave\\commandlineinterface.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -67,7 +40,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 10,
+          "SelectedChildIndex": 8,
           "Children": [
             {
               "$type": "Bookmark",
@@ -75,185 +48,107 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "LogManager.cs",
-              "DocumentMoniker": "C:\\Users\\lecle\\source\\repos\\loloxd11\\EasySave\\easysave\\easysave\\LogManager.cs",
-              "RelativeDocumentMoniker": "easysave\\LogManager.cs",
-              "ToolTip": "C:\\Users\\lecle\\source\\repos\\loloxd11\\EasySave\\easysave\\easysave\\LogManager.cs",
-              "RelativeToolTip": "easysave\\LogManager.cs",
-              "ViewState": "AgIAAGAAAAAAAAAAAAAiwGMAAAAZAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-08T14:06:15.236Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 11,
-              "Title": "config.json",
-              "DocumentMoniker": "C:\\Users\\lecle\\AppData\\Roaming\\EasySave\\config.json",
-              "RelativeDocumentMoniker": "..\\..\\..\\..\\..\\AppData\\Roaming\\EasySave\\config.json",
-              "ToolTip": "C:\\Users\\lecle\\AppData\\Roaming\\EasySave\\config.json",
-              "RelativeToolTip": "..\\..\\..\\..\\..\\AppData\\Roaming\\EasySave\\config.json",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-05-08T15:40:09.452Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 9,
-              "Title": "CommandLineInterface.cs",
-              "DocumentMoniker": "C:\\Users\\lecle\\source\\repos\\loloxd11\\EasySave\\easysave\\easysave\\CommandLineInterface.cs",
-              "RelativeDocumentMoniker": "easysave\\CommandLineInterface.cs",
-              "ToolTip": "C:\\Users\\lecle\\source\\repos\\loloxd11\\EasySave\\easysave\\easysave\\CommandLineInterface.cs",
-              "RelativeToolTip": "easysave\\CommandLineInterface.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAmAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-08T14:38:22.36Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 10,
-              "Title": "Program.cs",
-              "DocumentMoniker": "C:\\Users\\lecle\\source\\repos\\loloxd11\\EasySave\\easysave\\easysave\\Program.cs",
-              "RelativeDocumentMoniker": "easysave\\Program.cs",
-              "ToolTip": "C:\\Users\\lecle\\source\\repos\\loloxd11\\EasySave\\easysave\\easysave\\Program.cs",
-              "RelativeToolTip": "easysave\\Program.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAArAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-08T14:02:22.179Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 5,
               "Title": "AbstractBackupStrategy.cs",
               "DocumentMoniker": "C:\\Users\\lecle\\source\\repos\\loloxd11\\EasySave\\easysave\\easysave\\AbstractBackupStrategy.cs",
               "RelativeDocumentMoniker": "easysave\\AbstractBackupStrategy.cs",
               "ToolTip": "C:\\Users\\lecle\\source\\repos\\loloxd11\\EasySave\\easysave\\easysave\\AbstractBackupStrategy.cs",
               "RelativeToolTip": "easysave\\AbstractBackupStrategy.cs",
-              "ViewState": "AgIAADgAAAAAAAAAAADwv1YAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-08T14:07:29.745Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "BackupManager.cs",
-              "DocumentMoniker": "C:\\Users\\lecle\\source\\repos\\loloxd11\\EasySave\\easysave\\easysave\\BackupManager.cs",
-              "RelativeDocumentMoniker": "easysave\\BackupManager.cs",
-              "ToolTip": "C:\\Users\\lecle\\source\\repos\\loloxd11\\EasySave\\easysave\\easysave\\BackupManager.cs",
-              "RelativeToolTip": "easysave\\BackupManager.cs",
-              "ViewState": "AgIAAMUAAAAAAAAAAAAkwM4AAAANAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-08T14:03:37.847Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "Interfaces.cs",
-              "DocumentMoniker": "C:\\Users\\lecle\\source\\repos\\loloxd11\\EasySave\\easysave\\easysave\\Interfaces.cs",
-              "RelativeDocumentMoniker": "easysave\\Interfaces.cs",
-              "ToolTip": "C:\\Users\\lecle\\source\\repos\\loloxd11\\EasySave\\easysave\\easysave\\Interfaces.cs",
-              "RelativeToolTip": "easysave\\Interfaces.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAqwA8AAAAIAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-08T14:05:22.399Z"
+              "WhenOpened": "2025-05-08T23:53:56.091Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 4,
-              "Title": "state.json",
-              "DocumentMoniker": "C:\\Users\\lecle\\AppData\\Roaming\\EasySave\\state.json",
-              "RelativeDocumentMoniker": "..\\..\\..\\..\\..\\AppData\\Roaming\\EasySave\\state.json",
-              "ToolTip": "C:\\Users\\lecle\\AppData\\Roaming\\EasySave\\state.json",
-              "RelativeToolTip": "..\\..\\..\\..\\..\\AppData\\Roaming\\EasySave\\state.json",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAYAAAAAAAAAA==",
+              "Title": "config.json",
+              "DocumentMoniker": "C:\\Users\\lecle\\AppData\\Roaming\\EasySave\\config.json",
+              "RelativeDocumentMoniker": "..\\..\\..\\..\\..\\AppData\\Roaming\\EasySave\\config.json",
+              "ToolTip": "C:\\Users\\lecle\\AppData\\Roaming\\EasySave\\config.json",
+              "RelativeToolTip": "..\\..\\..\\..\\..\\AppData\\Roaming\\EasySave\\config.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-05-08T16:13:37.95Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "CompleteBackupStrategy.cs",
-              "DocumentMoniker": "C:\\Users\\lecle\\source\\repos\\loloxd11\\EasySave\\easysave\\easysave\\CompleteBackupStrategy.cs",
-              "RelativeDocumentMoniker": "easysave\\CompleteBackupStrategy.cs",
-              "ToolTip": "C:\\Users\\lecle\\source\\repos\\loloxd11\\EasySave\\easysave\\easysave\\CompleteBackupStrategy.cs",
-              "RelativeToolTip": "easysave\\CompleteBackupStrategy.cs",
-              "ViewState": "AgIAAEkAAAAAAAAAAADwv2cAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-08T14:09:01.074Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "DifferentialBackupStrategy.cs",
-              "DocumentMoniker": "C:\\Users\\lecle\\source\\repos\\loloxd11\\EasySave\\easysave\\easysave\\DifferentialBackupStrategy.cs",
-              "RelativeDocumentMoniker": "easysave\\DifferentialBackupStrategy.cs",
-              "ToolTip": "C:\\Users\\lecle\\source\\repos\\loloxd11\\EasySave\\easysave\\easysave\\DifferentialBackupStrategy.cs*",
-              "RelativeToolTip": "easysave\\DifferentialBackupStrategy.cs*",
-              "ViewState": "AgIAAIAAAAAAAAAAAAAAwJIAAABAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-08T14:35:52.35Z",
+              "WhenOpened": "2025-05-08T23:38:16.932Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 3,
-              "Title": "2020-12-17 (1).json",
-              "DocumentMoniker": "C:\\Users\\lecle\\Downloads\\2020-12-17 (1).json",
-              "RelativeDocumentMoniker": "..\\..\\..\\..\\..\\Downloads\\2020-12-17 (1).json",
-              "ToolTip": "C:\\Users\\lecle\\Downloads\\2020-12-17 (1).json",
-              "RelativeToolTip": "..\\..\\..\\..\\..\\Downloads\\2020-12-17 (1).json",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAACAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-05-08T16:28:37.875Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
               "Title": "BackupJob.cs",
               "DocumentMoniker": "C:\\Users\\lecle\\source\\repos\\loloxd11\\EasySave\\easysave\\easysave\\BackupJob.cs",
               "RelativeDocumentMoniker": "easysave\\BackupJob.cs",
               "ToolTip": "C:\\Users\\lecle\\source\\repos\\loloxd11\\EasySave\\easysave\\easysave\\BackupJob.cs",
               "RelativeToolTip": "easysave\\BackupJob.cs",
-              "ViewState": "AgIAAA4AAAAAAAAAAAAQwBIAAAAhAAAAAAAAAA==",
+              "ViewState": "AgIAAF4AAAAAAAAAAAA3wHsAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-08T14:04:40.375Z"
+              "WhenOpened": "2025-05-08T23:24:27.409Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
-              "Title": "StateManager.cs",
-              "DocumentMoniker": "C:\\Users\\lecle\\source\\repos\\loloxd11\\EasySave\\easysave\\easysave\\StateManager.cs",
-              "RelativeDocumentMoniker": "easysave\\StateManager.cs",
-              "ToolTip": "C:\\Users\\lecle\\source\\repos\\loloxd11\\EasySave\\easysave\\easysave\\StateManager.cs",
-              "RelativeToolTip": "easysave\\StateManager.cs",
-              "ViewState": "AgIAAAsAAAAAAAAAAAAQwBUAAAA/AAAAAAAAAA==",
+              "DocumentIndex": 7,
+              "Title": "CommandLineInterface.cs",
+              "DocumentMoniker": "C:\\Users\\lecle\\source\\repos\\loloxd11\\EasySave\\easysave\\easysave\\CommandLineInterface.cs",
+              "RelativeDocumentMoniker": "easysave\\CommandLineInterface.cs",
+              "ToolTip": "C:\\Users\\lecle\\source\\repos\\loloxd11\\EasySave\\easysave\\easysave\\CommandLineInterface.cs",
+              "RelativeToolTip": "easysave\\CommandLineInterface.cs",
+              "ViewState": "AgIAACcAAAAAAAAAAAAowFwAAAANAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-08T14:05:46.878Z"
+              "WhenOpened": "2025-05-08T23:14:24.184Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
-              "Title": "LanguageManager.cs",
-              "DocumentMoniker": "C:\\Users\\lecle\\source\\repos\\loloxd11\\EasySave\\easysave\\easysave\\LanguageManager.cs",
-              "RelativeDocumentMoniker": "easysave\\LanguageManager.cs",
-              "ToolTip": "C:\\Users\\lecle\\source\\repos\\loloxd11\\EasySave\\easysave\\easysave\\LanguageManager.cs",
-              "RelativeToolTip": "easysave\\LanguageManager.cs",
-              "ViewState": "AgIAAIcAAAAAAAAAAAAiwNoAAAAAAAAAAAAAAA==",
+              "DocumentIndex": 2,
+              "Title": "BackupManager.cs",
+              "DocumentMoniker": "C:\\Users\\lecle\\source\\repos\\loloxd11\\EasySave\\easysave\\easysave\\BackupManager.cs",
+              "RelativeDocumentMoniker": "easysave\\BackupManager.cs",
+              "ToolTip": "C:\\Users\\lecle\\source\\repos\\loloxd11\\EasySave\\easysave\\easysave\\BackupManager.cs",
+              "RelativeToolTip": "easysave\\BackupManager.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAqwBQAAAAuAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-08T14:37:34.971Z"
+              "WhenOpened": "2025-05-08T23:14:14.271Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
+              "DocumentIndex": 1,
               "Title": "ConfigManager.cs",
               "DocumentMoniker": "C:\\Users\\lecle\\source\\repos\\loloxd11\\EasySave\\easysave\\easysave\\ConfigManager.cs",
               "RelativeDocumentMoniker": "easysave\\ConfigManager.cs",
               "ToolTip": "C:\\Users\\lecle\\source\\repos\\loloxd11\\EasySave\\easysave\\easysave\\ConfigManager.cs",
               "RelativeToolTip": "easysave\\ConfigManager.cs",
-              "ViewState": "AgIAAEwAAAAAAAAAAAAiwGYAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAJcAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-08T14:36:42.711Z"
+              "WhenOpened": "2025-05-08T23:12:55.436Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "state.json",
+              "DocumentMoniker": "C:\\Users\\lecle\\AppData\\Roaming\\EasySave\\state.json",
+              "RelativeDocumentMoniker": "..\\..\\..\\..\\..\\AppData\\Roaming\\EasySave\\state.json",
+              "ToolTip": "C:\\Users\\lecle\\AppData\\Roaming\\EasySave\\state.json",
+              "RelativeToolTip": "..\\..\\..\\..\\..\\AppData\\Roaming\\EasySave\\state.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAZAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-05-08T16:13:37.95Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\lecle\\source\\repos\\loloxd11\\EasySave\\easysave\\easysave\\Program.cs",
+              "RelativeDocumentMoniker": "easysave\\Program.cs",
+              "ToolTip": "C:\\Users\\lecle\\source\\repos\\loloxd11\\EasySave\\easysave\\easysave\\Program.cs",
+              "RelativeToolTip": "easysave\\Program.cs",
+              "ViewState": "AgIAAAgAAAAAAAAAAAAQwBIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-08T14:02:22.179Z",
+              "EditorCaption": ""
             }
           ]
         }

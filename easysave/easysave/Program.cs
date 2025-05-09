@@ -11,6 +11,12 @@ namespace EasySave
         {
             try
             {
+                var configManager = ConfigManager.GetInstance();
+                var backupManager = BackupManager.GetInstance();
+
+                // Charger les jobs après l'initialisation
+                configManager.LoadBackupJobs();
+
                 // Initialize the command line interface
                 cli = new CommandLineInterface();
 
