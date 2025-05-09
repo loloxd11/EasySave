@@ -26,13 +26,13 @@ namespace EasySave
 
             int count = 0;
 
-            // Obtenir tous les fichiers dans le répertoire
+            // Get all files in the directory
             try
             {
                 string[] files = Directory.GetFiles(source);
                 count += files.Length;
 
-                // Compter récursivement les fichiers dans les sous-répertoires
+                // Recursively count files in subdirectories
                 string[] subdirectories = Directory.GetDirectories(source);
                 foreach (string subdirectory in subdirectories)
                 {
@@ -41,7 +41,7 @@ namespace EasySave
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Erreur lors du calcul du nombre total de fichiers: {ex.Message}");
+                Console.WriteLine($"Error while calculating total number of files: {ex.Message}");
             }
 
             return count;
@@ -53,10 +53,10 @@ namespace EasySave
 
             try
             {
-                // Ajouter tous les fichiers de ce répertoire
+                // Add all files in this directory
                 fileList.AddRange(Directory.GetFiles(path));
 
-                // Scanner récursivement les sous-répertoires
+                // Recursively scan subdirectories
                 foreach (string subdirectory in Directory.GetDirectories(path))
                 {
                     fileList.AddRange(ScanDirectory(subdirectory));
@@ -64,7 +64,7 @@ namespace EasySave
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Erreur lors du scan du répertoire {path}: {ex.Message}");
+                Console.WriteLine($"Error while scanning directory {path}: {ex.Message}");
             }
 
             return fileList;
@@ -93,13 +93,13 @@ namespace EasySave
 
             try
             {
-                // Calculer la taille de tous les fichiers dans le répertoire
+                // Calculate size of all files in the directory
                 foreach (string file in Directory.GetFiles(source))
                 {
                     size += GetFileSize(file);
                 }
 
-                // Calculer récursivement la taille dans les sous-répertoires
+                // Recursively calculate size in subdirectories
                 foreach (string subdirectory in Directory.GetDirectories(source))
                 {
                     size += CalculateTotalSize(subdirectory);
@@ -107,7 +107,7 @@ namespace EasySave
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Erreur lors du calcul de la taille totale: {ex.Message}");
+                Console.WriteLine($"Error while calculating total size: {ex.Message}");
             }
 
             return size;

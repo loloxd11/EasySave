@@ -6,33 +6,35 @@ namespace EasySave
 {
     public class BackupJob
     {
-        private string name;
-        private string sourcePath;
-        private string targetPath;
-        private BackupType type;
-        private List<IObserver> observers;
-        private JobState state;
-        private int totalFiles;
-        private long totalSize;
-        private int progression;
-        private AbstractBackupStrategy backupStrategy;
-        private long lastFileTime;
+        private string name; // The name of the backup job
+        private string sourcePath; // The source directory path for the backup
+        private string targetPath; // The target directory path for the backup
+        private BackupType type; // The type of backup (Complete or Differential)
+        private List<IObserver> observers; // List of observers attached to the job
+        private JobState state; // The current state of the backup job
+        private int totalFiles; // Total number of files to be backed up
+        private long totalSize; // Total size of files to be backed up
+        private int progression; // Progression percentage of the backup job
+        private AbstractBackupStrategy backupStrategy; // The strategy used to execute the backup
+        private long lastFileTime; // Timestamp of the last file processed
 
-        public string Name { get => name; }
-        public string SourcePath { get => sourcePath; }
-        public string TargetPath { get => targetPath; }
-        public BackupType Type { get => type; }
-        public JobState State { get => state; set => state = value; }
-        public int TotalFiles { get => totalFiles; set => totalFiles = value; }
-        public long TotalSize { get => totalSize; set => totalSize = value; }
-        public int Progression { get => progression; set => progression = value; }
-        public long LastFileTime { get => lastFileTime; set => lastFileTime = value; }
-        public string CurrentSourceFile { get; private set; }
-        public string CurrentTargetFile { get; private set; }
-        public int RemainingFiles { get; private set; }
-        public long RemainingSize { get; private set; }
-        public IEnumerable<IObserver> Observers => observers;
+        // Properties to expose private fields
+        public string Name { get => name; } // Gets the name of the backup job
+        public string SourcePath { get => sourcePath; } // Gets the source directory path
+        public string TargetPath { get => targetPath; } // Gets the target directory path
+        public BackupType Type { get => type; } // Gets the type of backup
+        public JobState State { get => state; set => state = value; } // Gets or sets the current state of the job
+        public int TotalFiles { get => totalFiles; set => totalFiles = value; } // Gets or sets the total number of files
+        public long TotalSize { get => totalSize; set => totalSize = value; } // Gets or sets the total size of files
+        public int Progression { get => progression; set => progression = value; } // Gets or sets the progression percentage
+        public long LastFileTime { get => lastFileTime; set => lastFileTime = value; } // Gets or sets the timestamp of the last file processed
+        public string CurrentSourceFile { get; private set; } // Gets the current source file being processed
+        public string CurrentTargetFile { get; private set; } // Gets the current target file being processed
+        public int RemainingFiles { get; private set; } // Gets the number of remaining files to process
+        public long RemainingSize { get; private set; } // Gets the remaining size of files to process
+        public IEnumerable<IObserver> Observers => observers; // Gets the list of observers
 
+        // Constructor to initialize the backup job
         public BackupJob(string name, string source, string target, BackupType type, AbstractBackupStrategy strategy)
         {
             this.name = name;
@@ -41,7 +43,7 @@ namespace EasySave
             this.type = type;
             this.backupStrategy = strategy;
             this.observers = new List<IObserver>();
-            this.state = JobState.Inactive;
+            this.state = JobState.Inactive; // Default state is inactive
             this.totalFiles = 0;
             this.totalSize = 0;
             this.progression = 0;
@@ -50,43 +52,45 @@ namespace EasySave
             this.RemainingSize = 0;
         }
 
+        // Executes the backup job
         public bool Execute()
         {
             try
             {
-                // Mettre à jour l'état comme actif
+                // Update the state to active
                 state = JobState.Active;
 
-                // Calculer le nombre total de fichiers et la taille
+                // Calculate the total number of files and their size
                 totalFiles = backupStrategy.CalculateTotalFiles(sourcePath);
                 totalSize = backupStrategy.CalculateTotalSize(sourcePath);
                 RemainingFiles = totalFiles;
                 RemainingSize = totalSize;
 
-                // Notifier les observateurs que la tâche a démarré
+                // Notify observers that the job has started
                 NotifyObservers("start");
 
-                // Exécuter la stratégie de sauvegarde
+                // Execute the backup strategy
                 bool result = backupStrategy.Execute(this);
 
-                // Mettre à jour l'état en fonction du résultat
+                // Update the state based on the result
                 state = result ? JobState.Completed : JobState.Error;
 
-                // Notifier les observateurs que la tâche est terminée
+                // Notify observers that the job has finished
                 NotifyObservers("finish");
-
 
                 return result;
             }
             catch (Exception ex)
             {
+                // Handle errors and update the state to error
                 state = JobState.Error;
-                Console.WriteLine($"Erreur lors de l'exécution de la tâche de sauvegarde {name}: {ex.Message}");
+                Console.WriteLine($"Error while executing the backup job {name}: {ex.Message}");
                 NotifyObservers("error");
                 return false;
             }
         }
 
+        // Attach an observer to the job
         public void AttachObserver(IObserver observer)
         {
             if (!observers.Contains(observer))
@@ -95,36 +99,35 @@ namespace EasySave
             }
         }
 
+        // Notify all observers about a specific action
         public void NotifyObservers(string action)
         {
             foreach (var observer in observers)
             {
-            
                 observer.Update(this, action);
             }
         }
 
+        // Update the progress of the backup job
         public void UpdateProgress(int files, long size)
         {
-            int filesProcessed = totalFiles - files;
-            progression = (totalFiles > 0) ? (int)((double)filesProcessed / totalFiles * 100) : 0;
-            RemainingFiles = files;
-            RemainingSize = size;
+            int filesProcessed = totalFiles - files; // Calculate the number of files processed
+            progression = (totalFiles > 0) ? (int)((double)filesProcessed / totalFiles * 100) : 0; // Calculate progression percentage
+            RemainingFiles = files; // Update remaining files
+            RemainingSize = size; // Update remaining size
 
-            // Notifier les observateurs de la mise à jour de progression
+            // Notify observers about the progress update
             NotifyObservers("progress");
         }
 
+        // Update the current file being processed
         public void UpdateCurrentFile(string source, string target)
         {
-            CurrentSourceFile = source;
-            CurrentTargetFile = target;
+            CurrentSourceFile = source; // Update the current source file
+            CurrentTargetFile = target; // Update the current target file
 
-            // Notifier les observateurs de la mise à jour du fichier
+            // Notify observers about the file update
             NotifyObservers("file");
         }
-
-
-
     }
 }

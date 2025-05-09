@@ -6,22 +6,22 @@ namespace EasySave
 {
     public class BackupManager
     {
-        private static BackupManager instance;
-        private List<BackupJob> backupJobs;
-        private LanguageManager languageManager;
+        private static BackupManager instance; // Singleton instance of BackupManager
+        private List<BackupJob> backupJobs; // List of backup jobs
+        private LanguageManager languageManager; // Language manager for translations
         private readonly Lazy<ConfigManager> lazyConfigManager = new(() => ConfigManager.GetInstance());
-        private ConfigManager ConfigManager => lazyConfigManager.Value;
+        private ConfigManager ConfigManager => lazyConfigManager.Value; // Lazy-loaded configuration manager
 
-
+        // Private constructor to enforce singleton pattern
         private BackupManager()
         {
             backupJobs = new List<BackupJob>();
             languageManager = LanguageManager.GetInstance();
-            // Charger la configuration
+
+            // Load configuration settings
             ConfigManager.LoadConfiguration();
 
-
-            // Créer le répertoire pour les fichiers de log et d'état s'ils n'existent pas
+            // Create the directory for log and state files if it doesn't exist
             string logDirectory = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                 "EasySave", "Logs");
@@ -32,6 +32,7 @@ namespace EasySave
             }
         }
 
+        // Get the singleton instance of BackupManager
         public static BackupManager GetInstance()
         {
             if (instance == null)
@@ -41,6 +42,7 @@ namespace EasySave
             return instance;
         }
 
+        // Add a backup job using string representation of the backup type
         public void AddBackupJob(string name, string source, string target, string backupTypeStr)
         {
             BackupType type;
@@ -50,27 +52,28 @@ namespace EasySave
             }
             else
             {
-                Console.WriteLine($"Type de sauvegarde invalide: {backupTypeStr}");
+                Console.WriteLine($"Invalid backup type: {backupTypeStr}");
             }
         }
 
+        // Add a backup job with specified parameters
         public bool AddBackupJob(string name, string source, string target, BackupType type)
         {
-            // Vérifier si nous avons déjà 5 tâches de sauvegarde
+            // Check if the maximum number of backup jobs (5) is reached
             if (backupJobs.Count >= 5)
             {
                 Console.WriteLine(languageManager.GetTranslation("MaxBackupJobsReached"));
                 return false;
             }
 
-            // Valider les répertoires source et cible
+            // Validate the source directory
             if (!Directory.Exists(source))
             {
                 Console.WriteLine(languageManager.GetTranslation("SourceDirNotFound"));
                 return false;
             }
 
-            // Créer le répertoire cible s'il n'existe pas
+            // Create the target directory if it doesn't exist
             if (!Directory.Exists(target))
             {
                 try
@@ -84,20 +87,20 @@ namespace EasySave
                 }
             }
 
-            // Vérifier si une tâche avec le même nom existe déjà
+            // Check if a job with the same name already exists
             if (backupJobs.Exists(job => job.Name == name))
             {
                 Console.WriteLine(languageManager.GetTranslation("JobNameExists"));
                 return false;
             }
 
-            // Créer la stratégie de sauvegarde appropriée
+            // Create the appropriate backup strategy
             AbstractBackupStrategy strategy = CreateBackupStrategy(type);
 
-            // Créer et ajouter la tâche de sauvegarde
+            // Create and add the backup job
             BackupJob job = new BackupJob(name, source, target, type, strategy);
 
-            // Configurer les observateurs pour la tâche
+            // Configure observers for the job
             string stateFilePath = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                 "EasySave", "state.json");
@@ -112,17 +115,18 @@ namespace EasySave
             job.AttachObserver(stateManager);
             job.AttachObserver(logManager);
 
-            // Initialiser l'état de la tâche
+            // Initialize the job state
             job.NotifyObservers("create");
 
             backupJobs.Add(job);
 
-            // Enregistrer la liste de tâches de sauvegarde mise à jour dans la configuration
+            // Save the updated list of backup jobs to the configuration
             SaveBackupJobsToConfig();
 
             return true;
         }
 
+        // Remove a backup job by its index
         public bool RemoveBackupJob(int index)
         {
             if (index >= 0 && index < backupJobs.Count)
@@ -135,6 +139,7 @@ namespace EasySave
             return false;
         }
 
+        // Update an existing backup job
         public bool UpdateBackupJob(int index, string name, string source, string target, BackupType type)
         {
             if (index < 0 || index >= backupJobs.Count)
@@ -142,14 +147,14 @@ namespace EasySave
                 return false;
             }
 
-            // Valider les répertoires source et cible
+            // Validate the source directory
             if (!Directory.Exists(source))
             {
                 Console.WriteLine(languageManager.GetTranslation("SourceDirNotFound"));
                 return false;
             }
 
-            // Créer le répertoire cible s'il n'existe pas
+            // Create the target directory if it doesn't exist
             if (!Directory.Exists(target))
             {
                 try
@@ -163,42 +168,44 @@ namespace EasySave
                 }
             }
 
-            // Vérifier si une tâche avec le même nom existe déjà (sauf pour la tâche actuelle)
+            // Check if a job with the same name already exists (excluding the current job)
             if (backupJobs.Exists(job => job.Name == name && backupJobs.IndexOf(job) != index))
             {
                 Console.WriteLine(languageManager.GetTranslation("JobNameExists"));
                 return false;
             }
 
-            // Créer la stratégie de sauvegarde appropriée
+            // Create the appropriate backup strategy
             AbstractBackupStrategy strategy = CreateBackupStrategy(type);
 
-            // Mettre à jour la tâche de sauvegarde
+            // Update the backup job
             BackupJob job = backupJobs[index];
 
-            // Créer une nouvelle tâche avec les paramètres mis à jour
+            // Create a new job with updated parameters
             BackupJob updatedJob = new BackupJob(name, source, target, type, strategy);
 
-            // Copier les observateurs de l'ancienne tâche vers la nouvelle tâche
+            // Copy observers from the old job to the new job
             foreach (var observer in job.Observers)
             {
                 updatedJob.AttachObserver(observer);
             }
 
-            // Remplacer l'ancienne tâche par la nouvelle
+            // Replace the old job with the updated job
             backupJobs[index] = updatedJob;
 
-            // Enregistrer la liste de tâches de sauvegarde mise à jour dans la configuration
+            // Save the updated list of backup jobs to the configuration
             SaveBackupJobsToConfig();
 
             return true;
         }
 
+        // List all backup jobs
         public List<BackupJob> ListBackups()
         {
             return backupJobs;
         }
 
+        // Execute specified backup jobs by their indices
         public void ExecuteBackupJob(List<int> backupIndices)
         {
             foreach (int index in backupIndices)
@@ -224,6 +231,7 @@ namespace EasySave
             }
         }
 
+        // Create the appropriate backup strategy based on the backup type
         private AbstractBackupStrategy CreateBackupStrategy(BackupType type)
         {
             string stateFilePath = Path.Combine(
@@ -248,12 +256,13 @@ namespace EasySave
             }
         }
 
+        // Save the list of backup jobs to the configuration file
         private void SaveBackupJobsToConfig()
         {
-            // Obtenir l'instance de ConfigManager
+            // Get the instance of ConfigManager
             ConfigManager configManager = ConfigManager.GetInstance();
 
-            // Préparer les données de configuration
+            // Prepare configuration data
             var configData = new
             {
                 Settings = new
@@ -275,20 +284,19 @@ namespace EasySave
                 })
             };
 
-            // Sérialiser les données en JSON
+            // Serialize data to JSON
             string json = System.Text.Json.JsonSerializer.Serialize(configData, new System.Text.Json.JsonSerializerOptions
             {
                 WriteIndented = true
             });
 
-            // Définir le chemin du fichier de configuration
+            // Define the configuration file path
             string configFilePath = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                 "EasySave", "config.json");
 
-            // Écrire les données dans le fichier
+            // Write data to the file
             File.WriteAllText(configFilePath, json);
         }
-
     }
 }

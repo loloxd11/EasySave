@@ -19,22 +19,23 @@ namespace EasySave
         {
             try
             {
-                // Définir les variables 'source' et 'target' à partir du job  
+                // Define 'source' and 'target' variables from the job
                 string source = job.SourcePath;
                 string target = job.TargetPath;
 
+                // Ensure the source directory exists
                 if (!Directory.Exists(source))
                 {
-                    throw new DirectoryNotFoundException($"Le répertoire source n'existe pas: {source}");
+                    throw new DirectoryNotFoundException($"The source directory does not exist: {source}");
                 }
 
-                // Créer le répertoire cible s'il n'existe pas  
+                // Create the target directory if it does not exist
                 if (!Directory.Exists(target))
                 {
                     Directory.CreateDirectory(target);
                 }
 
-                // Obtenir tous les fichiers du répertoire source et des sous-répertoires  
+                // Retrieve all files from the source directory and its subdirectories
                 List<string> files = ScanDirectory(source);
 
                 int totalFiles = files.Count;
@@ -42,7 +43,7 @@ namespace EasySave
                 long totalSize = 0;
                 long remainingSize = 0;
 
-                // Calculer la taille totale  
+                // Calculate the total size of all files
                 foreach (string file in files)
                 {
                     totalSize += GetFileSize(file);
@@ -50,30 +51,30 @@ namespace EasySave
 
                 remainingSize = totalSize;
 
-                // Créer un objet BackupJob pour suivre la progression  
+                // Update the job with total files and size
                 job.TotalFiles = totalFiles;
                 job.TotalSize = totalSize;
 
-                // Traiter chaque fichier  
+                // Process each file
                 foreach (string sourceFile in files)
                 {
-                    // Calculer le chemin relatif  
+                    // Compute the relative path of the file
                     string relativePath = sourceFile.Substring(source.Length).TrimStart('\\', '/');
                     string targetFile = Path.Combine(target, relativePath);
 
-                    // Créer le répertoire cible s'il n'existe pas  
+                    // Create the target directory if it does not exist
                     string targetDirectory = Path.GetDirectoryName(targetFile);
                     if (!Directory.Exists(targetDirectory))
                     {
                         Directory.CreateDirectory(targetDirectory);
                     }
 
-                    // Vérifier si nous devons copier le fichier (s'il n'existe pas ou a été modifié)  
+                    // Check if the file needs to be copied (if it does not exist or has been modified)
                     bool needsCopy = !File.Exists(targetFile) || !CompareFiles(sourceFile, targetFile);
 
                     if (needsCopy)
                     {
-                        // Copier le fichier et mesurer le temps  
+                        // Copy the file and measure the time taken
                         Stopwatch stopwatch = new Stopwatch();
                         stopwatch.Start();
 
@@ -83,23 +84,23 @@ namespace EasySave
                             stopwatch.Stop();
                             job.LastFileTime = stopwatch.ElapsedMilliseconds;
 
-                            // Mettre à jour les informations du fichier courant et déclencher la journalisation  
+                            // Update the current file information and trigger logging
                             job.UpdateCurrentFile(sourceFile, targetFile);
                         }
                         catch (Exception ex)
                         {
                             stopwatch.Stop();
-                            job.LastFileTime = -1; // Un temps négatif indique une erreur  
-                            Console.WriteLine($"Erreur lors de la copie du fichier {sourceFile}: {ex.Message}");
+                            job.LastFileTime = -1; // A negative time indicates an error
+                            Console.WriteLine($"Error while copying the file {sourceFile}: {ex.Message}");
                         }
                     }
                     else
                     {
-                        // Le fichier n'a pas besoin d'être copié, donc ne pas l'enregistrer dans les logs  
+                        // If the file does not need to be copied, do not log it
                         job.LastFileTime = 0;
                     }
 
-                    // Mettre à jour la progression  
+                    // Update the progress of the backup
                     long fileSize = GetFileSize(sourceFile);
                     remainingFiles--;
                     remainingSize -= fileSize;
@@ -110,14 +111,14 @@ namespace EasySave
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Erreur lors de l'exécution de la sauvegarde différentielle: {ex.Message}");
+                Console.WriteLine($"Error during the execution of the differential backup: {ex.Message}");
                 return false;
             }
-        }            
+        }
 
         private bool CompareFiles(string sourcePath, string targetPath)
         {
-            // Comparer les hash des fichiers
+            // Compare the hash of the files
             string sourceHash = ComputeFileHash(sourcePath);
             string targetHash = ComputeFileHash(targetPath);
 
@@ -126,6 +127,7 @@ namespace EasySave
 
         private string ComputeFileHash(string filePath)
         {
+            // Compute the SHA256 hash of a file
             using (var sha256 = SHA256.Create())
             using (var stream = File.OpenRead(filePath))
             {
@@ -136,13 +138,13 @@ namespace EasySave
 
         private bool AreFilesModified(string sourceFilePath, string targetFilePath)
         {
-            // Vérifie si les fichiers existent  
+            // Check if the files exist
             if (!File.Exists(sourceFilePath) || !File.Exists(targetFilePath))
             {
-                return true; // Considérer comme modifié si l'un des fichiers n'existe pas  
+                return true; // Consider as modified if one of the files does not exist
             }
 
-            // Compare les hash des fichiers  
+            // Compare the hash of the files
             string sourceHash = ComputeFileHash(sourceFilePath);
             string targetHash = ComputeFileHash(targetFilePath);
 

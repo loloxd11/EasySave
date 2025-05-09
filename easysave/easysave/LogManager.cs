@@ -15,13 +15,13 @@ namespace EasySave
         {
             logDirectory = directory;
 
-            // Créer le répertoire de logs s'il n'existe pas
+            // Create the log directory if it does not exist
             if (!Directory.Exists(logDirectory))
             {
                 Directory.CreateDirectory(logDirectory);
             }
 
-            // Obtenir l'instance de ILogService à partir de la DLL
+            // Obtain an instance of ILogService from the DLL
             logService = GetLogServiceInstance(logDirectory);
         }
 
@@ -29,35 +29,35 @@ namespace EasySave
         {
             try
             {
-                // Essayer de charger l'assembly LogLibrary
+                // Attempt to load the LogLibrary assembly
                 Assembly logLibrary = Assembly.Load("LogLibrary");
 
-                // Chercher le type LogServiceFactory
+                // Look for the LogServiceFactory type
                 Type factoryType = logLibrary.GetType("LogLibrary.LogServiceFactory");
                 if (factoryType != null)
                 {
-                    // Chercher la méthode CreateLogService qui prend un string en paramètre
+                    // Look for the CreateLogService method that takes a string parameter
                     MethodInfo createMethod = factoryType.GetMethod("CreateLogService", new[] { typeof(string) });
                     if (createMethod != null)
                     {
-                        // Appeler la méthode statique
+                        // Call the static method
                         return (ILogService)createMethod.Invoke(null, new object[] { directory });
                     }
                 }
 
-                // Deuxième approche : essayer de trouver l'implémentation directe de ILogService
+                // Second approach: try to find a direct implementation of ILogService
                 Type logManagerType = logLibrary.GetType("LogLibrary.LogManager");
                 if (logManagerType != null)
                 {
-                    // Chercher la méthode GetInstance
+                    // Look for the GetInstance method
                     MethodInfo getInstance = logManagerType.GetMethod("GetInstance", new[] { typeof(string) });
                     if (getInstance != null)
                     {
-                        // Appeler la méthode statique
+                        // Call the static method
                         return (ILogService)getInstance.Invoke(null, new object[] { directory });
                     }
 
-                    // Essayer de créer une instance avec le constructeur
+                    // Try to create an instance using the constructor
                     var constructor = logManagerType.GetConstructor(new[] { typeof(string) });
                     if (constructor != null)
                     {
@@ -65,7 +65,7 @@ namespace EasySave
                     }
                 }
 
-                // Si tout échoue, utiliser une implémentation de secours
+                // If all attempts fail, use a fallback implementation
                 return new FallbackLogService(directory);
             }
             catch (Exception)
@@ -80,32 +80,32 @@ namespace EasySave
             {
                 bool isServiceReady = true;
 
-                // Vérifier si la méthode IsLogServiceReady existe et l'appeler
+                // Check if the IsLogServiceReady method exists and call it
                 try
                 {
                     isServiceReady = logService.IsLogServiceReady();
                 }
                 catch
                 {
-                    // En cas d'erreur, supposer que le service est prêt
+                    // Assume the service is ready in case of an error
                     isServiceReady = true;
                 }
 
                 if (isServiceReady)
                 {
-                    // Vérifier que les chemins de fichiers sont valides
+                    // Ensure file paths are valid
                     if (!string.IsNullOrEmpty(job.CurrentSourceFile) && !string.IsNullOrEmpty(job.CurrentTargetFile))
                     {
                         try
                         {
-                            // Calculer la taille du fichier
+                            // Calculate the file size
                             long fileSize = 0;
                             if (File.Exists(job.CurrentSourceFile))
                             {
                                 fileSize = new FileInfo(job.CurrentSourceFile).Length;
                             }
 
-                            // Utiliser la nouvelle méthode SerializeLogEntry pour obtenir la chaîne JSON
+                            // Use the SerializeLogEntry method to get the JSON string
                             DateTime timestamp = DateTime.Now;
                             string jsonEntry = logService.SerializeLogEntry(
                                 job.Name,
@@ -115,11 +115,11 @@ namespace EasySave
                                 job.LastFileTime,
                                 timestamp);
 
-                            // Écrire l'entrée JSON dans le fichier de log
+                            // Write the JSON entry to the log file
                             string logFilePath = logService.GetDailyLogFilePath(timestamp);
                             File.AppendAllText(logFilePath, jsonEntry + Environment.NewLine);
 
-                            // Aussi appeler LogFileTransfer pour la compatibilité
+                            // Also call LogFileTransfer for compatibility
                             logService.LogFileTransfer(
                                 job.Name,
                                 job.CurrentSourceFile,
@@ -129,7 +129,7 @@ namespace EasySave
                         }
                         catch (Exception)
                         {
-                            // Ne pas afficher l'erreur dans la console
+                            // Do not display the error in the console
                         }
                     }
                 }
@@ -137,7 +137,7 @@ namespace EasySave
         }
     }
 
-    // Implémentation de secours pour ILogService en cas de problème avec la DLL
+    // Fallback implementation for ILogService in case of issues with the DLL
     internal class FallbackLogService : ILogService
     {
         private readonly string logDirectory;
@@ -152,10 +152,10 @@ namespace EasySave
                 Directory.CreateDirectory(logDirectory);
             }
 
-            // Configurer les options de sérialisation JSON
+            // Configure JSON serialization options
             jsonOptions = new JsonSerializerOptions
             {
-                WriteIndented = false // Pas de mise en forme pour avoir une entrée par ligne
+                WriteIndented = false // No formatting to have one entry per line
             };
         }
 
@@ -171,15 +171,15 @@ namespace EasySave
             {
                 string logFilePath = GetDailyLogFilePath(DateTime.Now);
 
-                // Utiliser SerializeLogEntry pour obtenir l'entrée JSON
+                // Use SerializeLogEntry to get the JSON entry
                 string jsonEntry = SerializeLogEntry(jobName, sourcePath, targetPath, fileSize, transferTime, DateTime.Now);
 
-                // Ajouter une nouvelle ligne à la fin du fichier
+                // Append a new line to the end of the file
                 File.AppendAllText(logFilePath, jsonEntry + Environment.NewLine);
             }
             catch (Exception)
             {
-                // Ne pas afficher l'erreur dans la console
+                // Do not display the error in the console
             }
         }
 
@@ -190,7 +190,7 @@ namespace EasySave
 
         public string SerializeLogEntry(string jobName, string sourcePath, string targetPath, long fileSize, long transferTime, DateTime timestamp)
         {
-            // Créer l'objet de log avec le format exact demandé
+            // Create the log object with the exact required format
             var logEntry = new
             {
                 Timestamp = timestamp.ToString("yyyy-MM-ddTHH:mm:ss"),
@@ -201,7 +201,7 @@ namespace EasySave
                 TransferTimeMs = transferTime
             };
 
-            // Sérialiser en JSON
+            // Serialize to JSON
             return JsonSerializer.Serialize(logEntry, jsonOptions);
         }
     }

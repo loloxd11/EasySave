@@ -11,45 +11,49 @@ namespace EasySave
         {
             try
             {
+                // Retrieve singleton instances of ConfigManager and BackupManager
                 var configManager = ConfigManager.GetInstance();
                 var backupManager = BackupManager.GetInstance();
 
-                // Charger les jobs après l'initialisation
+                // Load backup jobs from the configuration file
                 configManager.LoadBackupJobs();
 
-                // Initialize the command line interface
+                // Initialize the Command Line Interface (CLI)
                 cli = new CommandLineInterface();
 
-                // Parse command line arguments if any
+                // Check if command-line arguments are provided
                 if (args.Length > 0)
                 {
+                    // Parse and execute commands from the arguments
                     ParseArgs(args);
                 }
                 else
                 {
-                    // Display menu and handle user input
+                    // Display the CLI menu and handle user input
                     bool exit = false;
                     while (!exit)
                     {
                         cli.Start();
-                        exit = true;
+                        exit = true; // Exit after one iteration (can be modified for continuous interaction)
                     }
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Une erreur s'est produite : {ex.Message}");
+                // Handle and display any unexpected errors
+                Console.WriteLine($"An error occurred: {ex.Message}");
             }
         }
 
         public static void ParseArgs(string[] args)
         {
-            Console.WriteLine("Arguments de la ligne de commande détectés : " + string.Join(", ", args));
+            // Display the detected command-line arguments
+            Console.WriteLine("Command-line arguments detected: " + string.Join(", ", args));
             if (args.Length > 0)
             {
                 string command = args[0];
 
-                // Si la commande contient une plage comme "1-3"
+                // If the command specifies a range (e.g., "1-3")
                 if (command.Contains("-"))
                 {
                     string[] range = command.Split('-');
@@ -58,13 +62,14 @@ namespace EasySave
                         List<int> indices = new List<int>();
                         for (int i = start; i <= end; i++)
                         {
-                            indices.Add(i - 1); // Conversion en index 0-based
+                            indices.Add(i - 1); // Convert to 0-based index
                         }
 
+                        // Execute the backup jobs for the specified range
                         BackupManager.GetInstance().ExecuteBackupJob(indices);
                     }
                 }
-                // Si la commande contient des travaux spécifiques comme "1;3"
+                // If the command specifies specific jobs (e.g., "1,3")
                 else if (command.Contains(","))
                 {
                     string[] jobs = command.Split(',');
@@ -74,24 +79,27 @@ namespace EasySave
                     {
                         if (int.TryParse(job.Trim(), out int index))
                         {
-                            indices.Add(index - 1); // Conversion en index 0-based
+                            indices.Add(index - 1); // Convert to 0-based index
                         }
                     }
 
                     if (indices.Count > 0)
                     {
+                        // Execute the backup jobs for the specified indices
                         BackupManager.GetInstance().ExecuteBackupJob(indices);
                     }
                 }
-                // Si la commande est un seul numéro de travail
+                // If the command specifies a single job number
                 else if (int.TryParse(command, out int index))
                 {
-                    List<int> indices = new List<int> { index - 1 }; // Conversion en index 0-based
+                    List<int> indices = new List<int> { index - 1 }; // Convert to 0-based index
+                                                                     // Execute the backup job for the specified index
                     BackupManager.GetInstance().ExecuteBackupJob(indices);
                 }
                 else
                 {
-                    Console.WriteLine("Commande non reconnue. Utilisez un format valide : numéro, plage (1-3) ou liste (1,2,3)");
+                    // Display an error message for unrecognized commands
+                    Console.WriteLine("Unrecognized command. Use a valid format: single number, range (1-3), or list (1,2,3)");
                 }
             }
         }
