@@ -581,3 +581,6 @@ FodyWeavers.xsd
 # Additional files built by Visual Studio
 
 # End of https://www.toptal.com/developers/gitignore/api/csharp,visualstudio
+/easysave/.vs/easysave/CopilotIndices/17.13.444.19527/CodeChunks.db
+/easysave/.vs/easysave/CopilotIndices/17.13.444.19527/CodeChunks.db-wal
+/easysave/.vs/easysave/CopilotIndices/17.13.444.19527/SemanticSymbols.db-wal
