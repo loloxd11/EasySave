@@ -153,7 +153,6 @@ namespace EasySave
             }
             catch (Exception ex)
             {
-                // Handle any errors during the save process (e.g., log the error)
             }
         }
 
