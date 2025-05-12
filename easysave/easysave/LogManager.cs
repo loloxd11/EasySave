@@ -161,8 +161,8 @@ namespace EasySave
 
         public string GetDailyLogFilePath(DateTime date)
         {
-            string fileName = $"{date:yyyy-MM-dd}.json";
-            return Path.Combine(logDirectory, fileName);
+            string fileExtension = logFormat == "XML" ? "xml" : "json";
+            return Path.Combine(logDirectory, $"{date:yyyy-MM-dd}.{fileExtension}");
         }
 
         public void LogFileTransfer(string jobName, string sourcePath, string targetPath, long fileSize, long transferTime)
@@ -202,7 +202,24 @@ namespace EasySave
             };
 
             // Serialize to JSON
-            return JsonSerializer.Serialize(logEntry, jsonOptions);
+            if (logFormat == "XML")
+            {
+                return SerializeToXml(logEntry);
+            }
+            else
+            {
+                var options = JsonSerializerHelper.CreateDefaultOptions();
+                return JsonSerializer.Serialize(logEntry, jsonOptions);
+            }
+        }
+        private string SerializeToXml(LogEntry logEntry)
+        {
+            XmlSerializer xmlSerializer = new XmlSerializer(typeof(LogEntry));
+            using (StringWriter textWriter = new StringWriter())
+            {
+                xmlSerializer.Serialize(textWriter, logEntry);
+                return textWriter.ToString();
+            }
         }
     }
 }
