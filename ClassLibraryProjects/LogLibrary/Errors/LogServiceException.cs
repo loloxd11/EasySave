@@ -6,7 +6,7 @@ public class LogServiceException : Exception
     /// <summary>
     /// Gets or sets the error code associated with the exception.
     /// </summary>
-    public string ErrorCode { get; set; }
+    public string ErrorCode { get; set; } = null!;
 
     /// <summary>
     /// Gets the timestamp when the exception was created.

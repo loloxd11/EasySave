@@ -6,22 +6,22 @@ public class LogEntry
     /// <summary>
     /// The timestamp of when the log entry was created, in string format.
     /// </summary>
-    public string Timestamp { get; set; }
+    public required string Timestamp { get; set; }
 
     /// <summary>
     /// The name of the job associated with this log entry.
     /// </summary>
-    public string JobName { get; set; }
+    public required string JobName { get; set; }
 
     /// <summary>
     /// The source location of the file being transferred.
     /// </summary>
-    public string Source { get; set; }
+    public required string Source { get; set; }
 
     /// <summary>
     /// The target location where the file is being transferred to.
     /// </summary>
-    public string Target { get; set; }
+    public required string Target { get; set; }
 
     /// <summary>
     /// The size of the file being transferred, in bytes.

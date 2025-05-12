@@ -18,7 +18,7 @@ public static class JsonSerializerHelper
     /// <param name="json">The JSON string to deserialize.</param>
     /// <param name="options">The deserialization options to use.</param>
     /// <returns>An object of type T deserialized from the JSON string.</returns>
-    public static T Deserialize<T>(string json, JsonSerializerOptions options) => JsonSerializer.Deserialize<T>(json, options);
+    public static T Deserialize<T>(string json, JsonSerializerOptions options) => JsonSerializer.Deserialize<T>(json, options)!;
 
     /// <summary>
     /// Creates a default instance of JsonSerializerOptions with predefined settings.

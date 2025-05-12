@@ -11,7 +11,7 @@ public static class LogServiceFactory
             config.SetOption(option.Key, option.Value);
 
         // Get the log format from options, if provided
-        string logFormat = options.ContainsKey("LogFormat") ? options["LogFormat"].ToString().ToUpper() : "JSON";
+        string logFormat = options.ContainsKey("LogFormat") ? options["LogFormat"].ToString()!.ToUpper() : "JSON";
         config.LogFormat = logFormat;
 
         return LogManager.GetInstance(baseDirectory, logFormat);
