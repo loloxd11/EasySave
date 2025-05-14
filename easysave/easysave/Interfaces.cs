@@ -1,4 +1,5 @@
 ﻿using System;
+using LogLibrary.Enums;
 
 namespace EasySave
 {
@@ -10,18 +11,13 @@ namespace EasySave
     }
 
     // Interface representing the logging service used to track file transfers and backup operations
-    public interface ILogService
+    public interface ILogger
     {
-        // Logs the details of a file transfer, including job name, source and target paths, file size, and transfer time
-        void LogFileTransfer(string jobName, string sourcePath, string targetPath, long fileSize, long transferTime);
-
-        // Retrieves the file path of the daily log file for a specific date
-        string GetDailyLogFilePath(DateTime date);
-
-        // Checks if the logging service is ready to log operations
-        bool IsLogServiceReady();
-
-        // Serializes a log entry into a string format, including job name, source and target paths, file size, transfer time, and timestamp
-        string SerializeLogEntry(string jobName, string sourcePath, string targetPath, long fileSize, long transferTime, DateTime timestamp);
+        void LogTransfer(string jobName, string sourcePath, string targetPath, long fileSize, long transferTime, long encryptionTime);
+        void LogEvent(string eventName);
+        LogFormat GetCurrentFormat();
+        void SetFormat(LogFormat format);
+        string GetCurrentLogFilePath();
+        bool IsReady();
     }
 }

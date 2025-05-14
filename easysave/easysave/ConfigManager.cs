@@ -56,7 +56,8 @@ public class ConfigManager
                 settings = new Dictionary<string, string>
                 {
                     { "Language", "fr" },
-                    { "MaxBackupJobs", "5" }
+                    { "MaxBackupJobs", "5" },
+                    { "LogFormat", "XML" }  // Valeur par défaut: XML
                 };
                 SaveConfiguration();
                 return true;

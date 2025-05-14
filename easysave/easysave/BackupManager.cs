@@ -9,7 +9,10 @@ namespace EasySave
         private static BackupManager instance; // Singleton instance of BackupManager
         private List<BackupJob> backupJobs; // List of backup jobs
         private LanguageManager languageManager; // Language manager for translations
+        private LogManager logManager; // Log manager for logging events
         private readonly Lazy<ConfigManager> lazyConfigManager = new(() => ConfigManager.GetInstance());
+
+
         private ConfigManager ConfigManager => lazyConfigManager.Value; // Lazy-loaded configuration manager
 
         // Private constructor to enforce singleton pattern
@@ -110,7 +113,7 @@ namespace EasySave
                 "EasySave", "Logs");
 
             StateManager stateManager = new StateManager(stateFilePath);
-            LogManager logManager = new LogManager(logDirectory);
+            LogManager logManager = LogManager.GetInstance(logDirectory);
 
             job.AttachObserver(stateManager);
             job.AttachObserver(logManager);
@@ -243,7 +246,7 @@ namespace EasySave
                 "EasySave", "Logs");
 
             StateManager stateManager = new StateManager(stateFilePath);
-            LogManager logManager = new LogManager(logDirectory);
+            LogManager logManager = LogManager.GetInstance(logDirectory);
 
             switch (type)
             {

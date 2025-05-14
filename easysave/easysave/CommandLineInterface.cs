@@ -9,6 +9,7 @@ namespace EasySave
         private readonly BackupManager backupManager;
         private readonly LanguageManager languageManager;
         private readonly ConfigManager configManager;
+        private readonly LogManager logManager; // Ajout du champ logManager
 
         // Constructor to initialize the CommandLineInterface and its dependencies
         public CommandLineInterface()
@@ -16,6 +17,11 @@ namespace EasySave
             backupManager = BackupManager.GetInstance();
             languageManager = LanguageManager.GetInstance();
             configManager = ConfigManager.GetInstance();
+
+            string logDirectory = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "EasySave", "Logs");
+            logManager = LogManager.GetInstance(logDirectory);
 
             // Set the language based on the configuration settings
             string language = configManager.GetSetting("Language");
@@ -54,6 +60,9 @@ namespace EasySave
                         ChangeLanguageMenu();
                         break;
                     case "6":
+                        ChangeLogFormatMenu();
+                        break;
+                    case "7":
                         exit = true;
                         Console.WriteLine(languageManager.GetTranslation("MenuExit"));
                         break;
@@ -73,7 +82,8 @@ namespace EasySave
             Console.WriteLine("3. " + languageManager.GetTranslation("MenuExecuteJob")); // Execute a backup job
             Console.WriteLine("4. " + languageManager.GetTranslation("MenuListJobs")); // List all backup jobs
             Console.WriteLine("5. " + languageManager.GetTranslation("MenuChangeLanguage")); // Change the language
-            Console.WriteLine("6. " + languageManager.GetTranslation("MenuExit")); // Exit the application
+            Console.WriteLine("6. " + languageManager.GetTranslation("MenuFormatLog"));
+            Console.WriteLine("7. " + languageManager.GetTranslation("MenuExit")); // Exit the application
             Console.WriteLine("=============================");
             Console.Write("Your choice: ");
         }
@@ -298,6 +308,33 @@ namespace EasySave
             else
             {
                 Console.WriteLine(languageManager.GetTranslation("InvalidLanguage"));
+            }
+        }
+
+        private void ChangeLogFormatMenu()
+        {
+            Console.Clear();
+            Console.WriteLine("===== Changer le format du log =====");
+            Console.WriteLine("1. JSON");
+            Console.WriteLine("2. XML");
+            Console.Write("Votre choix : ");
+            string input = Console.ReadLine();
+
+            if (input == "1")
+            {
+                logManager.SetFormat(LogLibrary.Enums.LogFormat.JSON);
+                configManager.SetSetting("LogFormat", "JSON");
+                Console.WriteLine("Format du log changé en JSON.");
+            }
+            else if (input == "2")
+            {
+                logManager.SetFormat(LogLibrary.Enums.LogFormat.XML);
+                configManager.SetSetting("LogFormat", "XML");
+                Console.WriteLine("Format du log changé en XML.");
+            }
+            else
+            {
+                Console.WriteLine("Choix invalide.");
             }
         }
     }

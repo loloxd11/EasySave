@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using LogLibrary.Enums;
 
 namespace EasySave
 {
@@ -14,6 +15,18 @@ namespace EasySave
                 // Retrieve singleton instances of ConfigManager and BackupManager
                 var configManager = ConfigManager.GetInstance();
                 var backupManager = BackupManager.GetInstance();
+
+                // Initialiser LogManager avec le format depuis la configuration
+                string logFormat = configManager.GetSetting("LogFormat") ?? "XML";
+                LogFormat format = logFormat.Equals("JSON", StringComparison.OrdinalIgnoreCase)
+                    ? LogLibrary.Enums.LogFormat.JSON
+                    : LogLibrary.Enums.LogFormat.XML;
+
+                string logDirectory = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                    "EasySave", "Logs");
+
+                LogManager.GetInstance(logDirectory, format);
 
                 // Load backup jobs from the configuration file
                 configManager.LoadBackupJobs();

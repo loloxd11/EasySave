@@ -1,164 +1,170 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Text.Json;
-using System.Xml.Serialization;
+using LogLibrary.Enums;
+using LogLibrary.Factories;
+using LogLibrary.Interfaces;
 
 namespace EasySave
 {
-    public class LogManager : IObserver
+    public class LogManager : ILogger, IObserver
     {
-        private readonly ILogService logService;
-        private readonly string logDirectory;
+        // Instance unique (singleton)
+        private static LogManager instance;
+        private static readonly object lockObject = new object();
 
-        public LogManager(string directory)
+        // Logger de la bibliothèque externe
+        private readonly LogLibrary.Interfaces.ILogger _logger;
+
+        // Chemin du répertoire de log par défaut
+        private static string defaultLogDirectory = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "EasySave", "Logs");
+
+        // Constructeur privé pour empêcher l'instanciation directe
+        private LogManager(string logDirectory, LogFormat format = LogFormat.XML)
         {
-            logDirectory = directory;
-
-            if (!Directory.Exists(logDirectory))
-            {
-                Directory.CreateDirectory(logDirectory);
-            }
-
-            logService = GetLogServiceInstance(logDirectory);
+            _logger = LoggerFactory.Create(logDirectory, format);
         }
 
-        private ILogService GetLogServiceInstance(string directory)
+        // Méthode pour obtenir l'instance unique
+        public static LogManager GetInstance(string logDirectory = null, LogFormat format = LogFormat.XML)
         {
-            try
+            if (instance == null)
             {
-                // Simplified fallback implementation
-                return new FallbackLogService(directory);
-            }
-            catch (Exception)
-            {
-                return new FallbackLogService(directory);
-            }
-        }
-
-        public void Update(BackupJob job, string action)
-        {
-            if (action == "file")
-            {
-                if (!string.IsNullOrEmpty(job.CurrentSourceFile) && !string.IsNullOrEmpty(job.CurrentTargetFile))
+                lock (lockObject) // Thread-safe
                 {
-                    try
+                    if (instance == null)
                     {
-                        long fileSize = File.Exists(job.CurrentSourceFile) ? new FileInfo(job.CurrentSourceFile).Length : 0;
-                        DateTime timestamp = DateTime.Now;
+                        // Utiliser le répertoire par défaut si aucun n'est spécifié
+                        string directory = logDirectory ?? defaultLogDirectory;
 
-                        string jsonEntry = logService.SerializeLogEntry(
-                            job.Name,
-                            job.CurrentSourceFile,
-                            job.CurrentTargetFile,
-                            fileSize,
-                            job.LastFileTime,
-                            timestamp);
+                        // S'assurer que le répertoire existe
+                        if (!Directory.Exists(directory))
+                        {
+                            Directory.CreateDirectory(directory);
+                        }
 
-                        string logFilePath = logService.GetDailyLogFilePath(timestamp);
-                        File.AppendAllText(logFilePath, jsonEntry + Environment.NewLine);
+                        // Vérifier si un format est défini dans la configuration
+                        var configManager = ConfigManager.GetInstance();
+                        string formatSetting = configManager.GetSetting("LogFormat");
 
-                        logService.LogFileTransfer(
-                            job.Name,
-                            job.CurrentSourceFile,
-                            job.CurrentTargetFile,
-                            fileSize,
-                            job.LastFileTime);
-                    }
-                    catch (Exception)
-                    {
-                        // Handle exceptions silently
+                        if (!string.IsNullOrEmpty(formatSetting))
+                        {
+                            if (formatSetting.Equals("XML", StringComparison.OrdinalIgnoreCase))
+                            {
+                                format = LogFormat.XML;
+                            }
+                            else if (formatSetting.Equals("JSON", StringComparison.OrdinalIgnoreCase))
+                            {
+                                format = LogFormat.JSON;
+                            }
+                        }
+
+                        instance = new LogManager(directory, format);
                     }
                 }
             }
+            return instance;
         }
-    }
 
-    internal class LogEntry
-    {
-        public string Timestamp { get; set; }
-        public string JobName { get; set; }
-        public string Source { get; set; }
-        public string Target { get; set; }
-        public long FileSize { get; set; }
-        public long TransferTimeMs { get; set; }
-    }
-
-    internal class FallbackLogService : ILogService
-    {
-        private readonly string logDirectory;
-        private readonly JsonSerializerOptions jsonOptions;
-        private readonly string logFormat;
-
-        public FallbackLogService(string directory)
+        public void LogTransfer(string jobName, string sourcePath, string targetPath, long fileSize, long transferTime, long encryptionTime = 0)
         {
-            logDirectory = directory;
-            logFormat = "JSON";
+            _logger.LogTransfer(jobName, sourcePath, targetPath, fileSize, transferTime, encryptionTime);
+        }
 
-            if (!Directory.Exists(logDirectory))
-            {
-                Directory.CreateDirectory(logDirectory);
-            }
+        public void LogEvent(string eventName)
+        {
+            _logger.LogEvent(eventName);
+        }
 
-            jsonOptions = new JsonSerializerOptions
+        public LogFormat GetCurrentFormat()
+        {
+            return _logger.GetCurrentFormat();
+        }
+
+        public void SetFormat(LogFormat format)
+        {
+            _logger.SetFormat(format);
+        }
+
+        public string GetCurrentLogFilePath()
+        {
+            return _logger.GetCurrentLogFilePath();
+        }
+
+        public bool IsReady()
+        {
+            return _logger.IsReady();
+        }
+
+        // Implémentation de la méthode Update de l'interface IObserver
+        public void Update(BackupJob job, string action)
+        {
+            // Créer un dictionnaire pour stocker les propriétés de l'événement
+            Dictionary<string, object> properties = new Dictionary<string, object>
             {
-                WriteIndented = false
+                { "JobName", job.Name },
+                { "JobType", job.Type.ToString() },
+                { "JobState", job.State.ToString() },
+                { "SourcePath", job.SourcePath },
+                { "TargetPath", job.TargetPath },
+                { "TotalFiles", job.TotalFiles },
+                { "TotalSize", job.TotalSize },
+                { "Progression", job.Progression }
             };
+
+            switch (action)
+            {
+                case "start":
+                    // Journalisation du démarrage d'un travail de sauvegarde
+                    LogEvent("JobStarted");
+                    break;
+
+                case "finish":
+                    // Journalisation de la fin d'un travail de sauvegarde
+                    properties["Duration"] = job.LastFileTime; // Ajouter le temps total de la sauvegarde
+                    LogEvent("JobCompleted");
+                    break;
+
+                case "error":
+                    // Journalisation d'une erreur dans un travail de sauvegarde
+                    LogEvent("JobError");
+                    break;
+
+                case "file":
+                    // Journalisation du traitement d'un fichier si nécessaire
+                    if (job.LastFileTime > 0)
+                    {
+                        LogTransfer(
+                            job.Name,
+                            job.CurrentSourceFile,
+                            job.CurrentTargetFile,
+                            GetFileSize(job.CurrentSourceFile),
+                            job.LastFileTime,
+                            0 // Pas de cryptage pour l'instant
+                        );
+                    }
+                    break;
+
+                case "progress":
+                    // Optionnellement, logger les mises à jour de progression si besoin
+                    // LogEvent("JobProgress", properties);
+                    break;
+            }
         }
 
-        public string GetDailyLogFilePath(DateTime date)
-        {
-            string fileExtension = logFormat == "XML" ? "xml" : "json";
-            return Path.Combine(logDirectory, $"{date:yyyy-MM-dd}.{fileExtension}");
-        }
-
-        public void LogFileTransfer(string jobName, string sourcePath, string targetPath, long fileSize, long transferTime)
+        // Méthode utilitaire pour obtenir la taille d'un fichier
+        private long GetFileSize(string filePath)
         {
             try
             {
-                string logFilePath = GetDailyLogFilePath(DateTime.Now);
-                string jsonEntry = SerializeLogEntry(jobName, sourcePath, targetPath, fileSize, transferTime, DateTime.Now);
-                File.AppendAllText(logFilePath, jsonEntry + Environment.NewLine);
+                FileInfo fileInfo = new FileInfo(filePath);
+                return fileInfo.Length;
             }
             catch (Exception)
             {
-                // Handle exceptions silently
-            }
-        }
-
-        public bool IsLogServiceReady()
-        {
-            return true;
-        }
-
-        public string SerializeLogEntry(string jobName, string sourcePath, string targetPath, long fileSize, long transferTime, DateTime timestamp)
-        {
-            var logEntry = new LogEntry
-            {
-                Timestamp = timestamp.ToString("yyyy-MM-ddTHH:mm:ss"),
-                JobName = jobName,
-                Source = sourcePath,
-                Target = targetPath,
-                FileSize = fileSize,
-                TransferTimeMs = transferTime
-            };
-
-            if (logFormat == "XML")
-            {
-                return SerializeToXml(logEntry);
-            }
-            else
-            {
-                return JsonSerializer.Serialize(logEntry, jsonOptions);
-            }
-        }
-
-        private string SerializeToXml(LogEntry logEntry)
-        {
-            XmlSerializer xmlSerializer = new XmlSerializer(typeof(LogEntry));
-            using (StringWriter textWriter = new StringWriter())
-            {
-                xmlSerializer.Serialize(textWriter, logEntry);
-                return textWriter.ToString();
+                return 0;
             }
         }
     }
