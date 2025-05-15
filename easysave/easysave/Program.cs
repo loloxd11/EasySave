@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using LogLibrary.Enums;
 
 namespace EasySave
 {
@@ -7,6 +8,12 @@ namespace EasySave
     {
         private static CommandLineInterface cli;
 
+        /// <summary>
+        /// Entry point of the application.
+        /// Initializes configuration, logging, and backup management.
+        /// Handles command-line arguments or starts the CLI for user interaction.
+        /// </summary>
+        /// <param name="args">Command-line arguments passed to the application.</param>
         public static void Main(string[] args)
         {
             try
@@ -14,6 +21,18 @@ namespace EasySave
                 // Retrieve singleton instances of ConfigManager and BackupManager
                 var configManager = ConfigManager.GetInstance();
                 var backupManager = BackupManager.GetInstance();
+
+                // Initialize LogManager with the format from the configuration
+                string logFormat = configManager.GetSetting("LogFormat") ?? "XML";
+                LogFormat format = logFormat.Equals("JSON", StringComparison.OrdinalIgnoreCase)
+                    ? LogLibrary.Enums.LogFormat.JSON
+                    : LogLibrary.Enums.LogFormat.XML;
+
+                string logDirectory = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                    "EasySave", "Logs");
+
+                LogManager.GetInstance(logDirectory, format);
 
                 // Load backup jobs from the configuration file
                 configManager.LoadBackupJobs();
@@ -45,6 +64,11 @@ namespace EasySave
             }
         }
 
+        /// <summary>
+        /// Parses and executes commands provided as command-line arguments.
+        /// Supports single job execution, ranges, and lists of jobs.
+        /// </summary>
+        /// <param name="args">Array of command-line arguments.</param>
         public static void ParseArgs(string[] args)
         {
             // Display the detected command-line arguments

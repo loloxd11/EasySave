@@ -1,27 +1,65 @@
 ﻿using System;
+using LogLibrary.Enums;
 
 namespace EasySave
 {
-    // Observer interface to be implemented by classes that need to be notified of changes in a BackupJob
+    /// <summary>
+    /// Observer interface to be implemented by classes that need to be notified of changes in a BackupJob.
+    /// </summary>
     public interface IObserver
     {
-        // Method called to update the observer with the current state of the BackupJob and the action performed
+        /// <summary>
+        /// Method called to update the observer with the current state of the BackupJob and the action performed.
+        /// </summary>
+        /// <param name="job">The backup job whose state has changed.</param>
+        /// <param name="action">The action performed on the backup job.</param>
         void Update(BackupJob job, string action);
     }
 
-    // Interface representing the logging service used to track file transfers and backup operations
-    public interface ILogService
+    /// <summary>
+    /// Interface representing the logging service used to track file transfers and backup operations.
+    /// </summary>
+    public interface ILogger
     {
-        // Logs the details of a file transfer, including job name, source and target paths, file size, and transfer time
-        void LogFileTransfer(string jobName, string sourcePath, string targetPath, long fileSize, long transferTime);
+        /// <summary>
+        /// Logs the details of a file transfer operation.
+        /// </summary>
+        /// <param name="jobName">The name of the backup job.</param>
+        /// <param name="sourcePath">The source file path.</param>
+        /// <param name="targetPath">The target file path.</param>
+        /// <param name="fileSize">The size of the file in bytes.</param>
+        /// <param name="transferTime">The time taken to transfer the file in milliseconds.</param>
+        /// <param name="encryptionTime">The time taken to encrypt the file in milliseconds.</param>
+        void LogTransfer(string jobName, string sourcePath, string targetPath, long fileSize, long transferTime, long encryptionTime);
 
-        // Retrieves the file path of the daily log file for a specific date
-        string GetDailyLogFilePath(DateTime date);
+        /// <summary>
+        /// Logs a specific event related to the backup process.
+        /// </summary>
+        /// <param name="eventName">The name of the event to log.</param>
+        void LogEvent(string eventName);
 
-        // Checks if the logging service is ready to log operations
-        bool IsLogServiceReady();
+        /// <summary>
+        /// Retrieves the current log format used by the logger.
+        /// </summary>
+        /// <returns>The current log format.</returns>
+        LogFormat GetCurrentFormat();
 
-        // Serializes a log entry into a string format, including job name, source and target paths, file size, transfer time, and timestamp
-        string SerializeLogEntry(string jobName, string sourcePath, string targetPath, long fileSize, long transferTime, DateTime timestamp);
+        /// <summary>
+        /// Sets the log format to be used by the logger.
+        /// </summary>
+        /// <param name="format">The log format to set.</param>
+        void SetFormat(LogFormat format);
+
+        /// <summary>
+        /// Retrieves the file path of the current log file.
+        /// </summary>
+        /// <returns>The file path of the current log file.</returns>
+        string GetCurrentLogFilePath();
+
+        /// <summary>
+        /// Checks if the logger is ready to log events or transfers.
+        /// </summary>
+        /// <returns>True if the logger is ready, otherwise false.</returns>
+        bool IsReady();
     }
 }
