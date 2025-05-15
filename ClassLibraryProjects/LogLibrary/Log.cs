@@ -6,28 +6,31 @@ using LogLibrary.Interfaces;
 namespace LogLibrary
 {
     /// <summary>
-    /// Point d'entrée principal de la bibliothèque de logging.
+    /// Main entry point for the logging library.
+    /// Provides methods to create loggers with specified configurations.
     /// </summary>
     public static class Log
     {
         /// <summary>
-        /// Crée un logger avec le répertoire spécifié.
+        /// Creates a logger with the specified directory.
         /// </summary>
-        /// <param name="directory">Le répertoire où stocker les logs.</param>
-        /// <returns>Une instance de ILogger.</returns>
+        /// <param name="directory">The directory where logs will be stored.</param>
+        /// <returns>An instance of ILogger.</returns>
         public static ILogger CreateLogger(string directory)
         {
+            // Calls the LoggerFactory to create a logger with the given directory.
             return LoggerFactory.Create(directory);
         }
-        
+
         /// <summary>
-        /// Crée un logger avec le répertoire et le format spécifiés.
+        /// Creates a logger with the specified directory and log format.
         /// </summary>
-        /// <param name="directory">Le répertoire où stocker les logs.</param>
-        /// <param name="format">Le format des logs (JSON ou XML).</param>
-        /// <returns>Une instance de ILogger.</returns>
+        /// <param name="directory">The directory where logs will be stored.</param>
+        /// <param name="format">The format of the logs (JSON or XML).</param>
+        /// <returns>An instance of ILogger.</returns>
         public static ILogger CreateLogger(string directory, LogFormat format)
         {
+            // Calls the LoggerFactory to create a logger with the given directory and format.
             return LoggerFactory.Create(directory, format);
         }
     }

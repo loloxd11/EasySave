@@ -5,42 +5,42 @@ using System.Collections.Generic;
 namespace LogLibrary.Models
 {
     /// <summary>
-    /// Représente une entrée de log contenant les détails d'une opération.
+    /// Represents a log entry containing details of an operation.
     /// </summary>
     public class LogEntry
     {
         /// <summary>
-        /// L'horodatage de création de l'entrée de log.
+        /// The timestamp indicating when the log entry was created.
         /// </summary>
         public DateTime Timestamp { get; set; }
-        
+
         /// <summary>
-        /// Le nom du job associé à cette entrée.
+        /// The name of the job associated with this log entry.
         /// </summary>
         public string JobName { get; set; } = string.Empty;
-        
+
         /// <summary>
-        /// Le chemin source de l'opération.
+        /// The source path of the operation.
         /// </summary>
         public string SourcePath { get; set; } = string.Empty;
-        
+
         /// <summary>
-        /// Le chemin de destination de l'opération.
+        /// The target path of the operation.
         /// </summary>
         public string TargetPath { get; set; } = string.Empty;
-        
+
         /// <summary>
-        /// La taille du fichier en octets.
+        /// The size of the file in bytes.
         /// </summary>
         public long FileSize { get; set; }
-        
+
         /// <summary>
-        /// Le temps de transfert en millisecondes.
+        /// The time taken for the transfer operation, in milliseconds.
         /// </summary>
         public long TransferTimeMs { get; set; }
-        
+
         /// <summary>
-        /// Le temps de cryptage en millisecondes.
+        /// The time taken for the encryption process, in milliseconds.
         /// </summary>
         public long EncryptionTimeMs { get; set; }
     }

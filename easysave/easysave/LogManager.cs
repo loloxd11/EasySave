@@ -7,45 +7,60 @@ using LogLibrary.Interfaces;
 
 namespace EasySave
 {
+    /// <summary>
+    /// Manages logging operations for the EasySave application.
+    /// Implements the Singleton pattern to ensure a single instance.
+    /// </summary>
     public class LogManager : ILogger, IObserver
     {
-        // Instance unique (singleton)
+        // Singleton instance of LogManager
         private static LogManager instance;
         private static readonly object lockObject = new object();
 
-        // Logger de la bibliothèque externe
+        // External logger instance from the LogLibrary
         private readonly LogLibrary.Interfaces.ILogger _logger;
 
-        // Chemin du répertoire de log par défaut
+        // Default log directory path
         private static string defaultLogDirectory = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                 "EasySave", "Logs");
 
-        // Constructeur privé pour empêcher l'instanciation directe
+        /// <summary>
+        /// Private constructor to prevent direct instantiation.
+        /// Initializes the logger with the specified directory and format.
+        /// </summary>
+        /// <param name="logDirectory">The directory where logs will be stored.</param>
+        /// <param name="format">The format of the logs (XML or JSON).</param>
         private LogManager(string logDirectory, LogFormat format = LogFormat.XML)
         {
             _logger = LoggerFactory.Create(logDirectory, format);
         }
 
-        // Méthode pour obtenir l'instance unique
+        /// <summary>
+        /// Retrieves the singleton instance of LogManager.
+        /// Ensures thread safety and initializes the logger if not already done.
+        /// </summary>
+        /// <param name="logDirectory">Optional custom log directory.</param>
+        /// <param name="format">Optional log format (default is XML).</param>
+        /// <returns>The singleton instance of LogManager.</returns>
         public static LogManager GetInstance(string logDirectory = null, LogFormat format = LogFormat.XML)
         {
             if (instance == null)
             {
-                lock (lockObject) // Thread-safe
+                lock (lockObject) // Ensures thread safety
                 {
                     if (instance == null)
                     {
-                        // Utiliser le répertoire par défaut si aucun n'est spécifié
+                        // Use default directory if none is specified
                         string directory = logDirectory ?? defaultLogDirectory;
 
-                        // S'assurer que le répertoire existe
+                        // Ensure the directory exists
                         if (!Directory.Exists(directory))
                         {
                             Directory.CreateDirectory(directory);
                         }
 
-                        // Vérifier si un format est défini dans la configuration
+                        // Check for log format in configuration
                         var configManager = ConfigManager.GetInstance();
                         string formatSetting = configManager.GetSetting("LogFormat");
 
@@ -68,72 +83,105 @@ namespace EasySave
             return instance;
         }
 
+        /// <summary>
+        /// Logs the details of a file transfer operation.
+        /// </summary>
+        /// <param name="jobName">The name of the backup job.</param>
+        /// <param name="sourcePath">The source file path.</param>
+        /// <param name="targetPath">The target file path.</param>
+        /// <param name="fileSize">The size of the file in bytes.</param>
+        /// <param name="transferTime">The time taken to transfer the file in milliseconds.</param>
+        /// <param name="encryptionTime">The time taken to encrypt the file in milliseconds (default is 0).</param>
         public void LogTransfer(string jobName, string sourcePath, string targetPath, long fileSize, long transferTime, long encryptionTime = 0)
         {
             _logger.LogTransfer(jobName, sourcePath, targetPath, fileSize, transferTime, encryptionTime);
         }
 
+        /// <summary>
+        /// Logs a specific event related to the backup process.
+        /// </summary>
+        /// <param name="eventName">The name of the event to log.</param>
         public void LogEvent(string eventName)
         {
             _logger.LogEvent(eventName);
         }
 
+        /// <summary>
+        /// Retrieves the current log format used by the logger.
+        /// </summary>
+        /// <returns>The current log format.</returns>
         public LogFormat GetCurrentFormat()
         {
             return _logger.GetCurrentFormat();
         }
 
+        /// <summary>
+        /// Sets the log format to be used by the logger.
+        /// </summary>
+        /// <param name="format">The log format to set.</param>
         public void SetFormat(LogFormat format)
         {
             _logger.SetFormat(format);
         }
 
+        /// <summary>
+        /// Retrieves the file path of the current log file.
+        /// </summary>
+        /// <returns>The file path of the current log file.</returns>
         public string GetCurrentLogFilePath()
         {
             return _logger.GetCurrentLogFilePath();
         }
 
+        /// <summary>
+        /// Checks if the logger is ready to log events or transfers.
+        /// </summary>
+        /// <returns>True if the logger is ready, otherwise false.</returns>
         public bool IsReady()
         {
             return _logger.IsReady();
         }
 
-        // Implémentation de la méthode Update de l'interface IObserver
+        /// <summary>
+        /// Updates the observer with the current state of the BackupJob and the action performed.
+        /// </summary>
+        /// <param name="job">The backup job whose state has changed.</param>
+        /// <param name="action">The action performed on the backup job.</param>
         public void Update(BackupJob job, string action)
         {
-            // Créer un dictionnaire pour stocker les propriétés de l'événement
+            // Create a dictionary to store event properties
             Dictionary<string, object> properties = new Dictionary<string, object>
-            {
-                { "JobName", job.Name },
-                { "JobType", job.Type.ToString() },
-                { "JobState", job.State.ToString() },
-                { "SourcePath", job.SourcePath },
-                { "TargetPath", job.TargetPath },
-                { "TotalFiles", job.TotalFiles },
-                { "TotalSize", job.TotalSize },
-                { "Progression", job.Progression }
-            };
+                {
+                    { "JobName", job.Name },
+                    { "JobType", job.Type.ToString() },
+                    { "JobState", job.State.ToString() },
+                    { "SourcePath", job.SourcePath },
+                    { "TargetPath", job.TargetPath },
+                    { "TotalFiles", job.TotalFiles },
+                    { "TotalSize", job.TotalSize },
+                    { "Progression", job.Progression }
+                };
 
             switch (action)
             {
                 case "start":
-                    // Journalisation du démarrage d'un travail de sauvegarde
+                    // Log the start of a backup job
                     LogEvent("JobStarted");
                     break;
 
                 case "finish":
-                    // Journalisation de la fin d'un travail de sauvegarde
-                    properties["Duration"] = job.LastFileTime; // Ajouter le temps total de la sauvegarde
+                    // Log the completion of a backup job
+                    properties["Duration"] = job.LastFileTime; // Add total backup time
                     LogEvent("JobCompleted");
                     break;
 
                 case "error":
-                    // Journalisation d'une erreur dans un travail de sauvegarde
+                    // Log an error in a backup job
                     LogEvent("JobError");
                     break;
 
                 case "file":
-                    // Journalisation du traitement d'un fichier si nécessaire
+                    // Log the processing of a file if necessary
                     if (job.LastFileTime > 0)
                     {
                         LogTransfer(
@@ -142,19 +190,23 @@ namespace EasySave
                             job.CurrentTargetFile,
                             GetFileSize(job.CurrentSourceFile),
                             job.LastFileTime,
-                            0 // Pas de cryptage pour l'instant
+                            0 // No encryption for now
                         );
                     }
                     break;
 
                 case "progress":
-                    // Optionnellement, logger les mises à jour de progression si besoin
+                    // Optionally log progress updates if needed
                     // LogEvent("JobProgress", properties);
                     break;
             }
         }
 
-        // Méthode utilitaire pour obtenir la taille d'un fichier
+        /// <summary>
+        /// Utility method to get the size of a file.
+        /// </summary>
+        /// <param name="filePath">The file path.</param>
+        /// <returns>The size of the file in bytes, or 0 if an error occurs.</returns>
         private long GetFileSize(string filePath)
         {
             try

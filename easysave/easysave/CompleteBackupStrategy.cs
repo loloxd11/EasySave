@@ -5,12 +5,25 @@ using System.Diagnostics;
 
 namespace EasySave
 {
+    /// <summary>
+    /// Implements the complete backup strategy, which copies all files from the source directory to the target directory.
+    /// </summary>
     public class CompleteBackupStrategy : AbstractBackupStrategy
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CompleteBackupStrategy"/> class.
+        /// </summary>
+        /// <param name="stateManager">The state manager to track the backup job's state.</param>
+        /// <param name="logManager">The log manager to log backup operations.</param>
         public CompleteBackupStrategy(StateManager stateManager, LogManager logManager) : base(stateManager, logManager)
         {
         }
 
+        /// <summary>
+        /// Executes the complete backup process for the given backup job.
+        /// </summary>
+        /// <param name="job">The backup job to execute.</param>
+        /// <returns>True if the backup was successful, otherwise false.</returns>
         public override bool Execute(BackupJob job)
         {
             try

@@ -8,13 +8,26 @@ using Microsoft.Extensions.DependencyModel;
 
 namespace EasySave
 {
+    /// <summary>
+    /// Implements a differential backup strategy, which copies only files that have changed since the last backup.
+    /// </summary>
     public class DifferentialBackupStrategy : AbstractBackupStrategy
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DifferentialBackupStrategy"/> class.
+        /// </summary>
+        /// <param name="stateManager">The state manager to track job states.</param>
+        /// <param name="logManager">The log manager to handle logging operations.</param>
         public DifferentialBackupStrategy(StateManager stateManager, LogManager logManager)
             : base(stateManager, logManager)
         {
         }
 
+        /// <summary>
+        /// Executes the differential backup for the given job.
+        /// </summary>
+        /// <param name="job">The backup job to execute.</param>
+        /// <returns>True if the backup was successful, otherwise false.</returns>
         public override bool Execute(BackupJob job)
         {
             try
@@ -116,6 +129,12 @@ namespace EasySave
             }
         }
 
+        /// <summary>
+        /// Compares two files by computing their SHA256 hash values.
+        /// </summary>
+        /// <param name="sourcePath">The path of the source file.</param>
+        /// <param name="targetPath">The path of the target file.</param>
+        /// <returns>True if the files are identical, otherwise false.</returns>
         private bool CompareFiles(string sourcePath, string targetPath)
         {
             // Compare the hash of the files
@@ -125,6 +144,11 @@ namespace EasySave
             return sourceHash == targetHash;
         }
 
+        /// <summary>
+        /// Computes the SHA256 hash of a file.
+        /// </summary>
+        /// <param name="filePath">The path of the file to hash.</param>
+        /// <returns>The hash value as a hexadecimal string.</returns>
         private string ComputeFileHash(string filePath)
         {
             // Compute the SHA256 hash of a file
@@ -136,6 +160,12 @@ namespace EasySave
             }
         }
 
+        /// <summary>
+        /// Determines if two files are modified by comparing their hash values.
+        /// </summary>
+        /// <param name="sourceFilePath">The path of the source file.</param>
+        /// <param name="targetFilePath">The path of the target file.</param>
+        /// <returns>True if the files are modified, otherwise false.</returns>
         private bool AreFilesModified(string sourceFilePath, string targetFilePath)
         {
             // Check if the files exist

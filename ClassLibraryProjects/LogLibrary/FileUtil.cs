@@ -6,15 +6,15 @@ using System.Linq;
 namespace LogLibrary.Utils
 {
     /// <summary>
-    /// Utilitaires pour les opérations sur les fichiers.
+    /// Utilities for file operations.
     /// </summary>
     public static class FileUtil
     {
         /// <summary>
-        /// S'assure qu'un répertoire existe, le crée si nécessaire.
+        /// Ensures that a directory exists, creating it if necessary.
         /// </summary>
-        /// <param name="path">Le chemin du répertoire.</param>
-        /// <returns>True si le répertoire a été créé, false s'il existait déjà.</returns>
+        /// <param name="path">The path of the directory.</param>
+        /// <returns>True if the directory was created, false if it already existed.</returns>
         public static bool EnsureDirectoryExists(string path)
         {
             if (!Directory.Exists(path))
@@ -24,48 +24,48 @@ namespace LogLibrary.Utils
             }
             return false;
         }
-        
+
         /// <summary>
-        /// Obtient la taille d'un fichier.
+        /// Gets the size of a file.
         /// </summary>
-        /// <param name="path">Le chemin du fichier.</param>
-        /// <returns>La taille du fichier en octets.</returns>
+        /// <param name="path">The path of the file.</param>
+        /// <returns>The size of the file in bytes.</returns>
         public static long GetFileSize(string path)
         {
             if (!File.Exists(path))
                 return 0;
-                
+
             return new FileInfo(path).Length;
         }
-        
+
         /// <summary>
-        /// Récupère les fichiers de log pour une date spécifique.
+        /// Retrieves log files for a specific date based on a date pattern.
         /// </summary>
-        /// <param name="directory">Le répertoire des logs.</param>
-        /// <param name="datePattern">Le motif de date à rechercher.</param>
-        /// <returns>Un tableau de chemins de fichiers.</returns>
+        /// <param name="directory">The directory containing the log files.</param>
+        /// <param name="datePattern">The date pattern to search for in file names.</param>
+        /// <returns>An array of file paths matching the date pattern.</returns>
         public static string[] GetDailyLogFiles(string directory, string datePattern)
         {
             if (!Directory.Exists(directory))
                 return Array.Empty<string>();
-                
+
             return Directory.GetFiles(directory, $"{datePattern}*.*")
                 .OrderBy(f => f)
                 .ToArray();
         }
-        
+
         /// <summary>
-        /// Ajoute du contenu à un fichier.
+        /// Appends content to a file, creating the file and its directory if necessary.
         /// </summary>
-        /// <param name="filePath">Le chemin du fichier.</param>
-        /// <param name="content">Le contenu à ajouter.</param>
+        /// <param name="filePath">The path of the file.</param>
+        /// <param name="content">The content to append to the file.</param>
         public static void AppendToFile(string filePath, string content)
         {
             string? directory = Path.GetDirectoryName(filePath);
-            
+
             if (!string.IsNullOrEmpty(directory))
                 EnsureDirectoryExists(directory);
-                
+
             File.AppendAllText(filePath, content + Environment.NewLine);
         }
     }
