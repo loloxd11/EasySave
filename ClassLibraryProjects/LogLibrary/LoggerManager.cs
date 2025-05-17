@@ -1,4 +1,4 @@
-// LogLibrary/Managers/LoggerManager.cs
+﻿// LogLibrary/Managers/LoggerManager.cs
 using LogLibrary.Enums;
 using LogLibrary.Interfaces;
 using LogLibrary.Models;
@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Xml.Serialization;
 
 namespace LogLibrary.Managers
 {
@@ -44,6 +45,61 @@ namespace LogLibrary.Managers
 
             // Ensure the directory exists
             FileUtil.EnsureDirectoryExists(_logDirectory);
+
+            // Initialiser le chemin du fichier de log courant au dernier fichier existant
+            InitializeCurrentLogFile();
+        }
+
+        /// <summary>
+        /// Initializes the current log file path to the latest existing file that matches the current format
+        /// </summary>
+        private void InitializeCurrentLogFile()
+        {
+            string dateKey = DateTime.Now.ToString("yyyy-MM-dd");
+            string extension = FormatUtil.GetExtension(_format);
+
+            // Rechercher les fichiers de log existants pour aujourd'hui
+            string[] existingFiles = FileUtil.GetDailyLogFiles(_logDirectory, dateKey)
+                .Where(f => Path.GetExtension(f).Equals("." + extension, StringComparison.OrdinalIgnoreCase))
+                .ToArray();
+
+            if (existingFiles.Length > 0)
+            {
+                // Trouver le fichier avec le numéro de séquence le plus élevé
+                int maxSequence = 0;
+                string latestFile = null;
+
+                foreach (string filePath in existingFiles)
+                {
+                    string fileName = Path.GetFileName(filePath);
+                    string[] parts = fileName.Split('.');
+                    if (parts.Length >= 3 && int.TryParse(parts[1], out int seqNum))
+                    {
+                        if (seqNum > maxSequence)
+                        {
+                            maxSequence = seqNum;
+                            latestFile = filePath;
+                        }
+                    }
+                }
+
+                if (latestFile != null)
+                {
+                    _currentLogFilePath = latestFile;
+                    _sequenceNumbers[dateKey] = maxSequence;
+
+                    // Vérifier si le fichier actuel dépasse la taille maximale
+                    if (FileUtil.GetFileSize(_currentLogFilePath) >= MAX_FILE_SIZE_BYTES)
+                    {
+                        // Incrémenter la séquence pour créer un nouveau fichier
+                        _sequenceNumbers[dateKey] = maxSequence + 1;
+                        _currentLogFilePath = Path.Combine(
+                            _logDirectory,
+                            $"{dateKey}.{_sequenceNumbers[dateKey]}.{extension}"
+                        );
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -66,6 +122,7 @@ namespace LogLibrary.Managers
 
             _format = format;
             _currentLogFilePath = null; // Force creation of a new file
+            InitializeCurrentLogFile(); // Try to find existing file for the new format
         }
 
         /// <summary>
@@ -131,15 +188,17 @@ namespace LogLibrary.Managers
             if (rotatedFilePath != filePath)
                 _currentLogFilePath = rotatedFilePath;
 
-            bool isNewFile = rotatedFilePath != filePath;
+            bool isNewFile = !File.Exists(rotatedFilePath);
             string content = CreateLogEntry(entry, rotatedFilePath, isNewFile);
 
             if (_format == LogFormat.JSON)
             {
                 File.AppendAllText(rotatedFilePath, content + Environment.NewLine);
             }
-            else
+            else // XML
             {
+                // Pour XML, on réécrit le fichier complet car on a déjà chargé et mis à jour
+                // toutes les entrées dans la méthode CreateLogEntry
                 File.WriteAllText(rotatedFilePath, content);
             }
         }
@@ -162,19 +221,19 @@ namespace LogLibrary.Managers
             if (rotatedFilePath != filePath)
                 _currentLogFilePath = rotatedFilePath;
 
-            bool isNewFile = rotatedFilePath != filePath;
+            bool isNewFile = !File.Exists(rotatedFilePath);
             string content = CreateLogEntry(entry, rotatedFilePath, isNewFile);
 
             if (_format == LogFormat.JSON)
             {
-                // Add each JSON log on a new line
                 File.AppendAllText(rotatedFilePath, content + Environment.NewLine);
             }
-            else
+            else // XML
             {
+                // Pour XML, on réécrit le fichier complet car on a déjà chargé et mis à jour
+                // toutes les entrées dans la méthode CreateLogEntry
                 File.WriteAllText(rotatedFilePath, content);
             }
-
         }
 
         /// <summary>
@@ -186,15 +245,25 @@ namespace LogLibrary.Managers
         /// <returns>A string formatted according to the current format.</returns>
         private string CreateLogEntry(LogEntry entry, string filePath, bool isNewFile)
         {
-            LogEntries logEntries;
-
             if (_format == LogFormat.XML)
             {
+                LogEntries logEntries;
                 if (!isNewFile && File.Exists(filePath))
                 {
-                    using var stream = File.OpenRead(filePath);
-                    var serializer = new System.Xml.Serialization.XmlSerializer(typeof(LogEntries));
-                    logEntries = (LogEntries?)serializer.Deserialize(stream) ?? new LogEntries();
+                    try
+                    {
+                        using var stream = File.OpenRead(filePath);
+                        var serializer = new XmlSerializer(typeof(LogEntries));
+                        logEntries = (LogEntries?)serializer.Deserialize(stream) ?? new LogEntries();
+                    }
+                    catch (Exception ex)
+                    {
+                        // Sauvegarder le fichier corrompu avant de l'écraser
+                        var backupPath = filePath + ".corrupt";
+                        File.Copy(filePath, backupPath, overwrite: true);
+                        // On peut aussi logger l'erreur ici
+                        logEntries = new LogEntries();
+                    }
                 }
                 else
                 {
@@ -204,7 +273,7 @@ namespace LogLibrary.Managers
                 logEntries.Entries.Add(entry);
 
                 using var ms = new MemoryStream();
-                var serializer2 = new System.Xml.Serialization.XmlSerializer(typeof(LogEntries));
+                var serializer2 = new XmlSerializer(typeof(LogEntries));
                 serializer2.Serialize(ms, logEntries);
                 ms.Position = 0;
                 using var reader = new StreamReader(ms);

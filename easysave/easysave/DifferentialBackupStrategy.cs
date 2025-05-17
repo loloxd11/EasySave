@@ -49,15 +49,25 @@ namespace EasySave
                 }
 
                 // Retrieve all files from the source directory and its subdirectories
-                List<string> files = ScanDirectory(source);
+                List<string> sourceFiles = ScanDirectory(source);
 
-                int totalFiles = files.Count;
+                List<string> targetFiles = ScanDirectory(target);
+
+                Dictionary<string, bool> targetFileExists = new Dictionary<string, bool>();
+                foreach (string targetFile in targetFiles)
+                {
+                    // Get the relative path from target base directory
+                    string relativePath = targetFile.Substring(target.Length).TrimStart('\\', '/');
+                    targetFileExists[relativePath] = false;  // Initialize as not matched
+                }
+
+                int totalFiles = sourceFiles.Count;
                 int remainingFiles = totalFiles;
                 long totalSize = 0;
                 long remainingSize = 0;
 
                 // Calculate the total size of all files
-                foreach (string file in files)
+                foreach (string file in sourceFiles)
                 {
                     totalSize += GetFileSize(file);
                 }
@@ -69,11 +79,16 @@ namespace EasySave
                 job.TotalSize = totalSize;
 
                 // Process each file
-                foreach (string sourceFile in files)
+                foreach (string sourceFile in sourceFiles)
                 {
                     // Compute the relative path of the file
                     string relativePath = sourceFile.Substring(source.Length).TrimStart('\\', '/');
                     string targetFile = Path.Combine(target, relativePath);
+
+                    if (targetFileExists.ContainsKey(relativePath))
+                    {
+                        targetFileExists[relativePath] = true;
+                    }
 
                     // Create the target directory if it does not exist
                     string targetDirectory = Path.GetDirectoryName(targetFile);
@@ -120,12 +135,72 @@ namespace EasySave
                     job.UpdateProgress(remainingFiles, remainingSize);
                 }
 
+                // Delete files in target that don't exist in source
+                foreach (var entry in targetFileExists)
+                {
+                    if (!entry.Value)  // If the file wasn't matched to a source file
+                    {
+                        string fullTargetPath = Path.Combine(target, entry.Key);
+                        try
+                        {
+                            // Delete the file that doesn't exist in the source
+                            File.Delete(fullTargetPath);
+
+                            // Log the deletion
+                            job.UpdateCurrentFile("", fullTargetPath);
+                            job.LastFileTime = 0;  // No transfer time for deletions
+                                                   // Notify observers about the deletion
+                            job.NotifyObservers("delete");
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Error deleting file {fullTargetPath}: {ex.Message}");
+                        }
+                    }
+                }
+
+                // Clean empty directories in target
+                CleanEmptyDirectories(target);
+
                 return true;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error during the execution of the differential backup: {ex.Message}");
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// Recursively removes empty directories from the specified path.
+        /// </summary>
+        /// <param name="path">The path to clean.</param>
+        private void CleanEmptyDirectories(string path)
+        {
+            if (!Directory.Exists(path))
+                return;
+
+            // Recursively clean subdirectories first
+            foreach (var directory in Directory.GetDirectories(path))
+            {
+                CleanEmptyDirectories(directory);
+            }
+
+            // If this directory is now empty (no files and no subdirectories), delete it
+            if (Directory.GetFiles(path).Length == 0 && Directory.GetDirectories(path).Length == 0)
+            {
+                try
+                {
+                    // Don't delete the root target directory
+                    if (path != Path.GetDirectoryName(path))
+                    {
+                        Directory.Delete(path);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error deleting directory {path}: {ex.Message}");
+                }
             }
         }
 
