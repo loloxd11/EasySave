@@ -42,6 +42,12 @@ namespace EasySave
                 {
                     Directory.CreateDirectory(target);
                 }
+                else
+                {
+                    // Clean the target directory before starting the backup
+                    CleanDirectory(target, job);
+                    job.NotifyObservers("clean_complete"); // General notification that cleaning is complete
+                }
 
                 // Retrieve all files from the source directory and its subdirectories
                 List<string> files = ScanDirectory(source);
@@ -110,6 +116,59 @@ namespace EasySave
             {
                 Console.WriteLine($"Error during the execution of the complete backup: {ex.Message}");
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// Cleans a directory by removing all files and subdirectories within it, but preserves the directory itself.
+        /// </summary>
+        /// <param name="directoryPath">The path of the directory to clean.</param>
+        /// <summary>
+        /// Cleans a directory by removing all files and subdirectories within it, but preserves the directory itself.
+        /// </summary>
+        /// <param name="directoryPath">The path of the directory to clean.</param>
+        /// <param name="job">The backup job associated with the cleaning operation.</param>
+        private void CleanDirectory(string directoryPath, BackupJob job)
+        {
+            DirectoryInfo directory = new DirectoryInfo(directoryPath);
+
+            // Delete all files in the directory
+            foreach (FileInfo file in directory.GetFiles())
+            {
+                try
+                {
+                    string filePath = file.FullName;
+                    file.Delete();
+
+                    // Log the deletion by updating the job's current file and notifying observers
+                    job.UpdateCurrentFile("", filePath); // Empty source file (deletion)
+                    job.LastFileTime = 0; // No transfer time for deletions
+                    job.NotifyObservers("delete"); // Use a specific action for deletions
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error deleting file {file.FullName}: {ex.Message}");
+                }
+            }
+
+            // Delete all subdirectories and their contents recursively
+            foreach (DirectoryInfo subDirectory in directory.GetDirectories())
+            {
+                try
+                {
+                    // Optionally log directory deletion if needed
+                    string dirPath = subDirectory.FullName;
+
+                    subDirectory.Delete(true); // true means recursive deletion
+
+                    // You can also log directory deletions if desired
+                    job.UpdateCurrentFile("", dirPath + "/"); // Add trailing slash to indicate directory
+                    job.NotifyObservers("delete_dir"); // Specific action for directory deletion
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error deleting directory {subDirectory.FullName}: {ex.Message}");
+                }
             }
         }
     }

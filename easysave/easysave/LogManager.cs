@@ -149,39 +149,39 @@ namespace EasySave
         /// <param name="action">The action performed on the backup job.</param>
         public void Update(BackupJob job, string action)
         {
-            // Create a dictionary to store event properties
+            // Créer un dictionnaire pour stocker les propriétés de l'événement
             Dictionary<string, object> properties = new Dictionary<string, object>
-                {
-                    { "JobName", job.Name },
-                    { "JobType", job.Type.ToString() },
-                    { "JobState", job.State.ToString() },
-                    { "SourcePath", job.SourcePath },
-                    { "TargetPath", job.TargetPath },
-                    { "TotalFiles", job.TotalFiles },
-                    { "TotalSize", job.TotalSize },
-                    { "Progression", job.Progression }
-                };
+            {
+                { "JobName", job.Name },
+                { "JobType", job.Type.ToString() },
+                { "JobState", job.State.ToString() },
+                { "SourcePath", job.SourcePath },
+                { "TargetPath", job.TargetPath },
+                { "TotalFiles", job.TotalFiles },
+                { "TotalSize", job.TotalSize },
+                { "Progression", job.Progression }
+            };
 
             switch (action)
             {
                 case "start":
-                    // Log the start of a backup job
+                    // Journalisation du démarrage d'un travail de sauvegarde
                     LogEvent("JobStarted");
                     break;
 
                 case "finish":
-                    // Log the completion of a backup job
-                    properties["Duration"] = job.LastFileTime; // Add total backup time
+                    // Journalisation de la fin d'un travail de sauvegarde
+                    properties["Duration"] = job.LastFileTime; // Ajouter le temps total de la sauvegarde
                     LogEvent("JobCompleted");
                     break;
 
                 case "error":
-                    // Log an error in a backup job
+                    // Journalisation d'une erreur dans un travail de sauvegarde
                     LogEvent("JobError");
                     break;
 
                 case "file":
-                    // Log the processing of a file if necessary
+                    // Journalisation du traitement d'un fichier si nécessaire
                     if (job.LastFileTime > 0)
                     {
                         LogTransfer(
@@ -190,17 +190,40 @@ namespace EasySave
                             job.CurrentTargetFile,
                             GetFileSize(job.CurrentSourceFile),
                             job.LastFileTime,
-                            0 // No encryption for now
+                            0 // Pas de cryptage pour l'instant
                         );
                     }
                     break;
 
+                case "delete":
+                    // Journalisation de la suppression d'un fichier
+                    LogTransfer(
+                        job.Name,
+                        "", // Pas de fichier source pour une suppression
+                        job.CurrentTargetFile,
+                        0, // Pas de taille pour une suppression
+                        0, // Pas de temps de transfert pour une suppression
+                        0  // Pas de cryptage pour une suppression
+                    );
+                    break;
+
+                case "delete_dir":
+                    // Journalisation de la suppression d'un répertoire
+                    LogEvent("DirectoryDeleted");
+                    break;
+
+                case "clean_complete":
+                    // Journalisation de la fin du nettoyage d'un répertoire
+                    LogEvent("TargetDirectoryCleaned");
+                    break;
+
                 case "progress":
-                    // Optionally log progress updates if needed
+                    // Optionnellement, logger les mises à jour de progression si besoin
                     // LogEvent("JobProgress", properties);
                     break;
             }
         }
+
 
         /// <summary>
         /// Utility method to get the size of a file.

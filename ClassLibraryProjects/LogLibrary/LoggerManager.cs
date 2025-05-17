@@ -184,17 +184,28 @@ namespace LogLibrary.Managers
         /// <param name="filePath">The file path.</param>
         /// <param name="isNewFile">Indicates if this is a new file.</param>
         /// <returns>A string formatted according to the current format.</returns>
+        // Dans LoggerManager.cs
+        // Modifiez la méthode CreateLogEntry pour qu'elle utilise File.AppendAllText pour XML aussi
+
         private string CreateLogEntry(LogEntry entry, string filePath, bool isNewFile)
         {
-            LogEntries logEntries;
-
             if (_format == LogFormat.XML)
             {
+                LogEntries logEntries;
+
                 if (!isNewFile && File.Exists(filePath))
                 {
-                    using var stream = File.OpenRead(filePath);
-                    var serializer = new System.Xml.Serialization.XmlSerializer(typeof(LogEntries));
-                    logEntries = (LogEntries?)serializer.Deserialize(stream) ?? new LogEntries();
+                    try
+                    {
+                        using var stream = File.OpenRead(filePath);
+                        var serializer = new System.Xml.Serialization.XmlSerializer(typeof(LogEntries));
+                        logEntries = (LogEntries?)serializer.Deserialize(stream) ?? new LogEntries();
+                    }
+                    catch (Exception)
+                    {
+                        // En cas d'erreur de désérialisation, créer une nouvelle collection
+                        logEntries = new LogEntries();
+                    }
                 }
                 else
                 {
@@ -215,6 +226,7 @@ namespace LogLibrary.Managers
                 return FormatUtil.ToJson(entry);
             }
         }
+
 
         /// <summary>
         /// Generates the log file path for a given date.
