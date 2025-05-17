@@ -5,20 +5,31 @@ using System.Text.Json;
 
 namespace EasySave
 {
+    /// <summary>
+    /// Manages the state of backup jobs by observing their progress and saving their state to a file.
+    /// </summary>
     public class StateManager : IObserver
     {
-        private string stateFilePath;
-        private Dictionary<string, JobStateInfo> stateData;
+        private string stateFilePath; // Path to the state file where job states are saved
+        private Dictionary<string, JobStateInfo> stateData; // Dictionary to store the state of each backup job
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StateManager"/> class.
+        /// </summary>
+        /// <param name="path">The file path where the state data will be saved.</param>
         public StateManager(string path)
         {
             stateFilePath = path;
             LoadStateFile();
         }
 
+        /// <summary>
+        /// Updates the state of a backup job based on the specified action.
+        /// </summary>
+        /// <param name="job">The backup job whose state needs to be updated.</param>
+        /// <param name="action">The action performed on the job (e.g., "create", "end").</param>
         public void Update(BackupJob job, string action)
         {
-            // Update the state for the given job based on the action
             if (action == "create")
             {
                 InitializeJobState(job);
@@ -33,12 +44,15 @@ namespace EasySave
             }
         }
 
+        /// <summary>
+        /// Updates the state of an existing backup job with its current details.
+        /// </summary>
+        /// <param name="job">The backup job to update.</param>
         public void UpdateJobState(BackupJob job)
         {
-            // Retrieve or create the state for the given job
             JobStateInfo jobState = GetOrCreateJobState(job.Name);
 
-            // Update the job state with the current job details
+            // Update job state details
             jobState.Name = job.Name;
             jobState.State = job.State.ToString();
             jobState.LastUpdated = DateTime.Now;
@@ -50,13 +64,15 @@ namespace EasySave
             jobState.CurrentSourceFile = job.CurrentSourceFile;
             jobState.CurrentTargetFile = job.CurrentTargetFile;
 
-            // Save the updated state to the file
             SaveStateFile();
         }
 
+        /// <summary>
+        /// Initializes a new state for a backup job with default values.
+        /// </summary>
+        /// <param name="job">The backup job to initialize.</param>
         public void InitializeJobState(BackupJob job)
         {
-            // Initialize a new state for the given job
             JobStateInfo jobState = GetOrCreateJobState(job.Name);
 
             // Set default values for the job state
@@ -71,16 +87,18 @@ namespace EasySave
             jobState.CurrentSourceFile = string.Empty;
             jobState.CurrentTargetFile = string.Empty;
 
-            // Save the initialized state to the file
             SaveStateFile();
         }
 
+        /// <summary>
+        /// Finalizes the state of a backup job, marking it as completed or updating its final details.
+        /// </summary>
+        /// <param name="job">The backup job to finalize.</param>
         public void FinalizeJobState(BackupJob job)
         {
-            // Finalize the state for the given job
             JobStateInfo jobState = GetOrCreateJobState(job.Name);
 
-            // Update the job state with final details
+            // Update final job state details
             jobState.State = job.State.ToString();
             jobState.LastUpdated = DateTime.Now;
             jobState.TotalFiles = job.TotalFiles;
@@ -88,18 +106,19 @@ namespace EasySave
             jobState.Progression = (job.State == JobState.Completed) ? 100 : job.Progression;
             jobState.FilesRemaining = 0;
             jobState.SizeRemaining = 0;
-
-            // Clear the current file details
             jobState.CurrentSourceFile = null;
             jobState.CurrentTargetFile = null;
 
-            // Save the finalized state to the file
             SaveStateFile();
         }
 
+        /// <summary>
+        /// Retrieves the state of a backup job or creates a new state if it doesn't exist.
+        /// </summary>
+        /// <param name="jobName">The name of the backup job.</param>
+        /// <returns>The state information of the backup job.</returns>
         private JobStateInfo GetOrCreateJobState(string jobName)
         {
-            // Retrieve the state for the given job or create a new one if it doesn't exist
             if (!stateData.ContainsKey(jobName))
             {
                 stateData[jobName] = new JobStateInfo { Name = jobName };
@@ -108,11 +127,13 @@ namespace EasySave
             return stateData[jobName];
         }
 
+        /// <summary>
+        /// Loads the state data from the state file, or initializes an empty state if the file doesn't exist.
+        /// </summary>
         private void LoadStateFile()
         {
             try
             {
-                // Load the state data from the file if it exists
                 if (File.Exists(stateFilePath))
                 {
                     string json = File.ReadAllText(stateFilePath);
@@ -120,32 +141,31 @@ namespace EasySave
                 }
                 else
                 {
-                    // Initialize an empty state if the file doesn't exist
                     stateData = new Dictionary<string, JobStateInfo>();
                 }
             }
             catch (Exception)
             {
-                // Handle any errors by initializing an empty state
                 stateData = new Dictionary<string, JobStateInfo>();
             }
         }
 
+        /// <summary>
+        /// Saves the current state data to the state file in JSON format.
+        /// </summary>
         private void SaveStateFile()
         {
             try
             {
-                // Ensure the directory for the state file exists
                 string directory = Path.GetDirectoryName(stateFilePath);
                 if (!Directory.Exists(directory))
                 {
                     Directory.CreateDirectory(directory);
                 }
 
-                // Serialize the state data to JSON and save it to the file
                 var options = new JsonSerializerOptions
                 {
-                    WriteIndented = true // Format the JSON with indentation for readability
+                    WriteIndented = true // Format JSON for readability
                 };
 
                 string json = JsonSerializer.Serialize(stateData, options);
@@ -153,10 +173,13 @@ namespace EasySave
             }
             catch (Exception ex)
             {
+                // Handle exceptions silently
             }
         }
 
-        // Internal class to represent the state information of a backup job
+        /// <summary>
+        /// Represents the state information of a backup job.
+        /// </summary>
         private class JobStateInfo
         {
             public string Name { get; set; } // The name of the job

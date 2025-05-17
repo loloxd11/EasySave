@@ -4,18 +4,31 @@ using System.IO;
 
 namespace EasySave
 {
+    /// <summary>
+    /// CommandLineInterface class provides a command-line interface for managing backup jobs.
+    /// It allows users to add, update, remove, execute, and list backup jobs, as well as change application settings.
+    /// </summary>
     public class CommandLineInterface
     {
         private readonly BackupManager backupManager;
         private readonly LanguageManager languageManager;
         private readonly ConfigManager configManager;
+        private readonly LogManager logManager;
 
-        // Constructor to initialize the CommandLineInterface and its dependencies
+        /// <summary>
+        /// Constructor to initialize the CommandLineInterface and its dependencies.
+        /// It sets up the backup manager, language manager, configuration manager, and log manager.
+        /// </summary>
         public CommandLineInterface()
         {
             backupManager = BackupManager.GetInstance();
             languageManager = LanguageManager.GetInstance();
             configManager = ConfigManager.GetInstance();
+
+            string logDirectory = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "EasySave", "Logs");
+            logManager = LogManager.GetInstance(logDirectory);
 
             // Set the language based on the configuration settings
             string language = configManager.GetSetting("Language");
@@ -25,7 +38,10 @@ namespace EasySave
             }
         }
 
-        // Main entry point for the Command Line Interface
+        /// <summary>
+        /// Main entry point for the Command Line Interface.
+        /// Displays the main menu and handles user input to navigate through different functionalities.
+        /// </summary>
         public void Start()
         {
             bool exit = false;
@@ -54,6 +70,9 @@ namespace EasySave
                         ChangeLanguageMenu();
                         break;
                     case "6":
+                        ChangeLogFormatMenu();
+                        break;
+                    case "7":
                         exit = true;
                         Console.WriteLine(languageManager.GetTranslation("MenuExit"));
                         break;
@@ -64,7 +83,9 @@ namespace EasySave
             }
         }
 
-        // Display the main menu options
+        /// <summary>
+        /// Displays the main menu options to the user.
+        /// </summary>
         private void DisplayMainMenu()
         {
             Console.WriteLine("===== EasySave =====");
@@ -73,12 +94,16 @@ namespace EasySave
             Console.WriteLine("3. " + languageManager.GetTranslation("MenuExecuteJob")); // Execute a backup job
             Console.WriteLine("4. " + languageManager.GetTranslation("MenuListJobs")); // List all backup jobs
             Console.WriteLine("5. " + languageManager.GetTranslation("MenuChangeLanguage")); // Change the language
-            Console.WriteLine("6. " + languageManager.GetTranslation("MenuExit")); // Exit the application
+            Console.WriteLine("6. " + languageManager.GetTranslation("MenuFormatLog"));
+            Console.WriteLine("7. " + languageManager.GetTranslation("MenuExit")); // Exit the application
             Console.WriteLine("=============================");
             Console.Write("Your choice: ");
         }
 
-        // Menu to add a new backup job
+        /// <summary>
+        /// Menu to add a new backup job.
+        /// Prompts the user for job details and validates the input before adding the job.
+        /// </summary>
         private void AddBackupMenu()
         {
             Console.Clear();
@@ -128,7 +153,10 @@ namespace EasySave
             }
         }
 
-        // Menu to update or remove an existing backup job
+        /// <summary>
+        /// Menu to update or remove an existing backup job.
+        /// Displays the list of jobs and allows the user to select a job to update or remove.
+        /// </summary>
         private void UpdateOrRemoveBackupMenu()
         {
             Console.Clear();
@@ -165,7 +193,10 @@ namespace EasySave
             }
         }
 
-        // Update an existing backup job
+        /// <summary>
+        /// Updates an existing backup job with new parameters.
+        /// Prompts the user for updated job details and validates the input.
+        /// </summary>
         private void UpdateBackup(int index)
         {
             Console.Clear();
@@ -204,7 +235,10 @@ namespace EasySave
             }
         }
 
-        // Remove an existing backup job
+        /// <summary>
+        /// Removes an existing backup job by its index.
+        /// Displays a success or error message based on the operation result.
+        /// </summary>
         private void RemoveBackup(int index)
         {
             Console.Clear();
@@ -221,7 +255,10 @@ namespace EasySave
             }
         }
 
-        // Menu to execute one or more backup jobs
+        /// <summary>
+        /// Menu to execute one or more backup jobs.
+        /// Allows the user to execute all jobs or specific jobs by their indices.
+        /// </summary>
         private void ExecuteBackupMenu()
         {
             Console.Clear();
@@ -258,7 +295,10 @@ namespace EasySave
             Console.WriteLine(languageManager.GetTranslation("ExecutingJob"));
         }
 
-        // Display the list of all backup jobs
+        /// <summary>
+        /// Displays the list of all backup jobs.
+        /// If no jobs are defined, it shows a message indicating the absence of jobs.
+        /// </summary>
         private void ListBackups()
         {
             Console.Clear();
@@ -280,7 +320,10 @@ namespace EasySave
             }
         }
 
-        // Menu to change the application's language
+        /// <summary>
+        /// Menu to change the application's language.
+        /// Prompts the user for a new language and updates the configuration accordingly.
+        /// </summary>
         private void ChangeLanguageMenu()
         {
             Console.Clear();
@@ -298,6 +341,37 @@ namespace EasySave
             else
             {
                 Console.WriteLine(languageManager.GetTranslation("InvalidLanguage"));
+            }
+        }
+
+        /// <summary>
+        /// Menu to change the log format.
+        /// Allows the user to select between JSON and XML formats for logging.
+        /// </summary>
+        private void ChangeLogFormatMenu()
+        {
+            Console.Clear();
+            Console.WriteLine("===== Change Log Format =====");
+            Console.WriteLine("1. JSON");
+            Console.WriteLine("2. XML");
+            Console.Write("Your choice: ");
+            string input = Console.ReadLine();
+
+            if (input == "1")
+            {
+                logManager.SetFormat(LogLibrary.Enums.LogFormat.JSON);
+                configManager.SetSetting("LogFormat", "JSON");
+                Console.WriteLine("Log format changed to JSON.");
+            }
+            else if (input == "2")
+            {
+                logManager.SetFormat(LogLibrary.Enums.LogFormat.XML);
+                configManager.SetSetting("LogFormat", "XML");
+                Console.WriteLine("Log format changed to XML.");
+            }
+            else
+            {
+                Console.WriteLine("Invalid choice.");
             }
         }
     }

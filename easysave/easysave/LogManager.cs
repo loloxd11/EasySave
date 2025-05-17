@@ -1,208 +1,246 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
-using LogLibrary;
-using System.Reflection;
-using System.Text.Json;
+using LogLibrary.Enums;
+using LogLibrary.Factories;
+using LogLibrary.Interfaces;
 
 namespace EasySave
 {
-    public class LogManager : IObserver
+    /// <summary>
+    /// Manages logging operations for the EasySave application.
+    /// Implements the Singleton pattern to ensure a single instance.
+    /// </summary>
+    public class LogManager : ILogger, IObserver
     {
-        private readonly ILogService logService;
-        private readonly string logDirectory;
+        // Singleton instance of LogManager
+        private static LogManager instance;
+        private static readonly object lockObject = new object();
 
-        public LogManager(string directory)
+        // External logger instance from the LogLibrary
+        private readonly LogLibrary.Interfaces.ILogger _logger;
+
+        // Default log directory path
+        private static string defaultLogDirectory = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "EasySave", "Logs");
+
+        /// <summary>
+        /// Private constructor to prevent direct instantiation.
+        /// Initializes the logger with the specified directory and format.
+        /// </summary>
+        /// <param name="logDirectory">The directory where logs will be stored.</param>
+        /// <param name="format">The format of the logs (XML or JSON).</param>
+        private LogManager(string logDirectory, LogFormat format = LogFormat.XML)
         {
-            logDirectory = directory;
-
-            // Create the log directory if it does not exist
-            if (!Directory.Exists(logDirectory))
-            {
-                Directory.CreateDirectory(logDirectory);
-            }
-
-            // Obtain an instance of ILogService from the DLL
-            logService = GetLogServiceInstance(logDirectory);
+            _logger = LoggerFactory.Create(logDirectory, format);
         }
 
-        private ILogService GetLogServiceInstance(string directory)
+        /// <summary>
+        /// Retrieves the singleton instance of LogManager.
+        /// Ensures thread safety and initializes the logger if not already done.
+        /// </summary>
+        /// <param name="logDirectory">Optional custom log directory.</param>
+        /// <param name="format">Optional log format (default is XML).</param>
+        /// <returns>The singleton instance of LogManager.</returns>
+        public static LogManager GetInstance(string logDirectory = null, LogFormat format = LogFormat.XML)
         {
-            try
+            if (instance == null)
             {
-                // Attempt to load the LogLibrary assembly
-                Assembly logLibrary = Assembly.Load("LogLibrary");
-
-                // Look for the LogServiceFactory type
-                Type factoryType = logLibrary.GetType("LogLibrary.LogServiceFactory");
-                if (factoryType != null)
+                lock (lockObject) // Ensures thread safety
                 {
-                    // Look for the CreateLogService method that takes a string parameter
-                    MethodInfo createMethod = factoryType.GetMethod("CreateLogService", new[] { typeof(string) });
-                    if (createMethod != null)
+                    if (instance == null)
                     {
-                        // Call the static method
-                        return (ILogService)createMethod.Invoke(null, new object[] { directory });
+                        // Use default directory if none is specified
+                        string directory = logDirectory ?? defaultLogDirectory;
+
+                        // Ensure the directory exists
+                        if (!Directory.Exists(directory))
+                        {
+                            Directory.CreateDirectory(directory);
+                        }
+
+                        // Check for log format in configuration
+                        var configManager = ConfigManager.GetInstance();
+                        string formatSetting = configManager.GetSetting("LogFormat");
+
+                        if (!string.IsNullOrEmpty(formatSetting))
+                        {
+                            if (formatSetting.Equals("XML", StringComparison.OrdinalIgnoreCase))
+                            {
+                                format = LogFormat.XML;
+                            }
+                            else if (formatSetting.Equals("JSON", StringComparison.OrdinalIgnoreCase))
+                            {
+                                format = LogFormat.JSON;
+                            }
+                        }
+
+                        instance = new LogManager(directory, format);
                     }
                 }
-
-                // Second approach: try to find a direct implementation of ILogService
-                Type logManagerType = logLibrary.GetType("LogLibrary.LogManager");
-                if (logManagerType != null)
-                {
-                    // Look for the GetInstance method
-                    MethodInfo getInstance = logManagerType.GetMethod("GetInstance", new[] { typeof(string) });
-                    if (getInstance != null)
-                    {
-                        // Call the static method
-                        return (ILogService)getInstance.Invoke(null, new object[] { directory });
-                    }
-
-                    // Try to create an instance using the constructor
-                    var constructor = logManagerType.GetConstructor(new[] { typeof(string) });
-                    if (constructor != null)
-                    {
-                        return (ILogService)constructor.Invoke(new object[] { directory });
-                    }
-                }
-
-                // If all attempts fail, use a fallback implementation
-                return new FallbackLogService(directory);
             }
-            catch (Exception)
-            {
-                return new FallbackLogService(directory);
-            }
+            return instance;
         }
 
+        /// <summary>
+        /// Logs the details of a file transfer operation.
+        /// </summary>
+        /// <param name="jobName">The name of the backup job.</param>
+        /// <param name="sourcePath">The source file path.</param>
+        /// <param name="targetPath">The target file path.</param>
+        /// <param name="fileSize">The size of the file in bytes.</param>
+        /// <param name="transferTime">The time taken to transfer the file in milliseconds.</param>
+        /// <param name="encryptionTime">The time taken to encrypt the file in milliseconds (default is 0).</param>
+        public void LogTransfer(string jobName, string sourcePath, string targetPath, long fileSize, long transferTime, long encryptionTime = 0)
+        {
+            _logger.LogTransfer(jobName, sourcePath, targetPath, fileSize, transferTime, encryptionTime);
+        }
+
+        /// <summary>
+        /// Logs a specific event related to the backup process.
+        /// </summary>
+        /// <param name="eventName">The name of the event to log.</param>
+        public void LogEvent(string eventName)
+        {
+            _logger.LogEvent(eventName);
+        }
+
+        /// <summary>
+        /// Retrieves the current log format used by the logger.
+        /// </summary>
+        /// <returns>The current log format.</returns>
+        public LogFormat GetCurrentFormat()
+        {
+            return _logger.GetCurrentFormat();
+        }
+
+        /// <summary>
+        /// Sets the log format to be used by the logger.
+        /// </summary>
+        /// <param name="format">The log format to set.</param>
+        public void SetFormat(LogFormat format)
+        {
+            _logger.SetFormat(format);
+        }
+
+        /// <summary>
+        /// Retrieves the file path of the current log file.
+        /// </summary>
+        /// <returns>The file path of the current log file.</returns>
+        public string GetCurrentLogFilePath()
+        {
+            return _logger.GetCurrentLogFilePath();
+        }
+
+        /// <summary>
+        /// Checks if the logger is ready to log events or transfers.
+        /// </summary>
+        /// <returns>True if the logger is ready, otherwise false.</returns>
+        public bool IsReady()
+        {
+            return _logger.IsReady();
+        }
+
+        /// <summary>
+        /// Updates the observer with the current state of the BackupJob and the action performed.
+        /// </summary>
+        /// <param name="job">The backup job whose state has changed.</param>
+        /// <param name="action">The action performed on the backup job.</param>
         public void Update(BackupJob job, string action)
         {
-            if (action == "file")
+            // Créer un dictionnaire pour stocker les propriétés de l'événement
+            Dictionary<string, object> properties = new Dictionary<string, object>
             {
-                bool isServiceReady = true;
-
-                // Check if the IsLogServiceReady method exists and call it
-                try
-                {
-                    isServiceReady = logService.IsLogServiceReady();
-                }
-                catch
-                {
-                    // Assume the service is ready in case of an error
-                    isServiceReady = true;
-                }
-
-                if (isServiceReady)
-                {
-                    // Ensure file paths are valid
-                    if (!string.IsNullOrEmpty(job.CurrentSourceFile) && !string.IsNullOrEmpty(job.CurrentTargetFile))
-                    {
-                        try
-                        {
-                            // Calculate the file size
-                            long fileSize = 0;
-                            if (File.Exists(job.CurrentSourceFile))
-                            {
-                                fileSize = new FileInfo(job.CurrentSourceFile).Length;
-                            }
-
-                            // Use the SerializeLogEntry method to get the JSON string
-                            DateTime timestamp = DateTime.Now;
-                            string jsonEntry = logService.SerializeLogEntry(
-                                job.Name,
-                                job.CurrentSourceFile,
-                                job.CurrentTargetFile,
-                                fileSize,
-                                job.LastFileTime,
-                                timestamp);
-
-                            // Write the JSON entry to the log file
-                            string logFilePath = logService.GetDailyLogFilePath(timestamp);
-                            File.AppendAllText(logFilePath, jsonEntry + Environment.NewLine);
-
-                            // Also call LogFileTransfer for compatibility
-                            logService.LogFileTransfer(
-                                job.Name,
-                                job.CurrentSourceFile,
-                                job.CurrentTargetFile,
-                                fileSize,
-                                job.LastFileTime);
-                        }
-                        catch (Exception)
-                        {
-                            // Do not display the error in the console
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    // Fallback implementation for ILogService in case of issues with the DLL
-    internal class FallbackLogService : ILogService
-    {
-        private readonly string logDirectory;
-        private readonly JsonSerializerOptions jsonOptions;
-
-        public FallbackLogService(string directory)
-        {
-            logDirectory = directory;
-
-            if (!Directory.Exists(logDirectory))
-            {
-                Directory.CreateDirectory(logDirectory);
-            }
-
-            // Configure JSON serialization options
-            jsonOptions = new JsonSerializerOptions
-            {
-                WriteIndented = false // No formatting to have one entry per line
+                { "JobName", job.Name },
+                { "JobType", job.Type.ToString() },
+                { "JobState", job.State.ToString() },
+                { "SourcePath", job.SourcePath },
+                { "TargetPath", job.TargetPath },
+                { "TotalFiles", job.TotalFiles },
+                { "TotalSize", job.TotalSize },
+                { "Progression", job.Progression }
             };
+
+            switch (action)
+            {
+                case "start":
+                    // Journalisation du démarrage d'un travail de sauvegarde
+                    LogEvent("JobStarted");
+                    break;
+
+                case "finish":
+                    // Journalisation de la fin d'un travail de sauvegarde
+                    properties["Duration"] = job.LastFileTime; // Ajouter le temps total de la sauvegarde
+                    LogEvent("JobCompleted");
+                    break;
+
+                case "error":
+                    // Journalisation d'une erreur dans un travail de sauvegarde
+                    LogEvent("JobError");
+                    break;
+
+                case "file":
+                    // Journalisation du traitement d'un fichier si nécessaire
+                    if (job.LastFileTime > 0)
+                    {
+                        LogTransfer(
+                            job.Name,
+                            job.CurrentSourceFile,
+                            job.CurrentTargetFile,
+                            GetFileSize(job.CurrentSourceFile),
+                            job.LastFileTime,
+                            0 // Pas de cryptage pour l'instant
+                        );
+                    }
+                    break;
+
+                case "delete":
+                    // Journalisation de la suppression d'un fichier
+                    LogTransfer(
+                        job.Name,
+                        "", // Pas de fichier source pour une suppression
+                        job.CurrentTargetFile,
+                        0, // Pas de taille pour une suppression
+                        0, // Pas de temps de transfert pour une suppression
+                        0  // Pas de cryptage pour une suppression
+                    );
+                    break;
+
+                case "delete_dir":
+                    // Journalisation de la suppression d'un répertoire
+                    LogEvent("DirectoryDeleted");
+                    break;
+
+                case "clean_complete":
+                    // Journalisation de la fin du nettoyage d'un répertoire
+                    LogEvent("TargetDirectoryCleaned");
+                    break;
+
+                case "progress":
+                    // Optionnellement, logger les mises à jour de progression si besoin
+                    // LogEvent("JobProgress", properties);
+                    break;
+            }
         }
 
-        public string GetDailyLogFilePath(DateTime date)
-        {
-            string fileName = $"{date:yyyy-MM-dd}.json";
-            return Path.Combine(logDirectory, fileName);
-        }
 
-        public void LogFileTransfer(string jobName, string sourcePath, string targetPath, long fileSize, long transferTime)
+        /// <summary>
+        /// Utility method to get the size of a file.
+        /// </summary>
+        /// <param name="filePath">The file path.</param>
+        /// <returns>The size of the file in bytes, or 0 if an error occurs.</returns>
+        private long GetFileSize(string filePath)
         {
             try
             {
-                string logFilePath = GetDailyLogFilePath(DateTime.Now);
-
-                // Use SerializeLogEntry to get the JSON entry
-                string jsonEntry = SerializeLogEntry(jobName, sourcePath, targetPath, fileSize, transferTime, DateTime.Now);
-
-                // Append a new line to the end of the file
-                File.AppendAllText(logFilePath, jsonEntry + Environment.NewLine);
+                FileInfo fileInfo = new FileInfo(filePath);
+                return fileInfo.Length;
             }
             catch (Exception)
             {
-                // Do not display the error in the console
+                return 0;
             }
-        }
-
-        public bool IsLogServiceReady()
-        {
-            return true;
-        }
-
-        public string SerializeLogEntry(string jobName, string sourcePath, string targetPath, long fileSize, long transferTime, DateTime timestamp)
-        {
-            // Create the log object with the exact required format
-            var logEntry = new
-            {
-                Timestamp = timestamp.ToString("yyyy-MM-ddTHH:mm:ss"),
-                JobName = jobName,
-                Source = sourcePath,
-                Target = targetPath,
-                FileSize = fileSize,
-                TransferTimeMs = transferTime
-            };
-
-            // Serialize to JSON
-            return JsonSerializer.Serialize(logEntry, jsonOptions);
         }
     }
 }

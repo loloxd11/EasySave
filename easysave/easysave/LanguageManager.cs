@@ -5,6 +5,11 @@ using System.Text.Json;
 
 namespace EasySave
 {
+    /// <summary>
+    /// Manages application language settings and translations.
+    /// Provides functionality to load, retrieve, and manage translations for different languages.
+    /// Implements a singleton pattern to ensure a single instance of the manager.
+    /// </summary>
     public class LanguageManager
     {
         private static LanguageManager instance; // Singleton instance of the LanguageManager
@@ -13,6 +18,10 @@ namespace EasySave
         private readonly string enJsonPath; // Path to the English translation file
         private readonly string frJsonPath; // Path to the French translation file
 
+        /// <summary>
+        /// Private constructor to initialize the LanguageManager.
+        /// Ensures the configuration directory exists and sets up default language files.
+        /// </summary>
         private LanguageManager()
         {
             // Get the application data folder path
@@ -34,7 +43,10 @@ namespace EasySave
             LoadLanguageFile(currentLanguage);
         }
 
-        // Get the singleton instance of the LanguageManager
+        /// <summary>
+        /// Retrieves the singleton instance of the LanguageManager.
+        /// </summary>
+        /// <returns>The singleton instance of the LanguageManager.</returns>
         public static LanguageManager GetInstance()
         {
             if (instance == null)
@@ -44,7 +56,10 @@ namespace EasySave
             return instance;
         }
 
-        // Set the current language and load the corresponding translation file
+        /// <summary>
+        /// Sets the current language and loads the corresponding translation file.
+        /// </summary>
+        /// <param name="language">The language code ("en" or "fr").</param>
         public void SetLanguage(string language)
         {
             if (language.ToLower() == "en" || language.ToLower() == "fr")
@@ -54,7 +69,11 @@ namespace EasySave
             }
         }
 
-        // Retrieve the translation for a given key
+        /// <summary>
+        /// Retrieves the translation for a given key.
+        /// </summary>
+        /// <param name="key">The key for the translation.</param>
+        /// <returns>The translated string, or the key itself if not found.</returns>
         public string GetTranslation(string key)
         {
             if (translations != null && translations.ContainsKey(key))
@@ -64,7 +83,11 @@ namespace EasySave
             return key; // Return the key itself if the translation is not found
         }
 
-        // Load the translation file for the specified language
+        /// <summary>
+        /// Loads the translation file for the specified language.
+        /// Creates default translation files if they do not exist.
+        /// </summary>
+        /// <param name="language">The language code ("en" or "fr").</param>
         private void LoadLanguageFile(string language)
         {
             try
@@ -96,7 +119,10 @@ namespace EasySave
             }
         }
 
-        // Create a default translation file for the specified language
+        /// <summary>
+        /// Creates a default translation file for the specified language.
+        /// </summary>
+        /// <param name="language">The language code ("en" or "fr").</param>
         private void CreateDefaultTranslationFile(string language)
         {
             Dictionary<string, string> defaultTranslations = new Dictionary<string, string>();
@@ -143,6 +169,7 @@ namespace EasySave
                         { "MenuChangeLanguage", "Changer de langue" },
                         { "PromptChangeLanguage","Entrez 'en' pour anglais ou 'fr' pour français : " },
                         { "MenuHelp", "Afficher l'aide" },
+                        { "MenuFormatLog", "Changer le format de log"},
                         { "MenuExit", "Quitter" },
                         { "BackupJobs", "Travaux de sauvegarde" },
                         { "NoJobsDefined", "Aucun travail de sauvegarde défini" },
@@ -191,6 +218,7 @@ namespace EasySave
                         { "MenuChangeLanguage", "Change language" },
                         { "PromptChangeLanguage", "Enter 'en' for English or 'fr' for French: " },
                         { "MenuHelp", "Display help" },
+                        { "MenuFormatLog", "Change the log format"},
                         { "MenuExit", "Exit" },
                         { "BackupJobs", "Backup jobs" },
                         { "NoJobsDefined", "No backup jobs defined" },
