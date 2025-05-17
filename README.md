@@ -46,6 +46,13 @@ La première version est une application console en .NET Core permettant la cré
 
 ---
 
+## Version 1.1
+
+La version 1.1 apporte des améliorations à l’application console. Elle introduit la possibilité de choisir le format de log entre **JSON** et **XML**.  
+L’interface console est maintenue et continue d’être supportée.
+
+---
+
 ## Une tâche de sauvegarde est définie par :
 
 - Un nom
