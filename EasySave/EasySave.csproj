@@ -9,28 +9,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="LangResources\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Reference Include="LogLibrary">
       <HintPath>..\ClassLibraryProjects\LogLibrary\bin\Release\net8.0\LogLibrary.dll</HintPath>
     </Reference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="LangResources\english.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>english.resx</DependentUpon>
-    </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Update="LangResources\english.resx">
-      <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>english.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

@@ -61,38 +61,11 @@ namespace EasySave.LangResources {
         }
         
         /// <summary>
-        ///   Recherche une chaîne localisée semblable à addee.
+        ///   Recherche une chaîne localisée semblable à add.
         /// </summary>
         public static string add {
             get {
                 return ResourceManager.GetString("add", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une chaîne localisée semblable à add.
-        /// </summary>
-        public static string add1 {
-            get {
-                return ResourceManager.GetString("add1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une chaîne localisée semblable à add.
-        /// </summary>
-        public static string add2 {
-            get {
-                return ResourceManager.GetString("add2", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une chaîne localisée semblable à add.
-        /// </summary>
-        public static string add3 {
-            get {
-                return ResourceManager.GetString("add3", resourceCulture);
             }
         }
         
@@ -111,15 +84,6 @@ namespace EasySave.LangResources {
         public static string edit {
             get {
                 return ResourceManager.GetString("edit", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une chaîne localisée semblable à execute.
-        /// </summary>
-        public static string execute {
-            get {
-                return ResourceManager.GetString("execute", resourceCulture);
             }
         }
     }
