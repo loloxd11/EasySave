@@ -1,0 +1,48 @@
+﻿<Window x:Class="EasySave.AddBackupJobDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Ajouter un travail" Height="250" Width="400" WindowStartupLocation="CenterOwner">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+    </Window.Resources>
+    <StackPanel Margin="20">
+        <!-- Placeholder pour NameTextBox -->
+        <Grid Margin="0,0,0,10">
+            <TextBox x:Name="NameBox" Width="200" Height="30"/>
+            <TextBlock Text="Nom du travail"
+                       Foreground="Gray"
+                       Margin="8,0,0,0"
+                       VerticalAlignment="Center"
+                       IsHitTestVisible="False"
+                       Visibility="{Binding Text.IsEmpty, ElementName=NameTextBox, Converter={StaticResource BoolToVisibilityConverter}}"/>
+        </Grid>
+
+        <!-- Placeholder pour SourceBox -->
+        <Grid Margin="0,0,0,10">
+            <TextBox x:Name="SourceBox"/>
+            <TextBlock Text="Chemin source"
+                       Foreground="Gray"
+                       Margin="8,0,0,0"
+                       VerticalAlignment="Center"
+                       IsHitTestVisible="False"
+                       Visibility="{Binding Text.IsEmpty, ElementName=SourceBox, Converter={StaticResource BoolToVisibilityConverter}}"/>
+        </Grid>
+
+        <!-- Placeholder pour TargetBox -->
+        <Grid Margin="0,0,0,10">
+            <TextBox x:Name="TargetBox"/>
+            <TextBlock Text="Chemin cible"
+                       Foreground="Gray"
+                       Margin="8,0,0,0"
+                       VerticalAlignment="Center"
+                       IsHitTestVisible="False"
+                       Visibility="{Binding Text.IsEmpty, ElementName=TargetBox, Converter={StaticResource BoolToVisibilityConverter}}"/>
+        </Grid>
+
+        <ComboBox x:Name="TypeBox" Margin="0,0,0,10">
+            <ComboBoxItem Content="Complète" Tag="0"/>
+            <ComboBoxItem Content="Différentielle" Tag="1"/>
+        </ComboBox>
+        <Button Content="Valider" Click="Validate_Click"/>
+    </StackPanel>
+</Window>
