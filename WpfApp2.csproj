@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CacheManager.Microsoft.Extensions.Logging" Version="1.2.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="9.0.5" />
+    <PackageReference Include="Octokit" Version="14.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="LogLibrary">
+      <HintPath>..\..\projet_Genielogiciel_V1.1\ClassLibraryProjects\LogLibrary\bin\Release\net8.0\LogLibrary.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
