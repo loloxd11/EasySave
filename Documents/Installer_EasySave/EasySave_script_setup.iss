@@ -49,6 +49,8 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 
 [Files]
 Source: "C:\Users\lecle\source\repos\loloxd11\EasySave\easysave\easysave\bin\Release\net8.0\win-x64\publish\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+; Autres fichiers...
+Source: "C:\Users\lecle\AppData\Roaming\EasySave\default_config.json"; DestDir: "{userappdata}\EasySave"; DestName: "config.json"; Flags: onlyifdoesntexist
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Registry]
