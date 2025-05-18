@@ -61,38 +61,20 @@ namespace EasySave.LangResources {
         }
         
         /// <summary>
-        ///   Recherche une chaîne localisée semblable à addee.
+        ///   Recherche une chaîne localisée semblable à Add.
         /// </summary>
-        public static string add {
+        public static string Add {
             get {
-                return ResourceManager.GetString("add", resourceCulture);
+                return ResourceManager.GetString("Add", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Recherche une chaîne localisée semblable à add.
+        ///   Recherche une chaîne localisée semblable à Complete.
         /// </summary>
-        public static string add1 {
+        public static string CompleteBackup {
             get {
-                return ResourceManager.GetString("add1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une chaîne localisée semblable à add.
-        /// </summary>
-        public static string add2 {
-            get {
-                return ResourceManager.GetString("add2", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une chaîne localisée semblable à add.
-        /// </summary>
-        public static string add3 {
-            get {
-                return ResourceManager.GetString("add3", resourceCulture);
+                return ResourceManager.GetString("CompleteBackup", resourceCulture);
             }
         }
         
@@ -102,6 +84,15 @@ namespace EasySave.LangResources {
         public static string delete {
             get {
                 return ResourceManager.GetString("delete", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à Differential.
+        /// </summary>
+        public static string DifferentialBackup {
+            get {
+                return ResourceManager.GetString("DifferentialBackup", resourceCulture);
             }
         }
         
@@ -120,6 +111,51 @@ namespace EasySave.LangResources {
         public static string execute {
             get {
                 return ResourceManager.GetString("execute", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à Job Name.
+        /// </summary>
+        public static string JobName {
+            get {
+                return ResourceManager.GetString("JobName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à Jobs Management.
+        /// </summary>
+        public static string JobsTitle {
+            get {
+                return ResourceManager.GetString("JobsTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à Source Path.
+        /// </summary>
+        public static string SourcePath {
+            get {
+                return ResourceManager.GetString("SourcePath", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à Target Path.
+        /// </summary>
+        public static string TargetPath {
+            get {
+                return ResourceManager.GetString("TargetPath", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à Validate.
+        /// </summary>
+        public static string Validate {
+            get {
+                return ResourceManager.GetString("Validate", resourceCulture);
             }
         }
     }

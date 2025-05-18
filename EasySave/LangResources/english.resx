@@ -117,13 +117,37 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="add" xml:space="preserve">
-    <value>add</value>
+  <data name="Add" xml:space="preserve">
+    <value>Add</value>
   </data>
-  <data name="delete" xml:space="preserve">
-    <value>delete</value>
+  <data name="CompleteBackup" xml:space="preserve">
+    <value>Complete</value>
   </data>
-  <data name="edit" xml:space="preserve">
-    <value>edit</value>
+  <data name="Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="DifferentialBackup" xml:space="preserve">
+    <value>Differential</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="Execute" xml:space="preserve">
+    <value>execute</value>
+  </data>
+  <data name="JobName" xml:space="preserve">
+    <value>Job Name</value>
+  </data>
+  <data name="JobsTitle" xml:space="preserve">
+    <value>Jobs Management</value>
+  </data>
+  <data name="SourcePath" xml:space="preserve">
+    <value>Source Path</value>
+  </data>
+  <data name="TargetPath" xml:space="preserve">
+    <value>Target Path</value>
+  </data>
+  <data name="Validate" xml:space="preserve">
+    <value>Validate</value>
   </data>
 </root>

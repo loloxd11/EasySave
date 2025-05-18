@@ -36,16 +36,14 @@
                     <DataGridTextColumn Header="État" Binding="{Binding Status}" Width="*"/>
                 </DataGrid.Columns>
             </DataGrid>
-
-            <StackPanel Margin="20">
-                <TextBlock Text="{Binding [add]}" FontSize="18" Margin="0,0,0,10"/>
-                <TextBlock Text="{Binding [edit]}" FontSize="18" Margin="0,0,0,10"/>
-                <TextBlock Text="{Binding [delete]}" FontSize="18" Margin="0,0,0,10"/>
-                <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
-                    <Button Content="FR" Width="60" Margin="0,0,10,0" Click="TestChangeLanguageToFrench"/>
-                    <Button Content="EN" Width="60" Click="TestChangeLanguageToEnglish"/>
-                </StackPanel>
-            </StackPanel>
+            <WrapPanel HorizontalAlignment="Center" Margin="0,10,0,0">
+                <Button Content="{Binding [Add]}" Click="AddBackupJob_Click" Margin="10" Padding="10,5" Background="#5cb85c" Foreground="White"/>
+                <Button Content="{Binding [Edit]}" Click="EditBackupJob_Click" Margin="10" Padding="10,5" Background="#0275d8" Foreground="White"/>
+                <Button Content="{Binding [Delete]}" Click="DeleteBackupJob_Click" Margin="10" Padding="10,5" Background="#d9534f" Foreground="White"/>
+                <Button Content="{Binding [Execute]}" Click="ExecuteBackupJob_Click" Margin="10" Padding="10,5" Background="#f0ad4e" Foreground="White"/>
+                <Button Content="FR" Width="60" Margin="0,0,10,0" Click="TestChangeLanguageToFrench"/>
+                <Button Content="EN" Width="60" Click="TestChangeLanguageToEnglish"/>
+            </WrapPanel>
         </StackPanel>
     </Grid>
 </Window>

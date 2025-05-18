@@ -1,8 +1,9 @@
-﻿using System.Collections.ObjectModel;
+﻿using EasySave.ViewModels;
+using EasySave.Views;
+using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using EasySave.ViewModels;
 
 namespace EasySave
 {
@@ -51,5 +52,34 @@ namespace EasySave
         {
             _viewModel.ChangeLanguage("french");
         }
+
+        private void AddBackupJob_Click(object sender, RoutedEventArgs e)
+        {
+            // Création et affichage de la vue Jobs
+            Frame jobsFrame = new Frame();
+            Jobs jobsPage = new Jobs();
+            jobsFrame.Content = jobsPage;
+
+            // Vous pouvez afficher cette page dans une fenêtre ou remplacer le contenu principal
+            // Par exemple:
+            Content = jobsFrame;
+        }
+        private void EditBackupJob_Click(object sender, RoutedEventArgs e)
+        {
+            // Logique pour éditer un job
+        }
+        private void DeleteBackupJob_Click(object sender, RoutedEventArgs e)
+        {
+            // Logique pour supprimer un job
+        }
+        private void ExecuteBackupJob_Click(object sender, RoutedEventArgs e)
+        {
+            // Logique pour exécuter un job
+        }
+        private void SettingsButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Logique pour ouvrir les paramètres
+        }
+
     }
 }
