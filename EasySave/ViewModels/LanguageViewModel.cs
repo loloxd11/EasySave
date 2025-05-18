@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Resources;
 using System.Threading;
 
-namespace EasySave.easysave.ViewModels
+namespace EasySave.ViewModels
 {
     // Singleton pour LanguageViewModel (partagé globalement)
     public class LanguageViewModel : INotifyPropertyChanged

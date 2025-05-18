@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using EasySave.Models;
 
-namespace EasySave.easysave.ViewModels
+namespace EasySave.ViewModels
 {
     // MainMenuViewModel n'est PAS un singleton, il est instancié par vue
     public class MainMenuViewModel : INotifyPropertyChanged

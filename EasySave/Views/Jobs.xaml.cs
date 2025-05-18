@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
-using EasySave.easysave.ViewModels;
+using EasySave.ViewModels;
+using WinForm = System.Windows.Forms;
 
 namespace EasySave.Views
 {
@@ -18,7 +19,26 @@ namespace EasySave.Views
             _viewModel = new JobsViewModel();
             DataContext = _viewModel; // Utiliser le ViewModel comme DataContext
         }
+        private void SelectSourceFolder_Click(object sender, RoutedEventArgs e)
+        {
+            WinForm.FolderBrowserDialog folderDialog = new WinForm.FolderBrowserDialog
+            { };
 
+            if (folderDialog.ShowDialog() == WinForm.DialogResult.OK)
+            {
+                _viewModel.SourcePath = folderDialog.SelectedPath;
+            }
+        }
+
+        private void SelectTargetFolder_Click(object sender, RoutedEventArgs e)
+        {
+            WinForm.FolderBrowserDialog folderDialog = new WinForm.FolderBrowserDialog { };
+
+            if (folderDialog.ShowDialog() == WinForm.DialogResult.OK)
+            {
+                _viewModel.TargetPath = folderDialog.SelectedPath;
+            }
+        }
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             // Logique pour valider le job
@@ -29,5 +49,6 @@ namespace EasySave.Views
             }
 
         }
+
     }
 }
