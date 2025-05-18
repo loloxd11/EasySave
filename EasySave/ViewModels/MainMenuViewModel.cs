@@ -5,9 +5,17 @@ using EasySave.Models;
 
 namespace EasySave.ViewModels
 {
-    // MainMenuViewModel n'est PAS un singleton, il est instancié par vue
+    /// <summary>
+    /// ViewModel for the main menu in the application.
+    /// This class is not a singleton; it is instantiated per view.
+    /// Implements INotifyPropertyChanged to support data binding and notify the UI of property changes.
+    /// </summary>
     public class MainMenuViewModel : INotifyPropertyChanged
     {
+        /// <summary>
+        /// Event triggered when a property value changes.
+        /// Used to notify the UI of updates to bound properties.
+        /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged(string name) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
@@ -29,7 +37,7 @@ namespace EasySave.ViewModels
             }
         }
 
-        // Job sélectionné pour l'édition ou la suppression
+        // Job sï¿½lectionnï¿½ pour l'ï¿½dition ou la suppression
         private BackupJob _selectedJob;
         public BackupJob SelectedJob
         {
@@ -41,6 +49,10 @@ namespace EasySave.ViewModels
             }
         }
 
+        /// <summary>
+        /// Constructor for MainMenuViewModel.
+        /// Initializes the LanguageViewModel property with the singleton instance.
+        /// </summary>
         public MainMenuViewModel()
         {
             LanguageViewModel = LanguageViewModel.Instance;
@@ -49,18 +61,17 @@ namespace EasySave.ViewModels
             // Initialiser la collection des jobs
             LoadBackupJobs();
         }
-
-        // Méthode pour récupérer la liste des jobs de sauvegarde et les afficher
+        // Mï¿½thode pour rï¿½cupï¿½rer la liste des jobs de sauvegarde et les afficher
         public void LoadBackupJobs()
         {
-            // Récupérer la liste des jobs depuis le BackupManager
+            // Rï¿½cupï¿½rer la liste des jobs depuis le BackupManager
             var jobs = _backupManager.ListBackups();
 
-            // Créer une ObservableCollection à partir de la liste
+            // Crï¿½er une ObservableCollection ï¿½ partir de la liste
             BackupJobs = new ObservableCollection<BackupJob>(jobs);
         }
 
-        // Méthode pour rafraîchir la liste des jobs (à appeler après ajout/suppression/modification)
+        // Mï¿½thode pour rafraï¿½chir la liste des jobs (ï¿½ appeler aprï¿½s ajout/suppression/modification)
         public void RefreshJobsList()
         {
             LoadBackupJobs();
