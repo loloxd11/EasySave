@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 
-namespace EasySave.easysave.ViewModels
+namespace EasySave.ViewModels
 {
     public class JobsViewModel : INotifyPropertyChanged
     {
