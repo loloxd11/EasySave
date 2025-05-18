@@ -1,20 +1,63 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using EasySave.Commands;
+using EasySave.Models;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
+using System.Windows.Input;
 
 namespace EasySave.easysave.ViewModels
 {
-    internal class JobsViewModel
+    public class JobsViewModel : INotifyPropertyChanged
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        // Utilise l'instance singleton de LanguageViewModel
+        public event PropertyChangedEventHandler? PropertyChanged;
         public LanguageViewModel LanguageViewModel { get; }
-        public JobsViewModel() {
+        private void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string name = "") =>
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+
+        private string jobName;
+        public string JobName
+        {
+            get => jobName;
+            set { jobName = value; OnPropertyChanged(); }
+        }
+
+        private string sourcePath;
+        public string SourcePath
+        {
+            get => sourcePath;
+            set { sourcePath = value; OnPropertyChanged(); }
+        }
+
+        private string targetPath;
+        public string TargetPath
+        {
+            get => targetPath;
+            set { targetPath = value; OnPropertyChanged(); }
+        }
+
+        public IEnumerable<BackupType> BackupTypes { get; } = Enum.GetValues(typeof(BackupType)).Cast<BackupType>();
+
+        private int selectedBackupType;
+        public int SelectedBackupType
+        {
+            get => selectedBackupType;
+            set
+            {
+                selectedBackupType = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public ICommand ValidateCommand { get; }
+
+        public JobsViewModel()
+        {
             LanguageViewModel = LanguageViewModel.Instance;
+            ValidateCommand = new RelayCommand(() =>
+            {
+                // Exécution du job ou autre
+                // messagebox qui affiche les valeurs entrer
+                System.Windows.MessageBox.Show($"Name: {JobName}\nSource: {SourcePath}\nTarget: {TargetPath}\nBackupType: {SelectedBackupType}", "Job Details",System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+            });
         }
     }
 }

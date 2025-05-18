@@ -1,48 +1,53 @@
 ﻿<Page x:Class="EasySave.Views.Jobs"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="{Binding [JobsTitle]}" Height="250" Width="400">
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="{Binding [JobsTitle]}" Height="250" Width="400">
+
     <Page.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
     </Page.Resources>
+
     <StackPanel Margin="20">
-        <!-- Placeholder pour NameTextBox -->
+
+        <!-- Name -->
         <Grid Margin="0,0,0,10">
-            <TextBox x:Name="NameBox" Height="30"/>
+            <TextBox Text="{Binding JobName, UpdateSourceTrigger=PropertyChanged}" Height="30"/>
             <TextBlock Text="{Binding [JobName]}"
                        Foreground="Gray"
                        Margin="10,0,262,0"
                        VerticalAlignment="Center"
                        IsHitTestVisible="False"
-                       Visibility="{Binding Text.IsEmpty, ElementName=NameBox, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                       Visibility="{Binding JobName, Converter={StaticResource BoolToVisibilityConverter}}"/>
         </Grid>
 
-        <!-- Placeholder pour SourceBox -->
+        <!-- Source -->
         <Grid Margin="0,0,0,10">
-            <TextBox x:Name="SourceBox"/>
+            <TextBox Text="{Binding SourcePath, UpdateSourceTrigger=PropertyChanged}"/>
             <TextBlock Text="{Binding [SourcePath]}"
                        Foreground="Gray"
                        Margin="8,0,0,0"
                        VerticalAlignment="Center"
                        IsHitTestVisible="False"
-                       Visibility="{Binding Text.IsEmpty, ElementName=SourceBox, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                       Visibility="{Binding SourcePath, Converter={StaticResource BoolToVisibilityConverter}}"/>
         </Grid>
 
-        <!-- Placeholder pour TargetBox -->
+        <!-- Target -->
         <Grid Margin="0,0,0,10">
-            <TextBox x:Name="TargetBox"/>
+            <TextBox Text="{Binding TargetPath, UpdateSourceTrigger=PropertyChanged}"/>
             <TextBlock Text="{Binding [TargetPath]}"
                        Foreground="Gray"
                        Margin="8,0,0,0"
                        VerticalAlignment="Center"
                        IsHitTestVisible="False"
-                       Visibility="{Binding Text.IsEmpty, ElementName=TargetBox, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                       Visibility="{Binding TargetPath, Converter={StaticResource BoolToVisibilityConverter}}"/>
         </Grid>
 
-        <ComboBox x:Name="TypeBox" Margin="0,0,0,10">
-            <ComboBoxItem Content="{Binding [CompleteBackup]}" Tag="0"/>
-            <ComboBoxItem Content="{Binding [DifferentialBackup]}" Tag="1"/>
-        </ComboBox>
-        <Button Content="{Binding [Validate]}" Click="Validate_Click"/>
+        <ComboBox ItemsSource="{Binding BackupTypes}"
+          SelectedItem="{Binding SelectedBackupType}"
+          DisplayMemberPath="."
+          Margin="0,0,0,10" />
+
+
+        <Button Content="{Binding [Validate]}" Command="{Binding ValidateCommand}" Height="18" Click="Button_Click"/>
     </StackPanel>
 </Page>
