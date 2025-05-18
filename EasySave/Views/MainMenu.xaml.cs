@@ -10,15 +10,15 @@ namespace EasySave
     public partial class MainWindow : Window
     {
         // Un seul ViewModel principal
-        private MainMenuViewModel _viewModel = new MainMenuViewModel();
-        private bool isLanguagePanelVisible = false;
+        private MainMenuViewModel _viewModel;
 
         public static object SharedLanguageViewModel { get; internal set; }
 
         public MainWindow()
         {
             InitializeComponent();
-            DataContext = _viewModel.LanguageViewModel;
+            _viewModel = new MainMenuViewModel();
+            DataContext = _viewModel;
         }
 
         private void TestChangeLanguageToEnglish(object sender, RoutedEventArgs e)

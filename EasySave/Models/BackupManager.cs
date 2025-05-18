@@ -10,26 +10,26 @@ namespace EasySave.Models
 {
     public class BackupManager
     {
-        private static BackupManager instance;
+        private static BackupManager _instance;
         private List<BackupJob> backupJobs;
-        private Lazy<StateManager> lazyConfigManager;
-        private ConfigManager configManager;
+        private static ConfigManager _configManager;
         private readonly object lockObject = new object();
 
         private BackupManager()
         {
             backupJobs = new List<BackupJob>();
-            lazyConfigManager = new Lazy<StateManager>(() => StateManager.GetInstance());
-            configManager = ConfigManager.GetInstance();
+
         }
 
         public static BackupManager GetInstance()
         {
-            if (instance == null)
+            if (_instance == null)
             {
-                instance = new BackupManager();
+                _instance = new BackupManager();
+                _configManager = ConfigManager.GetInstance();
+                _configManager.LoadConfiguration(); // Load configuration on instance creation
             }
-            return instance;
+            return _instance;
         }
 
         public bool AddBackupJob(string name, string source, string target, BackupType type)
@@ -108,10 +108,7 @@ namespace EasySave.Models
 
         public List<BackupJob> ListBackups()
         {
-            lock (lockObject)
-            {
-                return new List<BackupJob>(backupJobs);
-            }
+                return backupJobs;
         }
 
         public void ExecuteBackupJob(List<int> backupIndices, string order)
@@ -155,9 +152,8 @@ namespace EasySave.Models
             {
                 Settings = new
                 {
-                    Language = configManager.GetSetting("Language"),
-                    MaxBackupJobs = configManager.GetSetting("MaxBackupJobs"),
-                    LogFormat = configManager.GetSetting("LogFormat")
+                    Language = _configManager.GetSetting("Language"),
+                    LogFormat = _configManager.GetSetting("LogFormat")
                 },
                 BackupJobs = backupJobs.ConvertAll(job => new
                 {
