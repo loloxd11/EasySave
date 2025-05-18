@@ -18,7 +18,7 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <TextBox Grid.Column="0" Text="{Binding SourcePath, UpdateSourceTrigger=PropertyChanged}" Height="30"/>
+            <TextBox Grid.Column="0" Text="{Binding SourcePath, UpdateSourceTrigger=PropertyChanged}" Height="30" IsReadOnly="True"/>
             <Button Grid.Column="1" Content="..." Width="30" Margin="5,0,0,0" Click="SelectSourceFolder_Click"/>
         </Grid>
 
@@ -29,7 +29,7 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <TextBox Grid.Column="0" Text="{Binding TargetPath, UpdateSourceTrigger=PropertyChanged}" Height="30"/>
+            <TextBox Grid.Column="0" Text="{Binding TargetPath, UpdateSourceTrigger=PropertyChanged}" Height="30" IsReadOnly="True"/>
             <Button Grid.Column="1" Content="..." Width="30" Margin="5,0,0,0" Click="SelectTargetFolder_Click"/>
         </Grid>
 
@@ -55,6 +55,10 @@
                 </DataTemplate>
             </ComboBox.ItemTemplate>
         </ComboBox>
-        <Button Content="{Binding LanguageViewModel[Validate]}" Command="{Binding ValidateCommand}" Height="18"/>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
+            <Button Content="{Binding LanguageViewModel[Validate]}" Command="{Binding ValidateCommand}" Width="100" Height="30" Margin="0,0,10,0"/>
+            <Button Content="{Binding LanguageViewModel[Cancel]}" Command="{Binding CancelCommand}" Width="100" Height="30"/>
+        </StackPanel>
+
     </StackPanel>
 </Page>

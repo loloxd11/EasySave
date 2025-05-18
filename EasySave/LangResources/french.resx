@@ -120,6 +120,9 @@
   <data name="Add" xml:space="preserve">
     <value>Ajouter</value>
   </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Annuler</value>
+  </data>
   <data name="CompleteBackup" xml:space="preserve">
     <value>Complète</value>
   </data>
