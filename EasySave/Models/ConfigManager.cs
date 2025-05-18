@@ -4,13 +4,14 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace EasySave.Models
 {
     public class ConfigManager
     {
-        private static Lazy<ConfigManager> lazyInstance = new Lazy<ConfigManager>(() => new ConfigManager());
+        private static ConfigManager _instance;
         private string configFilePath;
         private Dictionary<string, string> settings;
         private ConfigDataWithJobs configData;
@@ -24,7 +25,7 @@ namespace EasySave.Models
             {
                 public string Name { get; set; }
                 public string Source { get; set; }
-                public string Target { get; set; }
+                public string Destination { get; set; }
                 public BackupType Type { get; set; }
             }
         }
@@ -35,12 +36,15 @@ namespace EasySave.Models
             configFilePath = Path.Combine(appDataPath, "EasySave", "config.json");
             settings = new Dictionary<string, string>();
             configData = new ConfigDataWithJobs();
-            LoadConfiguration();
         }
 
         public static ConfigManager GetInstance()
         {
-            return lazyInstance.Value;
+            if (_instance == null)
+            {
+                _instance = new ConfigManager();
+            }
+            return _instance;
         }
 
         public bool LoadConfiguration()
@@ -50,9 +54,16 @@ namespace EasySave.Models
                 if (File.Exists(configFilePath))
                 {
                     string json = File.ReadAllText(configFilePath);
-                    configData = JsonSerializer.Deserialize<ConfigDataWithJobs>(json)
-                        ?? new ConfigDataWithJobs();
+                    JsonSerializerOptions options = new JsonSerializerOptions
+                    {
+                        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, allowIntegerValues: false) }
+                    };
+                    configData = JsonSerializer.Deserialize<ConfigDataWithJobs>(json, options) ?? new ConfigDataWithJobs();
                     settings = configData.Settings;
+
+                    Console.WriteLine(configData.BackupJobs.Count + " backup jobs loaded.");
+
+
 
                     LoadBackupJobs();
                     LoadLogFormat();
@@ -71,11 +82,30 @@ namespace EasySave.Models
 
         public void LoadBackupJobs()
         {
-            // Logic to load backup jobs from configuration
-            // This would typically interact with the BackupManager
+            // Récupérer l'instance du BackupManager
             BackupManager manager = BackupManager.GetInstance();
 
-            // Implementation would create backup jobs based on configData.BackupJobs
+            // Vérifier si des jobs de sauvegarde existent dans la configuration
+            if (configData.BackupJobs != null && configData.BackupJobs.Count > 0)
+            {
+                // Parcourir chaque tâche de sauvegarde dans la configuration
+                foreach (var jobConfig in configData.BackupJobs)
+                {
+                    // Vérifier que les données nécessaires sont présentes
+                    if (!string.IsNullOrEmpty(jobConfig.Name) &&
+                        !string.IsNullOrEmpty(jobConfig.Source) &&
+                        !string.IsNullOrEmpty(jobConfig.Destination))
+                    {
+                        // Ajouter la tâche au BackupManager
+                        manager.AddBackupJob(
+                            jobConfig.Name,
+                            jobConfig.Source,
+                            jobConfig.Destination,
+                            jobConfig.Type
+                        );
+                    }
+                }
+            }
         }
 
         public void LoadLogFormat()
@@ -114,12 +144,12 @@ namespace EasySave.Models
 
         public string GetSetting(string key)
         {
-            if (settings.TryGetValue(key, out string value))
+            if (settings[key] != null)
             {
-                return value;
+                return settings[key];
             }
 
-            return null;
+            return null!;
         }
 
         public void SetSetting(string key, string value)
