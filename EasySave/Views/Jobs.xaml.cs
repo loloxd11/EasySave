@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
-using EasySave.ViewModels;
+// Assurez-vous que le namespace correspond au chemin correct du ViewModel
+using EasySave.easysave.ViewModels;
 
 namespace EasySave.Views
 {
