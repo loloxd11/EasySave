@@ -13,6 +13,9 @@ namespace EasySave.easysave.ViewModels
         private void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string name = "") =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
+        // instance de BackupManager
+        private BackupManager backupManager = BackupManager.GetInstance();
+
         private string jobName;
         public string JobName
         {
@@ -36,15 +39,11 @@ namespace EasySave.easysave.ViewModels
 
         public IEnumerable<BackupType> BackupTypes { get; } = Enum.GetValues(typeof(BackupType)).Cast<BackupType>();
 
-        private int selectedBackupType;
-        public int SelectedBackupType
+        private BackupType selectedBackupType;
+        public BackupType SelectedBackupType
         {
             get => selectedBackupType;
-            set
-            {
-                selectedBackupType = value;
-                OnPropertyChanged();
-            }
+            set { selectedBackupType = value; OnPropertyChanged(); }
         }
 
         public ICommand ValidateCommand { get; }
@@ -57,6 +56,7 @@ namespace EasySave.easysave.ViewModels
                 // Exécution du job ou autre
                 // messagebox qui affiche les valeurs entrer
                 System.Windows.MessageBox.Show($"Name: {JobName}\nSource: {SourcePath}\nTarget: {TargetPath}\nBackupType: {SelectedBackupType}", "Job Details",System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+                backupManager.AddBackupJob(JobName, SourcePath, TargetPath, SelectedBackupType);
             });
         }
     }

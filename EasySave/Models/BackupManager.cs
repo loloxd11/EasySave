@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace EasySave.Models
 {
@@ -148,8 +150,37 @@ namespace EasySave.Models
 
         private void SaveBackupJobsToConfig()
         {
-            // Logic to save backup jobs to configuration file
-            configManager.SaveConfiguration();
+            // Prepare configuration data
+            var configData = new
+            {
+                Settings = new
+                {
+                    Language = configManager.GetSetting("Language"),
+                    MaxBackupJobs = configManager.GetSetting("MaxBackupJobs"),
+                    LogFormat = configManager.GetSetting("LogFormat")
+                },
+                BackupJobs = backupJobs.ConvertAll(job => new
+                {
+                    Name = job.Name,
+                    SourcePath = job.Source,
+                    TargetPath = job.Destination,
+                    Type = job.Type.ToString()
+                })
+            };
+
+            // Serialize data to JSON
+            string json = System.Text.Json.JsonSerializer.Serialize(configData, new System.Text.Json.JsonSerializerOptions
+            {
+                WriteIndented = true
+            });
+
+            // Define the configuration file path
+            string configFilePath = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "EasySave", "config.json");
+
+            // Write data to the file
+            File.WriteAllText(configFilePath, json);
         }
 
         public void AddToStateObserver(IStateObserver observer)

@@ -40,7 +40,9 @@ namespace EasySave.Models
         {
             if (instance == null)
             {
-                string defaultPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "state.json");
+                string defaultPath = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                    "EasySave", "state.json");
                 instance = new StateManager(defaultPath);
             }
             return instance;

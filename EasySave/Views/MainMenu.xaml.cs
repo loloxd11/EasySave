@@ -21,8 +21,6 @@ namespace EasySave
             DataContext = _viewModel.LanguageViewModel;
         }
 
-
-
         private void TestChangeLanguageToEnglish(object sender, RoutedEventArgs e)
         {
             _viewModel.LanguageViewModel.ChangeLanguage("english");
