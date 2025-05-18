@@ -9,13 +9,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="LogLibrary">
-      <HintPath>..\ClassLibraryProjects\LogLibrary\bin\Release\net8.0\LogLibrary.dll</HintPath>
-    </Reference>
+    <Folder Include="easysave\" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="easysave\" />
+    <Reference Include="LogLibrary">
+      <HintPath>..\ClassLibraryProjects\LogLibrary\obj\Release\net8.0\LogLibrary.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>
