@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
-// Assurez-vous que le namespace correspond au chemin correct du ViewModel
 using EasySave.easysave.ViewModels;
 
 namespace EasySave.Views
@@ -11,20 +10,18 @@ namespace EasySave.Views
     /// </summary>
     public partial class Jobs : Page
     {
-        private readonly MainMenuViewModel _viewModel;
+        private JobsViewModel _viewModel = new JobsViewModel();
 
         public Jobs()
         {
             InitializeComponent();
-
-            // Utiliser le même système de localisation que dans MainMenu
-            _viewModel = new MainMenuViewModel();
-            DataContext = _viewModel; // Fix: Ensure 'DataContext' is accessible by inheriting from 'FrameworkElement' or 'Page'.
+            // Utilise JobsViewModel comme DataContext
+            DataContext = _viewModel.LanguageViewModel;
         }
 
         private void Validate_Click(object sender, RoutedEventArgs e)
         {
-            // Logiq
+            // Utilisez _viewModel pour la logique liée aux jobs
         }
     }
 }
