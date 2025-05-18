@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <Folder Include="Commands\" />
+    <Folder Include="Converters\" />
   </ItemGroup>
 
   <ItemGroup>

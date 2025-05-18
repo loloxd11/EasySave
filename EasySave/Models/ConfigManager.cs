@@ -31,7 +31,8 @@ namespace EasySave.Models
 
         private ConfigManager()
         {
-            configFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.json");
+            string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            configFilePath = Path.Combine(appDataPath, "EasySave", "config.json");
             settings = new Dictionary<string, string>();
             configData = new ConfigDataWithJobs();
             LoadConfiguration();
