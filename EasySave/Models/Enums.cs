@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 
 namespace EasySave.Models
 {
-    #region Enums
     public enum BackupType
     {
         Complete,
@@ -26,5 +25,4 @@ namespace EasySave.Models
         JSON,
         XML
     }
-    #endregion
- }
+}

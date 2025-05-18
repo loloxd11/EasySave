@@ -15,13 +15,13 @@ namespace EasySave.Views
         public Jobs()
         {
             InitializeComponent();
-            // Utilise JobsViewModel comme DataContext
-            DataContext = _viewModel.LanguageViewModel;
+            _viewModel = new JobsViewModel();
+            DataContext = _viewModel; // Utilisez directement le ViewModel comme DataContext
         }
 
-        private void Validate_Click(object sender, RoutedEventArgs e)
+        private void Button_Click(object sender, RoutedEventArgs e)
         {
-            // Utilisez _viewModel pour la logique liée aux jobs
+
         }
     }
 }

@@ -9,7 +9,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="easysave\" />
+    <Compile Remove="easysave\**" />
+    <EmbeddedResource Remove="easysave\**" />
+    <None Remove="easysave\**" />
+    <Page Remove="easysave\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Commands\" />
   </ItemGroup>
 
   <ItemGroup>
