@@ -158,8 +158,8 @@ namespace EasySave.Models
                 BackupJobs = backupJobs.ConvertAll(job => new
                 {
                     Name = job.Name,
-                    SourcePath = job.Source,
-                    TargetPath = job.Destination,
+                    Source = job.Source,
+                    Destination = job.Destination,
                     Type = job.Type.ToString()
                 })
             };
