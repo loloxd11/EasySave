@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -13,6 +14,7 @@ namespace EasySave.Models
         private string destinationFile;
         private int totalFiles;
         private int remainFiles;
+        private BackupType backupType = BackupType.Complete;
 
         public override bool Execute(string name, string sourcePath, string targetPath, string order)
         {
@@ -26,10 +28,10 @@ namespace EasySave.Models
                 totalFiles = CalculateTotalFiles(sourcePath);
                 totalSize = CalculateTotalSize(sourcePath);
                 remainFiles = totalFiles;
-                progression = 0;
+                currentProgress = 0;
 
                 // Notify observers
-                NotifyObserver("start", name, sourcePath, targetPath, totalSize, 0, 0);
+                NotifyObserver("start", name, state, sourcePath, targetPath, totalFiles, totalSize,0, 0, 0);
 
                 // Get all files from source directory
                 List<string> files = ScanDirectory(sourcePath);
@@ -63,7 +65,6 @@ namespace EasySave.Models
                     // Update current file
                     currentFile = sourceFile;
                     destinationFile = destFile;
-                    UpdateCurrentFile(sourceFile, destFile);
 
                     // Copy file
                     long fileSize = GetFileSize(sourceFile);
@@ -84,20 +85,25 @@ namespace EasySave.Models
 
                     // Update progress
                     remainFiles--;
-                    progression = totalFiles - remainFiles;
+                    currentProgress = totalFiles - remainFiles;
 
-                    // Notify observers
-                    NotifyObserver("transfer", name, sourceFile, destFile, fileSize, transferTime, encryptionTime);
+                    // Notifier les observateurs après chaque fichier copié pour mettre à jour la progression en temps réel
+                    NotifyObserver(BackupActions.Processing, name, state, sourceFile, destinationFile, totalFiles, totalSize, transferTime, 0, currentProgress);
                 }
 
                 state = JobState.completed;
-                NotifyObserver("complete", name, sourcePath, targetPath, totalSize, 0, 0);
+                NotifyObserver("complete", name, state, sourcePath, targetPath, totalFiles, totalSize, 0, 0, 0);
                 return true;
             }
             catch (Exception ex)
             {
                 state = JobState.error;
-                NotifyObserver("error", name, sourcePath, targetPath, 0, 0, 0);
+                System.Windows.MessageBox.Show(
+                ex.Message,
+                "Erreur de sauvegarde",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Warning);
+                NotifyObserver("error", name, state, sourcePath, targetPath, totalFiles, totalSize, 0, 0, 0);
                 Console.WriteLine($"Error executing complete backup: {ex.Message}");
                 return false;
             }

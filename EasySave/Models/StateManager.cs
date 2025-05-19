@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using EasySave.Views;
 
 namespace EasySave.Models
 {
@@ -132,6 +133,8 @@ namespace EasySave.Models
         {
             lock (lockObject)
             {
+                Console.WriteLine($"Received update: action={action}, name={name}, progression={progression}");
+
                 if (action == "start")
                 {
                     InitializeJobState(name, type, state, sourcePath, targetPath, totalFiles, totalSize, progression);
@@ -140,15 +143,19 @@ namespace EasySave.Models
                 {
                     FinalizeJobState(name, type, state, sourcePath, targetPath, totalFiles, totalSize, progression);
                 }
+                else if (action == "transfer" || action == "processing")  // Assurez-vous que "transfer" est bien traité
+                {
+                    UpdateJobState(name, type, state, sourcePath, targetPath, totalFiles, totalSize, progression);
+                }
                 else
                 {
                     UpdateJobState(name, type, state, sourcePath, targetPath, totalFiles, totalSize, progression);
                 }
 
-                NotifyObservers();
+                 NotifyObservers();
             }
         }
-
+        
         /// <summary>
         /// Updates the state of an existing job.
         /// </summary>
@@ -169,11 +176,17 @@ namespace EasySave.Models
             jobState.State = state;
             jobState.SourcePath = sourcePath;
             jobState.TargetPath = targetPath;
-            jobState.TotalFiles = totalFiles;
-            jobState.TotalSize = totalSize;
 
-            // Calculate progression in percent (0-100)
-            jobState.Progression = totalFiles > 0 ? (int)Math.Round(((double)progression / totalFiles) * 100) : 0;
+            // Assurez-vous que TotalFiles soit toujours initialisé avec la valeur correcte
+            // et ne change pas pendant l'exécution
+            if (jobState.TotalFiles == 0 && totalFiles > 0)
+            {
+                jobState.TotalFiles = totalFiles;
+            }
+
+            jobState.TotalSize = totalSize;
+            // Calculer la progression en pourcentage
+            jobState.Progression = (int)Math.Min(100, Math.Round((double)progression / jobState.TotalFiles * 100));
 
             SaveStateFile();
         }
@@ -217,7 +230,7 @@ namespace EasySave.Models
         /// <param name="totalSize">Total size.</param>
         /// <param name="progression">Progression value.</param>
         public void FinalizeJobState(string name, BackupType type, JobState state,
-            string sourcePath, string targetPath, int totalFiles, long totalSize, int progression)
+    string sourcePath, string targetPath, int totalFiles, long totalSize, int progression)
         {
             JobStateInfo jobState = GetOrCreateJobState(name);
 
@@ -225,13 +238,28 @@ namespace EasySave.Models
             jobState.State = state;
             jobState.SourcePath = sourcePath;
             jobState.TargetPath = targetPath;
-            jobState.TotalFiles = totalFiles;
+
+            // Ne pas modifier TotalFiles lors de la finalisation
+            if (jobState.TotalFiles == 0 && totalFiles > 0)
+            {
+                jobState.TotalFiles = totalFiles;
+            }
+
             jobState.TotalSize = totalSize;
 
-            // If completed successfully, set progression to 100%
-            jobState.Progression = state == JobState.completed ? 100 :
-                totalFiles > 0 ? (int)Math.Round(((double)progression / totalFiles) * 100) : 0;
+            // Pour un job complété, aucun fichier ne reste à traiter
+            if (state == JobState.completed)
+            {
+                jobState.Progression = 100;
+            }
+            else
+            {
 
+                // Calculer la progression en pourcentage
+                jobState.Progression = jobState.TotalFiles > 0
+                    ? (int)Math.Min(100, Math.Round((double)progression / jobState.TotalFiles * 100))
+                    : 0;
+            }
             SaveStateFile();
         }
 

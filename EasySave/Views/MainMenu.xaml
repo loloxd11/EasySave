@@ -59,6 +59,20 @@
                     <DataGridTextColumn Header="{Binding LanguageViewModel[TargetPath]}" Binding="{Binding Destination}" Width="2*"/>
                     <DataGridTextColumn Header="{Binding LanguageViewModel[BackupType]}" Binding="{Binding Type}" Width="*"/>
                     <DataGridTextColumn Header="{Binding LanguageViewModel[Status]}" Binding="{Binding State}" Width="*"/>
+                    <DataGridTemplateColumn Header="{Binding LanguageViewModel[Progress]}" Width="*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <ProgressBar Value="{Binding Progress}" Maximum="100" 
+                                        Height="18" Margin="2"/>
+                                    <TextBlock Text="{Binding Progress, StringFormat={}{0}%}" 
+                                       HorizontalAlignment="Center" 
+                                       VerticalAlignment="Center"
+                                       FontWeight="SemiBold"/>
+                                </Grid>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
                 </DataGrid.Columns>
             </DataGrid>
             

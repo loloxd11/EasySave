@@ -195,6 +195,9 @@
   <data name="Validate" xml:space="preserve">
     <value>Validate</value>
   </data>
+  <data name="Progress" xml:space="preserve">
+    <value>Progress</value>
+  </data>
   <data name="LogFormat" xml:space="preserve">
     <value>Log Format</value>
   </data>

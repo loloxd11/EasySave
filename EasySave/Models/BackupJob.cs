@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -7,10 +8,7 @@ using System.Threading.Tasks;
 
 namespace EasySave.Models
 {
-    /// <summary>
-    /// Represents a backup job with its configuration and execution logic.
-    /// </summary>
-    public class BackupJob
+    public class BackupJob : INotifyPropertyChanged
     {
         // Name of the backup job
         private string name;
@@ -22,6 +20,15 @@ namespace EasySave.Models
         private BackupType type;
         // Strategy used to execute the backup
         private AbstractBackupStrategy backupStrategy;
+        private JobState _state = JobState.inactive;
+        private int _progress = 0;
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BackupJob"/> class.
@@ -70,5 +77,31 @@ namespace EasySave.Models
         /// Gets the type of backup.
         /// </summary>
         public BackupType Type => type;
+
+        public JobState State
+        {
+            get => _state;
+            set
+            {
+                if (_state != value)
+                {
+                    _state = value;
+                    OnPropertyChanged(nameof(State));
+                }
+            }
+        }
+
+        public int Progress
+        {
+            get => _progress;
+            set
+            {
+                if (_progress != value)
+                {
+                    _progress = value;
+                    OnPropertyChanged(nameof(Progress));
+                }
+            }
+        }
     }
 }

@@ -25,5 +25,6 @@ namespace EasySave.Models
         /// <param name="progression">The progression percentage of the backup job.</param>
         void Update(string action, string name, BackupType type, JobState state,
             string sourcePath, string targetPath, int totalFiles, long totalSize, int progression);
+
     }
 }
