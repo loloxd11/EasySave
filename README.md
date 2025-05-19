@@ -52,7 +52,12 @@ La version 1.1 apporte des améliorations à l’application console. Elle intro
 L’interface console est maintenue et continue d’être supportée.
 
 ---
+## Version 2.O
+La version 2.0 d’EasySave introduit une interface graphique WPF  afin de faciliter l’utilisation du logiciel. Contrairement à la version précédente, il n’y a plus de limite sur le nombre de travaux de sauvegarde pouvant être créés. Le chiffrement des fichiers est désormais possible.
+Le journal (log) a été enrichi pour inclure le temps de cryptage de chaque fichier, avec des valeurs indiquant s’il y a eu cryptage, le temps que cela a pris ou un éventuel code d’erreur. Le logiciel est désormais capable de détecter l’exécution d’un logiciel métier (comme la calculatrice), ce qui bloque les sauvegardes, termine proprement le fichier en cours de traitement et consigne l’événement dans le log.
+Le support du multilingue (français/anglais) est maintenu. Le fichier d’état, utile pour suivre en temps réel l’avancement d’une sauvegarde, est toujours présent. Le logiciel peut être exécuté en mode mono ou séquentiel selon les préférences de l’utilisateur.
 
+---
 ## Une tâche de sauvegarde est définie par :
 
 - Un nom
