@@ -31,11 +31,39 @@
 
         <!-- Main area -->
         <StackPanel Grid.Row="2" Orientation="Vertical" Margin="20">
-            <DataGrid x:Name="BackupJobsGrid" ItemsSource="{Binding BackupJobs}" 
-              AutoGenerateColumns="False" Height="300" Margin="0,0,0,20"
-              CanUserAddRows="False" IsReadOnly="True" SelectionMode="Single" 
-              SelectedItem="{Binding SelectedJob, Mode=TwoWay}">
+            <!-- Case à cocher "Tout sélectionner" -->
+            <CheckBox Content="{Binding LanguageViewModel[SelectAll]}" 
+               IsChecked="{Binding AreAllJobsSelected, Mode=TwoWay}"
+               Margin="0,0,0,10" 
+               FontWeight="Bold"/>
+
+            <!-- DataGrid avec cases à cocher individuelles -->
+            <DataGrid x:Name="BackupJobsGrid" 
+               ItemsSource="{Binding BackupJobs}" 
+               AutoGenerateColumns="False" 
+               Height="300" 
+               Margin="0,0,0,20"
+               CanUserAddRows="False" 
+               IsReadOnly="True" 
+               SelectionMode="Extended" 
+               SelectedItem="{Binding SelectedJob, Mode=TwoWay}">
                 <DataGrid.Columns>
+                    <!-- Colonne avec cases à cocher -->
+                    <DataGridTemplateColumn Width="40">
+                        <DataGridTemplateColumn.Header>
+                            <TextBlock Text="✓" FontWeight="Bold" HorizontalAlignment="Center"/>
+                        </DataGridTemplateColumn.Header>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                          HorizontalAlignment="Center"
+                                          Checked="JobCheckBox_Checked" 
+                                          Unchecked="JobCheckBox_Unchecked"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <!-- Colonnes existantes -->
                     <DataGridTextColumn Header="{Binding LanguageViewModel[JobName]}" Binding="{Binding Name}" Width="*"/>
                     <DataGridTextColumn Header="{Binding LanguageViewModel[SourcePath]}" Binding="{Binding Source}" Width="2*"/>
                     <DataGridTextColumn Header="{Binding LanguageViewModel[TargetPath]}" Binding="{Binding Destination}" Width="2*"/>
@@ -43,6 +71,7 @@
                     <DataGridTextColumn Header="{Binding LanguageViewModel[Status]}" Binding="{Binding State}" Width="*"/>
                 </DataGrid.Columns>
             </DataGrid>
+            
             <!-- Le reste du code reste inchangé -->
             <WrapPanel HorizontalAlignment="Center" Margin="0,10,0,0">
                 <Button Content="{Binding LanguageViewModel[Add]}" Click="AddBackupJob_Click" Margin="10" Padding="10,5" Background="#5cb85c" Foreground="White"/>
