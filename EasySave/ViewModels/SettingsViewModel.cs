@@ -403,7 +403,7 @@ namespace EasySave.ViewModels
         public void SaveEncryptedExtensions()
         {
             string extensionsStr = string.Join(",", EncryptedExtensions);
-            //_configManager.SetSetting("EncryptedExtensions", extensionsStr);
+            _configManager.SetSetting("EncryptedExtensions", extensionsStr);
         }
 
         /// <summary>
@@ -420,7 +420,7 @@ namespace EasySave.ViewModels
         /// </summary>
         public void SaveEncryptionPassphrase()
         {
-            //_configManager.SetSetting("EncryptionPassphrase", EncryptionPassphrase ?? string.Empty);
+            _configManager.SetSetting("EncryptionPassphrase", EncryptionPassphrase ?? string.Empty);
 
         }
 
@@ -429,8 +429,7 @@ namespace EasySave.ViewModels
         /// </summary>
         private void LoadPriorityProcess()
         {
-            //PriorityProcess = _configManager.GetSetting("PriorityProcess") ?? string.Empty;
-            PriorityProcess = string.Empty;
+            PriorityProcess = _configManager.GetSetting("PriorityProcess") ?? string.Empty;
         }
 
         /// <summary>
@@ -438,7 +437,7 @@ namespace EasySave.ViewModels
         /// </summary>
         public void SavePriorityProcess()
         {
-            //_configManager.SetSetting("PriorityProcess", PriorityProcess ?? string.Empty);
+            _configManager.SetSetting("PriorityProcess", PriorityProcess ?? string.Empty);
         }
 
         /// <summary>
@@ -464,10 +463,6 @@ namespace EasySave.ViewModels
         public void SaveLogFormat()
         {
             _configManager.SetSetting("LogFormat", SelectedLogFormat.ToString());
-
-            // Réinitialiser le singleton LogManager pour qu'il prenne en compte le nouveau format
-            // Cette ligne peut être facultative selon l'architecture
-            // LogManager.ResetInstance();
 
             _logManager.SetFormat(SelectedLogFormat);
 

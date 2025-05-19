@@ -26,24 +26,9 @@ namespace EasySave.Views
 
             // Abonnement à l'événement de navigation vers le menu principal
             _viewModel.NavigateToMainMenu += OnNavigateToMainMenu;
-            
+
             // Mettre à jour la PasswordBox avec la passphrase chargée du ViewModel
             Loaded += SettingsView_Loaded;
-            
-            // Reconfigurer la commande Save pour gérer la passphrase et autres paramètres
-            _viewModel.SaveCommand = new EasySave.Commands.RelayCommand(() => {
-                // Capturer la passphrase depuis la PasswordBox
-                _viewModel.EncryptionPassphrase = PassphraseBox.Password;
-                
-                // Sauvegarder les paramètres
-                _viewModel.SaveEncryptedExtensions();
-                _viewModel.SaveEncryptionPassphrase();
-                _viewModel.SavePriorityProcess();
-                _viewModel.SaveLogFormat(); // Sauvegarder le format de log
-                
-                // Naviguer vers le menu principal
-                //_viewModel.NavigateToMainMenu?.Invoke(this, EventArgs.Empty);
-            });
         }
 
         private void SettingsView_Loaded(object sender, RoutedEventArgs e)
