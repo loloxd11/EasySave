@@ -13,6 +13,7 @@ namespace EasySave.Models
         private string destinationFile;
         private int totalFiles;
         private int remainFiles;
+        private BackupType backupType = BackupType.Differential;
 
         public override bool Execute(string name, string sourcePath, string targetPath, string order)
         {
@@ -21,17 +22,39 @@ namespace EasySave.Models
 
             try
             {
-                // Calculate total files and size
-                totalFiles = CalculateTotalFiles(sourcePath);
+                // Obtenir tous les fichiers de la source
+                List<string> sourceFiles = ScanDirectory(sourcePath);
+                
+                // Calculer d'abord les fichiers qui devront être copiés
+                List<string> filesToCopy = new List<string>();
+                
+                foreach (string sourceFile in sourceFiles)
+                {
+                    string relativePath = sourceFile.Substring(sourcePath.Length);
+                    if (relativePath.StartsWith("\\") || relativePath.StartsWith("/"))
+                    {
+                        relativePath = relativePath.Substring(1);
+                    }
+                    string destFile = Path.Combine(targetPath, relativePath);
+                    
+                    // Vérifier si ce fichier doit être copié
+                    bool shouldCopy = !File.Exists(destFile) || 
+                                     File.GetLastWriteTime(sourceFile) > File.GetLastWriteTime(destFile);
+                    
+                    if (shouldCopy)
+                    {
+                        filesToCopy.Add(sourceFile);
+                    }
+                }
+                
+                // Calculate total files and size (seulement pour les fichiers à copier)
+                totalFiles = sourceFiles.Count; // Pour la progression totale, on garde tous les fichiers
                 totalSize = CalculateTotalSize(sourcePath);
                 remainFiles = totalFiles;
-                progression = 0;
+                currentProgress = 0;
 
                 // Notify observers
-                NotifyObserver("start", name, sourcePath, targetPath, totalSize, 0, 0);
-
-                // Get all files from source directory
-                List<string> files = ScanDirectory(sourcePath);
+                NotifyObserver(BackupActions.Start, name, state, sourcePath, targetPath, totalFiles, totalSize, 0, 0, 0);
 
                 // Create target directory if it doesn't exist
                 if (!Directory.Exists(targetPath))
@@ -39,8 +62,8 @@ namespace EasySave.Models
                     Directory.CreateDirectory(targetPath);
                 }
 
-                // Copy each file only if it's new or modified
-                foreach (string sourceFile in files)
+                // Traiter tous les fichiers pour la progression
+                foreach (string sourceFile in sourceFiles)
                 {
                     // Create relative path
                     string relativePath = sourceFile.Substring(sourcePath.Length);
@@ -68,7 +91,6 @@ namespace EasySave.Models
                         // Update current file
                         currentFile = sourceFile;
                         destinationFile = destFile;
-                        UpdateCurrentFile(sourceFile, destFile);
 
                         // Copy file
                         long fileSize = GetFileSize(sourceFile);
@@ -80,22 +102,22 @@ namespace EasySave.Models
                         long transferTime = endTime - startTime;
 
                         // Notify observers
-                        NotifyObserver("transfer", name, sourceFile, destFile, fileSize, transferTime, 0);
+                        NotifyObserver(BackupActions.Processing, name, state, sourceFile, destFile, totalFiles, totalSize, transferTime, 0, currentProgress);
                     }
 
-                    // Update progress
+                    // Update progress (une seule fois par fichier)
                     remainFiles--;
-                    progression = totalFiles - remainFiles;
+                    currentProgress = totalFiles - remainFiles;
                 }
 
                 state = JobState.completed;
-                NotifyObserver("complete", name, sourcePath, targetPath, totalSize, 0, 0);
+                NotifyObserver(BackupActions.Complete, name, state, sourcePath, targetPath, totalFiles, totalSize, 0, 0, totalFiles);
                 return true;
             }
             catch (Exception ex)
             {
                 state = JobState.error;
-                NotifyObserver("error", name, sourcePath, targetPath, 0, 0, 0);
+                NotifyObserver(BackupActions.Error, name, state, sourcePath, targetPath, totalFiles, totalSize, 0, 0, currentProgress);
                 Console.WriteLine($"Error executing differential backup: {ex.Message}");
                 return false;
             }

@@ -13,9 +13,20 @@ namespace EasySave.Models
         protected JobState state;
         protected int totalFiles;
         protected long totalSize;
-        protected int progression;
+        protected int currentProgress;
         protected long LastFileTime;
         protected string name;
+
+        // Constantes pour standardiser les valeurs d'action
+        public static class BackupActions
+        {
+            public const string Start = "start";
+            public const string Processing = "processing";
+            public const string Transfer = "transfer";
+            public const string Complete = "complete";
+            public const string Error = "error";
+            public const string Progress = "progress";
+        }
 
         public void AttachObserver(IObserver observer)
         {
@@ -25,27 +36,56 @@ namespace EasySave.Models
             }
         }
 
-        public void NotifyObserver(string action, string name, string sourcePath, string targetPath,
-            long fileSize, long transferTime, long encryptionTime)
+        /// <summary>
+        /// Méthode unifiée pour notifier tous les observateurs avec différents types de mises à jour
+        /// </summary>
+        /// <param name="action">Type d'action (start, processing, transfer, complete, error, progress)</param>
+        /// <param name="name">Nom du travail de sauvegarde</param>
+        /// <param name="sourcePath">Chemin source (peut être vide pour les mises à jour de progression)</param>
+        /// <param name="targetPath">Chemin cible (peut être vide pour les mises à jour de progression)</param>
+        /// <param name="fileSize">Taille du fichier (pour les transferts)</param>
+        /// <param name="transferTime">Temps de transfert (pour les transferts)</param>
+        /// <param name="encryptionTime">Temps de chiffrement (pour les transferts)</param>
+        /// <param name="currentProgress">Valeur de progression actuelle (optionnel, utilisé pour les mises à jour de progression)</param>
+        public void NotifyObserver(
+            string action,
+            string name,
+            JobState state, 
+            string sourcePath = "",
+            string targetPath = "",
+            int totalFiles = 0,
+            long totalSize = 0,
+            long transferTime = 0,
+            long encryptionTime = 0,
+            int currentProgress = 0)
         {
+
+            // Déterminer le type de sauvegarde en cours
+            BackupType backupType = this is CompleteBackupStrategy ? BackupType.Complete : BackupType.Differential;
+
+            // Les paramètres fileSize, transferTime et encryptionTime pourraient être ajoutés à l'interface IObserver
+            // si nécessaire, mais pour l'instant ils ne sont pas utilisés dans l'appel à Update
             foreach (var observer in observers)
             {
-                observer.Update(action, name, BackupType.Complete, state, sourcePath, targetPath,
-                    totalFiles, totalSize, progression);
+                observer.Update(action, name, backupType, state, sourcePath, targetPath,
+                    totalFiles, totalSize, currentProgress);
             }
         }
 
-        public void UpdateProgress(int files, long size)
+
+        /*public void UpdateProgress(int files, long size)
         {
             progression = files;
-            // Update logic
-        }
+            // Notifier les observateurs du changement de progression
+            NotifyObserver(BackupActions.Progress, name, currentProgress: files);
+        }*/
 
         public void UpdateCurrentFile(string source, string target)
         {
             // Update current file being processed
             LastFileTime = DateTime.Now.Ticks;
-            NotifyObserver("processing", name, source, target, 0, 0, 0);
+            // Utiliser les constantes standardisées et passer l'état correctement
+            NotifyObserver(BackupActions.Processing, name, state, source, target);
         }
 
         public abstract bool Execute(string name, string src, string dst, string order);

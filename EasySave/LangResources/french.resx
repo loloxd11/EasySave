@@ -195,6 +195,9 @@
   <data name="Validate" xml:space="preserve">
     <value>Valider</value>
   </data>
+  <data name="Progress" xml:space="preserve">
+    <value>Progression</value>
+  </data>
   <data name="DeleteJobConfirmation" xml:space="preserve">
     <value>Êtes-vous sure ? </value>
   </data>
