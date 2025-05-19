@@ -41,8 +41,11 @@ namespace EasySave.ViewModels
         /// </summary>
         private LanguageViewModel()
         {
+            // Set default language to English
             _currentLanguage = "english";
+            // Initialize ResourceManager with English resources
             _resourceManager = new ResourceManager("EasySave.LangResources.english", typeof(LanguageViewModel).Assembly);
+            // Set the current UI culture to English
             Thread.CurrentThread.CurrentUICulture = new CultureInfo("en");
         }
 
@@ -56,7 +59,9 @@ namespace EasySave.ViewModels
         {
             get
             {
+                // Retrieve the localized string for the given key
                 string value = _resourceManager.GetString(key, Thread.CurrentThread.CurrentUICulture);
+                // Return the value if found, otherwise return the key wrapped in exclamation marks
                 return value ?? $"!{key}!";
             }
         }
@@ -68,16 +73,21 @@ namespace EasySave.ViewModels
         /// <param name="culture">The culture identifier (e.g., "french", "english").</param>
         public void ChangeLanguage(string culture)
         {
+            // Switch the language based on the provided culture identifier
             switch (culture)
             {
                 case "french":
+                    // Set ResourceManager to French resources
                     _resourceManager = new ResourceManager("EasySave.LangResources.french", typeof(LanguageViewModel).Assembly);
+                    // Set the current UI culture to French
                     Thread.CurrentThread.CurrentUICulture = new CultureInfo("fr");
                     _currentLanguage = "french";
                     break;
                 case "english":
                 default:
+                    // Set ResourceManager to English resources
                     _resourceManager = new ResourceManager("EasySave.LangResources.english", typeof(LanguageViewModel).Assembly);
+                    // Set the current UI culture to English
                     Thread.CurrentThread.CurrentUICulture = new CultureInfo("en");
                     _currentLanguage = "english";
                     break;

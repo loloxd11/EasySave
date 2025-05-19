@@ -8,7 +8,6 @@
     </Page.Resources>
 
     <StackPanel Margin="18,20,20,-40">
-        <!-- Titre dynamique selon le mode -->
         <TextBlock FontSize="18" FontWeight="Bold" Margin="0,0,0,15" HorizontalAlignment="Center">
             <TextBlock.Style>
                 <Style TargetType="TextBlock">
@@ -24,13 +23,11 @@
             </TextBlock.Style>
         </TextBlock>
 
-        <!-- Name -->
         <Label Content="{Binding LanguageViewModel[JobName]}" Margin="0,0,0,5"/>
         <Grid Margin="0,0,0,10">
             <TextBox Text="{Binding JobName, UpdateSourceTrigger=PropertyChanged}" Height="30"/>
         </Grid>
 
-        <!-- Source -->
         <Label Content="{Binding LanguageViewModel[SourcePath]}" Margin="0,0,0,5"/>
         <Grid Margin="0,0,0,10">
             <Grid.ColumnDefinitions>
@@ -41,7 +38,6 @@
             <Button Grid.Column="1" Content="..." Width="30" Margin="5,0,0,0" Click="SelectSourceFolder_Click"/>
         </Grid>
 
-        <!-- Target -->
         <Label Content="{Binding LanguageViewModel[TargetPath]}" Margin="0,0,0,5"/>
         <Grid Margin="0,0,0,10">
             <Grid.ColumnDefinitions>
@@ -75,8 +71,7 @@
             </ComboBox.ItemTemplate>
         </ComboBox>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
-            <Button Content="{Binding IsEditMode, Converter={StaticResource ResourceKey=BoolToVisConverter}, ConverterParameter=Validate|Update}" 
-                    Command="{Binding ValidateCommand}" Width="100" Height="30" Margin="0,0,10,0">
+            <Button Command="{Binding ValidateCommand}" Width="100" Height="30" Margin="0,0,10,0">
                 <Button.Style>
                     <Style TargetType="Button">
                         <Style.Triggers>

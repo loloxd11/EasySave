@@ -7,11 +7,18 @@ using WinForm = System.Windows.Forms;
 
 namespace EasySave.Views
 {
+    /// <summary>
+    /// Interaction logic for Jobs page.
+    /// Handles creation and editing of backup jobs.
+    /// </summary>
     public partial class Jobs : Page
     {
         private JobsViewModel _viewModel;
 
-        // Constructeur standard pour l'ajout d'un nouveau job
+        /// <summary>
+        /// Default constructor for adding a new backup job.
+        /// Initializes the view model and sets up data binding.
+        /// </summary>
         public Jobs()
         {
             InitializeComponent();
@@ -20,7 +27,12 @@ namespace EasySave.Views
             _viewModel.NavigateToMainMenu += OnNavigateToMainMenu;
         }
 
-        // Constructeur pour l'édition d'un job existant
+        /// <summary>
+        /// Constructor for editing an existing backup job.
+        /// Initializes the view model with the job to edit and its index.
+        /// </summary>
+        /// <param name="jobToEdit">The backup job to edit.</param>
+        /// <param name="jobIndex">The index of the job in the list.</param>
         public Jobs(BackupJob jobToEdit, int jobIndex)
         {
             InitializeComponent();
@@ -29,6 +41,9 @@ namespace EasySave.Views
             _viewModel.NavigateToMainMenu += OnNavigateToMainMenu;
         }
 
+        /// <summary>
+        /// Handles navigation back to the main menu when requested by the view model.
+        /// </summary>
         private void OnNavigateToMainMenu(object sender, EventArgs e)
         {
             if (Window.GetWindow(this) is MainWindow mainWindow)
@@ -37,6 +52,10 @@ namespace EasySave.Views
             }
         }
 
+        /// <summary>
+        /// Opens a folder browser dialog for selecting the source folder.
+        /// Updates the view model with the selected path.
+        /// </summary>
         private void SelectSourceFolder_Click(object sender, RoutedEventArgs e)
         {
             WinForm.FolderBrowserDialog folderDialog = new WinForm.FolderBrowserDialog { };
@@ -46,6 +65,10 @@ namespace EasySave.Views
             }
         }
 
+        /// <summary>
+        /// Opens a folder browser dialog for selecting the target folder.
+        /// Updates the view model with the selected path.
+        /// </summary>
         private void SelectTargetFolder_Click(object sender, RoutedEventArgs e)
         {
             WinForm.FolderBrowserDialog folderDialog = new WinForm.FolderBrowserDialog { };

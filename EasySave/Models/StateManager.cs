@@ -9,29 +9,88 @@ using System.Threading.Tasks;
 
 namespace EasySave.Models
 {
+    /// <summary>
+    /// Manages the state of backup jobs, persists their state to a file, and notifies observers of state changes.
+    /// Implements the singleton pattern.
+    /// </summary>
     public class StateManager : IObserver
     {
+        /// <summary>
+        /// List of observers interested in state changes.
+        /// </summary>
         private List<IStateObserver> stateObservers;
+
+        /// <summary>
+        /// Singleton instance of StateManager.
+        /// </summary>
         private static StateManager instance;
+
+        /// <summary>
+        /// Path to the state file on disk.
+        /// </summary>
         private string stateFilePath;
+
+        /// <summary>
+        /// Dictionary holding the state information for each job, keyed by job name.
+        /// </summary>
         private Dictionary<string, JobStateInfo> stateData;
+
+        /// <summary>
+        /// Lock object for thread safety.
+        /// </summary>
         private readonly object lockObject = new object();
 
+        /// <summary>
+        /// Internal class representing the state information of a backup job.
+        /// </summary>
         private class JobStateInfo
         {
+            /// <summary>
+            /// Name of the backup job.
+            /// </summary>
             public string Name { get; set; }
+
+            /// <summary>
+            /// Type of backup (Complete or Differential).
+            /// </summary>
             public BackupType Type { get; set; }
 
+            /// <summary>
+            /// Current state of the job (inactive, active, completed, error).
+            /// </summary>
             [JsonConverter(typeof(JsonStringEnumConverter))]
             public JobState State { get; set; }
 
+            /// <summary>
+            /// Source path of the backup.
+            /// </summary>
             public string SourcePath { get; set; }
+
+            /// <summary>
+            /// Target path of the backup.
+            /// </summary>
             public string TargetPath { get; set; }
+
+            /// <summary>
+            /// Total number of files to backup.
+            /// </summary>
             public int TotalFiles { get; set; }
+
+            /// <summary>
+            /// Total size of files to backup.
+            /// </summary>
             public long TotalSize { get; set; }
-            public int Progression { get; set; } // En pourcentage (0-100)
+
+            /// <summary>
+            /// Progression of the backup in percent (0-100).
+            /// </summary>
+            public int Progression { get; set; } // In percentage (0-100)
         }
 
+        /// <summary>
+        /// Private constructor for singleton pattern.
+        /// </summary>
+        /// <param name="path">Path to the state file.</param>
         private StateManager(string path)
         {
             stateObservers = new List<IStateObserver>();
@@ -40,6 +99,10 @@ namespace EasySave.Models
             LoadStateFile();
         }
 
+        /// <summary>
+        /// Gets the singleton instance of StateManager.
+        /// </summary>
+        /// <returns>StateManager instance.</returns>
         public static StateManager GetInstance()
         {
             if (instance == null)
@@ -52,6 +115,18 @@ namespace EasySave.Models
             return instance;
         }
 
+        /// <summary>
+        /// Updates the state of a job based on the action and notifies observers.
+        /// </summary>
+        /// <param name="action">Action type ("start", "complete", "error", or other).</param>
+        /// <param name="name">Job name.</param>
+        /// <param name="type">Backup type.</param>
+        /// <param name="state">Job state.</param>
+        /// <param name="sourcePath">Source path.</param>
+        /// <param name="targetPath">Target path.</param>
+        /// <param name="totalFiles">Total files.</param>
+        /// <param name="totalSize">Total size.</param>
+        /// <param name="progression">Progression value.</param>
         public void Update(string action, string name, BackupType type, JobState state,
             string sourcePath, string targetPath, int totalFiles, long totalSize, int progression)
         {
@@ -74,6 +149,17 @@ namespace EasySave.Models
             }
         }
 
+        /// <summary>
+        /// Updates the state of an existing job.
+        /// </summary>
+        /// <param name="name">Job name.</param>
+        /// <param name="type">Backup type.</param>
+        /// <param name="state">Job state.</param>
+        /// <param name="sourcePath">Source path.</param>
+        /// <param name="targetPath">Target path.</param>
+        /// <param name="totalFiles">Total files.</param>
+        /// <param name="totalSize">Total size.</param>
+        /// <param name="progression">Progression value.</param>
         public void UpdateJobState(string name, BackupType type, JobState state,
             string sourcePath, string targetPath, int totalFiles, long totalSize, int progression)
         {
@@ -86,12 +172,23 @@ namespace EasySave.Models
             jobState.TotalFiles = totalFiles;
             jobState.TotalSize = totalSize;
 
-            // Calcul de la progression en pourcentage (0-100)
+            // Calculate progression in percent (0-100)
             jobState.Progression = totalFiles > 0 ? (int)Math.Round(((double)progression / totalFiles) * 100) : 0;
 
             SaveStateFile();
         }
 
+        /// <summary>
+        /// Initializes the state of a job at the start.
+        /// </summary>
+        /// <param name="name">Job name.</param>
+        /// <param name="type">Backup type.</param>
+        /// <param name="state">Job state.</param>
+        /// <param name="sourcePath">Source path.</param>
+        /// <param name="targetPath">Target path.</param>
+        /// <param name="totalFiles">Total files.</param>
+        /// <param name="totalSize">Total size.</param>
+        /// <param name="progression">Progression value.</param>
         public void InitializeJobState(string name, BackupType type, JobState state,
             string sourcePath, string targetPath, int totalFiles, long totalSize, int progression)
         {
@@ -103,11 +200,22 @@ namespace EasySave.Models
             jobState.TargetPath = targetPath;
             jobState.TotalFiles = totalFiles;
             jobState.TotalSize = totalSize;
-            jobState.Progression = 0; // Progression initiale à 0%
+            jobState.Progression = 0; // Initial progression at 0%
 
             SaveStateFile();
         }
 
+        /// <summary>
+        /// Finalizes the state of a job when completed or errored.
+        /// </summary>
+        /// <param name="name">Job name.</param>
+        /// <param name="type">Backup type.</param>
+        /// <param name="state">Job state.</param>
+        /// <param name="sourcePath">Source path.</param>
+        /// <param name="targetPath">Target path.</param>
+        /// <param name="totalFiles">Total files.</param>
+        /// <param name="totalSize">Total size.</param>
+        /// <param name="progression">Progression value.</param>
         public void FinalizeJobState(string name, BackupType type, JobState state,
             string sourcePath, string targetPath, int totalFiles, long totalSize, int progression)
         {
@@ -120,13 +228,18 @@ namespace EasySave.Models
             jobState.TotalFiles = totalFiles;
             jobState.TotalSize = totalSize;
 
-            // Si terminé avec succès, progression à 100%
+            // If completed successfully, set progression to 100%
             jobState.Progression = state == JobState.completed ? 100 :
                 totalFiles > 0 ? (int)Math.Round(((double)progression / totalFiles) * 100) : 0;
 
             SaveStateFile();
         }
 
+        /// <summary>
+        /// Gets the state info for a job, or creates it if it does not exist.
+        /// </summary>
+        /// <param name="jobName">Job name.</param>
+        /// <returns>JobStateInfo instance.</returns>
         private JobStateInfo GetOrCreateJobState(string jobName)
         {
             if (!stateData.ContainsKey(jobName))
@@ -137,6 +250,9 @@ namespace EasySave.Models
             return stateData[jobName];
         }
 
+        /// <summary>
+        /// Loads the state file from disk into memory.
+        /// </summary>
         private void LoadStateFile()
         {
             try
@@ -160,6 +276,9 @@ namespace EasySave.Models
             }
         }
 
+        /// <summary>
+        /// Saves the current state data to the state file on disk.
+        /// </summary>
         private void SaveStateFile()
         {
             try
@@ -185,6 +304,9 @@ namespace EasySave.Models
             }
         }
 
+        /// <summary>
+        /// Notifies all attached observers of the current state of all jobs.
+        /// </summary>
         public void NotifyObservers()
         {
             foreach (var jobState in stateData.Values)
@@ -198,6 +320,10 @@ namespace EasySave.Models
             }
         }
 
+        /// <summary>
+        /// Attaches an observer to be notified of state changes.
+        /// </summary>
+        /// <param name="observer">Observer to attach.</param>
         public void AttachObserver(IStateObserver observer)
         {
             if (!stateObservers.Contains(observer))

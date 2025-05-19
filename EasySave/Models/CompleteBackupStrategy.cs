@@ -18,6 +18,7 @@ namespace EasySave.Models
         {
             this.name = name;
             state = JobState.active;
+            EncryptionService encryptionService = EncryptionService.GetInstance();
 
             try
             {
@@ -73,12 +74,20 @@ namespace EasySave.Models
                     long endTime = DateTime.Now.Ticks;
                     long transferTime = endTime - startTime;
 
+                    // Vérifier si le fichier doit être chiffré
+                    long encryptionTime = 0;
+                    if (encryptionService.ShouldEncryptFile(sourceFile))
+                    {
+                        // Chiffrer le fichier copié
+                        encryptionTime = encryptionService.EncryptFile(destFile);
+                    }
+
                     // Update progress
                     remainFiles--;
                     progression = totalFiles - remainFiles;
 
                     // Notify observers
-                    NotifyObserver("transfer", name, sourceFile, destFile, fileSize, transferTime, 0);
+                    NotifyObserver("transfer", name, sourceFile, destFile, fileSize, transferTime, encryptionTime);
                 }
 
                 state = JobState.completed;
@@ -93,5 +102,6 @@ namespace EasySave.Models
                 return false;
             }
         }
+
     }
 }

@@ -12,88 +12,89 @@ using System.Linq;
 namespace EasySave.ViewModels
 {
     /// <summary>
-    /// ViewModel pour la page des paramètres de l'application
+    /// ViewModel for the application's settings page.
+    /// Handles language, encryption, logging format, and process priority settings.
     /// </summary>
     public class SettingsViewModel : INotifyPropertyChanged
     {
         /// <summary>
-        /// Événement déclenché lorsqu'une propriété change de valeur
+        /// Event triggered when a property value changes.
         /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
         /// <summary>
-        /// Instance du ViewModel de langue pour gérer les traductions
+        /// Singleton instance of the language ViewModel for managing translations.
         /// </summary>
         public LanguageViewModel LanguageViewModel { get; }
 
         /// <summary>
-        /// Instance du gestionnaire de configuration
+        /// Instance of the configuration manager.
         /// </summary>
         private readonly ConfigManager _configManager;
 
         /// <summary>
-        /// Instance du LogManager
+        /// Instance of the LogManager.
         /// </summary>
         private readonly LogManager _logManager;
 
         /// <summary>
-        /// Événement pour naviguer vers le menu principal
+        /// Event to navigate back to the main menu.
         /// </summary>
         public event EventHandler NavigateToMainMenu;
 
         /// <summary>
-        /// Commande pour enregistrer les paramètres et retourner au menu principal
+        /// Command to save settings and return to the main menu.
         /// </summary>
         public ICommand SaveCommand { get; set; }
 
         /// <summary>
-        /// Commande pour annuler et revenir au menu principal
+        /// Command to cancel and return to the main menu.
         /// </summary>
         public ICommand CancelCommand { get; }
 
         /// <summary>
-        /// Commande pour changer la langue en anglais
+        /// Command to change the language to English.
         /// </summary>
         public ICommand EnglishCommand { get; }
 
         /// <summary>
-        /// Commande pour changer la langue en français
+        /// Command to change the language to French.
         /// </summary>
         public ICommand FrenchCommand { get; }
 
         /// <summary>
-        /// Commande pour ajouter une extension de fichier à la liste
+        /// Command to add a file extension to the encrypted list.
         /// </summary>
         public ICommand AddExtensionCommand { get; }
 
         /// <summary>
-        /// Commande pour supprimer une extension de fichier de la liste
+        /// Command to remove a file extension from the encrypted list.
         /// </summary>
         public ICommand RemoveExtensionCommand { get; }
 
         /// <summary>
-        /// Commande pour actualiser la liste des processus en cours d'exécution
+        /// Command to refresh the list of running processes.
         /// </summary>
         public ICommand RefreshProcessesCommand { get; }
-        
+
         /// <summary>
-        /// Commande pour définir le format de log en XML
+        /// Command to set the log format to XML.
         /// </summary>
         public ICommand SetXmlFormatCommand { get; }
-        
+
         /// <summary>
-        /// Commande pour définir le format de log en JSON
+        /// Command to set the log format to JSON.
         /// </summary>
         public ICommand SetJsonFormatCommand { get; }
 
         /// <summary>
-        /// Langue actuelle de l'application
+        /// Current application language.
         /// </summary>
         public string CurrentLanguage => LanguageViewModel.CurrentLanguage;
 
         private LogFormat _selectedLogFormat;
         /// <summary>
-        /// Format de log sélectionné
+        /// Selected log format.
         /// </summary>
         public LogFormat SelectedLogFormat
         {
@@ -109,20 +110,20 @@ namespace EasySave.ViewModels
                 }
             }
         }
-        
+
         /// <summary>
-        /// Indique si le format XML est sélectionné
+        /// Indicates if XML format is selected.
         /// </summary>
         public bool IsXmlSelected => _selectedLogFormat == LogFormat.XML;
-        
+
         /// <summary>
-        /// Indique si le format JSON est sélectionné
+        /// Indicates if JSON format is selected.
         /// </summary>
         public bool IsJsonSelected => _selectedLogFormat == LogFormat.JSON;
 
         private string _newExtension;
         /// <summary>
-        /// Nouvelle extension à ajouter à la liste
+        /// New extension to add to the encrypted list.
         /// </summary>
         public string NewExtension
         {
@@ -136,7 +137,7 @@ namespace EasySave.ViewModels
 
         private ObservableCollection<string> _encryptedExtensions;
         /// <summary>
-        /// Collection des extensions de fichiers à chiffrer
+        /// Collection of file extensions to encrypt.
         /// </summary>
         public ObservableCollection<string> EncryptedExtensions
         {
@@ -150,7 +151,7 @@ namespace EasySave.ViewModels
 
         private string _selectedExtension;
         /// <summary>
-        /// Extension sélectionnée dans la liste
+        /// Selected extension in the list.
         /// </summary>
         public string SelectedExtension
         {
@@ -164,7 +165,7 @@ namespace EasySave.ViewModels
 
         private string _encryptionPassphrase;
         /// <summary>
-        /// Phrase de passe pour le chiffrement des fichiers
+        /// Passphrase for file encryption.
         /// </summary>
         public string EncryptionPassphrase
         {
@@ -178,7 +179,7 @@ namespace EasySave.ViewModels
 
         private ObservableCollection<ProcessInfo> _runningProcesses;
         /// <summary>
-        /// Collection des processus en cours d'exécution
+        /// Collection of currently running processes.
         /// </summary>
         public ObservableCollection<ProcessInfo> RunningProcesses
         {
@@ -192,7 +193,7 @@ namespace EasySave.ViewModels
 
         private ProcessInfo _selectedProcess;
         /// <summary>
-        /// Processus sélectionné dans la liste
+        /// Selected process in the list.
         /// </summary>
         public ProcessInfo SelectedProcess
         {
@@ -207,7 +208,7 @@ namespace EasySave.ViewModels
 
         private string _priorityProcess;
         /// <summary>
-        /// Processus prioritaire sélectionné
+        /// Selected priority process.
         /// </summary>
         public string PriorityProcess
         {
@@ -221,12 +222,13 @@ namespace EasySave.ViewModels
         }
 
         /// <summary>
-        /// Indique si un processus prioritaire est sélectionné
+        /// Indicates if a priority process is selected.
         /// </summary>
         public bool IsPriorityProcessSelected => !string.IsNullOrEmpty(_priorityProcess);
 
         /// <summary>
-        /// Constructeur du ViewModel des paramètres
+        /// Constructor for the settings ViewModel.
+        /// Initializes commands and loads configuration values.
         /// </summary>
         public SettingsViewModel()
         {
@@ -234,73 +236,79 @@ namespace EasySave.ViewModels
             _configManager = ConfigManager.GetInstance();
             _logManager = LogManager.GetInstance();
 
-            // Charger les extensions chiffrées depuis la configuration
+            // Load encrypted extensions from configuration
             LoadEncryptedExtensions();
-            
-            // Charger la passphrase depuis la configuration
+
+            // Load encryption passphrase from configuration
             LoadEncryptionPassphrase();
 
-            // Charger le processus prioritaire
+            // Load priority process from configuration
             LoadPriorityProcess();
 
-            // Charger le format de log actuel depuis la configuration
+            // Load current log format from configuration
             LoadLogFormat();
 
-            // Initialiser la liste des processus en cours d'exécution
+            // Initialize the list of running processes
             LoadRunningProcesses();
 
-            SaveCommand = new RelayCommand(() => {
-                // Sauvegarder les extensions chiffrées
+            SaveCommand = new RelayCommand(() =>
+            {
+                // Save encrypted extensions
                 SaveEncryptedExtensions();
-                
-                // Sauvegarder la passphrase
+
+                // Save passphrase
                 SaveEncryptionPassphrase();
-                
-                // Sauvegarder le processus prioritaire
+
+                // Save priority process
                 SavePriorityProcess();
-                
-                // Sauvegarder le format de log
+
+                // Save log format
                 SaveLogFormat();
-                
+
                 NavigateToMainMenu?.Invoke(this, EventArgs.Empty);
             });
 
-            CancelCommand = new RelayCommand(() => {
+            CancelCommand = new RelayCommand(() =>
+            {
                 NavigateToMainMenu?.Invoke(this, EventArgs.Empty);
             });
 
-            EnglishCommand = new RelayCommand(() => {
+            EnglishCommand = new RelayCommand(() =>
+            {
                 LanguageViewModel.ChangeLanguage("english");
                 OnPropertyChanged(nameof(CurrentLanguage));
             });
 
-            FrenchCommand = new RelayCommand(() => {
+            FrenchCommand = new RelayCommand(() =>
+            {
                 LanguageViewModel.ChangeLanguage("french");
                 OnPropertyChanged(nameof(CurrentLanguage));
             });
 
-            AddExtensionCommand = new RelayCommand(() => {
+            AddExtensionCommand = new RelayCommand(() =>
+            {
                 if (!string.IsNullOrWhiteSpace(NewExtension))
                 {
-                    // S'assurer que l'extension commence par un point
+                    // Ensure the extension starts with a dot
                     string ext = NewExtension.Trim();
                     if (!ext.StartsWith("."))
                     {
                         ext = "." + ext;
                     }
 
-                    // Ajouter l'extension à la liste si elle n'y est pas déjà
+                    // Add the extension if not already present
                     if (!EncryptedExtensions.Contains(ext))
                     {
                         EncryptedExtensions.Add(ext);
                     }
 
-                    // Réinitialiser le champ
+                    // Reset the input field
                     NewExtension = string.Empty;
                 }
             });
 
-            RemoveExtensionCommand = new RelayCommand(() => {
+            RemoveExtensionCommand = new RelayCommand(() =>
+            {
                 if (!string.IsNullOrEmpty(SelectedExtension))
                 {
                     EncryptedExtensions.Remove(SelectedExtension);
@@ -308,23 +316,26 @@ namespace EasySave.ViewModels
                 }
             }, () => SelectedExtension != null);
 
-            RefreshProcessesCommand = new RelayCommand(() => {
+            RefreshProcessesCommand = new RelayCommand(() =>
+            {
                 LoadRunningProcesses();
             });
 
-            // Commande pour définir le format de log en XML
-            SetXmlFormatCommand = new RelayCommand(() => {
+            // Command to set log format to XML
+            SetXmlFormatCommand = new RelayCommand(() =>
+            {
                 SelectedLogFormat = LogFormat.XML;
             });
-            
-            // Commande pour définir le format de log en JSON
-            SetJsonFormatCommand = new RelayCommand(() => {
+
+            // Command to set log format to JSON
+            SetJsonFormatCommand = new RelayCommand(() =>
+            {
                 SelectedLogFormat = LogFormat.JSON;
             });
         }
 
         /// <summary>
-        /// Charge les processus en cours d'exécution
+        /// Loads the list of currently running processes.
         /// </summary>
         public void LoadRunningProcesses()
         {
@@ -337,13 +348,13 @@ namespace EasySave.ViewModels
                     .ToList();
 
                 RunningProcesses = new ObservableCollection<ProcessInfo>(processes);
-                
-                // Présélectionner le processus prioritaire s'il est en cours d'exécution
+
+                // Preselect the priority process if it is running
                 if (!string.IsNullOrEmpty(PriorityProcess))
                 {
-                    var matchingProcess = RunningProcesses.FirstOrDefault(p => 
+                    var matchingProcess = RunningProcesses.FirstOrDefault(p =>
                         string.Equals(p.Name, PriorityProcess, StringComparison.OrdinalIgnoreCase));
-                    
+
                     if (matchingProcess != null)
                     {
                         SelectedProcess = matchingProcess;
@@ -352,15 +363,17 @@ namespace EasySave.ViewModels
             }
             catch (Exception ex)
             {
-                // En cas d'erreur, afficher un message ou logger l'erreur
-                System.Diagnostics.Debug.WriteLine($"Erreur lors du chargement des processus : {ex.Message}");
+                // Log or display error if process loading fails
+                System.Diagnostics.Debug.WriteLine($"Error loading processes: {ex.Message}");
                 RunningProcesses = new ObservableCollection<ProcessInfo>();
             }
         }
 
         /// <summary>
-        /// Détermine si un processus est courant/utilisé même s'il n'a pas de fenêtre principale
+        /// Determines if a process is common/used even if it has no main window.
         /// </summary>
+        /// <param name="processName">The process name.</param>
+        /// <returns>True if the process is common, otherwise false.</returns>
         private bool IsCommonProcess(string processName)
         {
             string[] commonProcesses = { "word", "excel", "powerpoint", "outlook", "chrome", "firefox", "edge", "notepad" };
@@ -368,7 +381,7 @@ namespace EasySave.ViewModels
         }
 
         /// <summary>
-        /// Définit le processus sélectionné comme prioritaire
+        /// Sets the selected process as the priority process.
         /// </summary>
         public void SetPriorityProcess()
         {
@@ -379,7 +392,7 @@ namespace EasySave.ViewModels
         }
 
         /// <summary>
-        /// Supprime le processus prioritaire
+        /// Clears the priority process.
         /// </summary>
         public void ClearPriorityProcess()
         {
@@ -387,62 +400,74 @@ namespace EasySave.ViewModels
         }
 
         /// <summary>
-        /// Charge les extensions chiffrées depuis la configuration
+        /// Loads encrypted file extensions from configuration.
         /// </summary>
         private void LoadEncryptedExtensions()
         {
-            //string extensionsStr = _configManager.GetSetting("EncryptedExtensions") ?? string.Empty;
-            string extensionsStr = string.Empty;
-            string[] extensions = extensionsStr.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            EncryptionService encryptionService = EncryptionService.GetInstance();
+            var extensions = encryptionService.GetEncryptedExtensions();
             EncryptedExtensions = new ObservableCollection<string>(extensions);
         }
 
         /// <summary>
-        /// Sauvegarde les extensions chiffrées dans la configuration
+        /// Saves encrypted file extensions to configuration.
         /// </summary>
         public void SaveEncryptedExtensions()
         {
-            string extensionsStr = string.Join(",", EncryptedExtensions);
-            //_configManager.SetSetting("EncryptedExtensions", extensionsStr);
+            EncryptionService encryptionService = EncryptionService.GetInstance();
+            encryptionService.SetEncryptedExtensions(EncryptedExtensions);
         }
 
         /// <summary>
-        /// Charge la passphrase de chiffrement depuis la configuration
-        /// </summary>
-        private void LoadEncryptionPassphrase()
-        {
-            //EncryptionPassphrase = _configManager.GetSetting("EncryptionPassphrase") ?? string.Empty;
-            EncryptionPassphrase = string.Empty;
-        }
-
-        /// <summary>
-        /// Sauvegarde la passphrase de chiffrement dans la configuration
+        /// Saves the encryption passphrase to configuration.
         /// </summary>
         public void SaveEncryptionPassphrase()
         {
-            //_configManager.SetSetting("EncryptionPassphrase", EncryptionPassphrase ?? string.Empty);
-
+            if (!string.IsNullOrWhiteSpace(EncryptionPassphrase))
+            {
+                EncryptionService.GetInstance().SetEncryptionPassword(EncryptionPassphrase);
+            }
         }
 
         /// <summary>
-        /// Charge le processus prioritaire depuis la configuration
+        /// Loads the encryption passphrase from configuration.
+        /// For security, the passphrase is not displayed in the UI.
+        /// </summary>
+        private void LoadEncryptionPassphrase()
+        {
+            // The passphrase is already hashed and stored, do not display the hash in the UI!
+            // Leave the field empty for security reasons.
+            bool hasPassword = !string.IsNullOrEmpty(_configManager.GetSetting("EncryptionPassword"));
+
+            if (hasPassword)
+            {
+                // Inform the user that a password is already set, but do not display it.
+                EncryptionPassphrase = string.Empty;
+            }
+            else
+            {
+                EncryptionPassphrase = string.Empty;
+            }
+        }
+
+        /// <summary>
+        /// Loads the priority process from configuration.
         /// </summary>
         private void LoadPriorityProcess()
         {
-            //PriorityProcess = _configManager.GetSetting("PriorityProcess") ?? string.Empty;
-            PriorityProcess = string.Empty;
+            PriorityProcess = _configManager.GetSetting("PriorityProcess") ?? string.Empty;
         }
 
         /// <summary>
-        /// Sauvegarde le processus prioritaire dans la configuration
+        /// Saves the priority process to configuration.
         /// </summary>
         public void SavePriorityProcess()
         {
-            //_configManager.SetSetting("PriorityProcess", PriorityProcess ?? string.Empty);
+            _configManager.SetSetting("PriorityProcess", PriorityProcess ?? string.Empty);
         }
 
         /// <summary>
-        /// Charge le format de log depuis la configuration
+        /// Loads the log format from configuration.
         /// </summary>
         private void LoadLogFormat()
         {
@@ -453,30 +478,26 @@ namespace EasySave.ViewModels
             }
             else
             {
-                // Par défaut, utiliser XML
+                // Default to XML
                 SelectedLogFormat = LogFormat.XML;
             }
         }
-        
+
         /// <summary>
-        /// Sauvegarde le format de log dans la configuration
+        /// Saves the log format to configuration and updates the LogManager.
         /// </summary>
         public void SaveLogFormat()
         {
             _configManager.SetSetting("LogFormat", SelectedLogFormat.ToString());
-
-            // Réinitialiser le singleton LogManager pour qu'il prenne en compte le nouveau format
-            // Cette ligne peut être facultative selon l'architecture
+            // Optionally reset the LogManager singleton if needed by architecture
             // LogManager.ResetInstance();
-
             _logManager.SetFormat(SelectedLogFormat);
-
-
         }
 
         /// <summary>
-        /// Notifie les abonnés du changement d'une propriété
+        /// Notifies subscribers of a property value change.
         /// </summary>
+        /// <param name="name">The property name.</param>
         protected void OnPropertyChanged([CallerMemberName] string name = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
@@ -484,27 +505,32 @@ namespace EasySave.ViewModels
     }
 
     /// <summary>
-    /// Classe représentant les informations d'un processus
+    /// Represents information about a process.
     /// </summary>
     public class ProcessInfo
     {
         /// <summary>
-        /// Nom du processus
+        /// Process name.
         /// </summary>
         public string Name { get; }
 
         /// <summary>
-        /// Titre de la fenêtre principale du processus
+        /// Main window title of the process.
         /// </summary>
         public string WindowTitle { get; }
 
         /// <summary>
-        /// Texte affiché dans l'interface utilisateur
+        /// Text displayed in the UI.
         /// </summary>
-        public string DisplayText => string.IsNullOrEmpty(WindowTitle) 
-            ? Name 
+        public string DisplayText => string.IsNullOrEmpty(WindowTitle)
+            ? Name
             : $"{Name} - {WindowTitle}";
 
+        /// <summary>
+        /// Constructor for ProcessInfo.
+        /// </summary>
+        /// <param name="name">Process name.</param>
+        /// <param name="windowTitle">Main window title.</param>
         public ProcessInfo(string name, string windowTitle)
         {
             Name = name;

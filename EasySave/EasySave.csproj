@@ -10,9 +10,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="CryptoSoft\**" />
     <Compile Remove="easysave\**" />
+    <EmbeddedResource Remove="CryptoSoft\**" />
     <EmbeddedResource Remove="easysave\**" />
+    <None Remove="CryptoSoft\**" />
     <None Remove="easysave\**" />
+    <Page Remove="CryptoSoft\**" />
     <Page Remove="easysave\**" />
   </ItemGroup>
 
