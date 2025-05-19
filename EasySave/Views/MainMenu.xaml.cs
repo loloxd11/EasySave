@@ -168,11 +168,15 @@ namespace EasySave
 
 
         /// <summary>
-        /// Placeholder for opening the settings page.
+        /// Opens the settings page
+        /// Creates a new Frame and sets its content to the Settings page.
         /// </summary>
         private void SettingsButton_Click(object sender, RoutedEventArgs e)
         {
-            // Logic for opening settings
+            Frame settingsFrame = new Frame();
+            SettingsView settingsPage = new SettingsView();
+            settingsFrame.Content = settingsPage;
+            Content = settingsFrame;
         }
     }
 }

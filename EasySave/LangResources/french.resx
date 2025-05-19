@@ -123,8 +123,17 @@
   <data name="Cancel" xml:space="preserve">
     <value>Annuler</value>
   </data>
+  <data name="ClearPriority" xml:space="preserve">
+    <value>Enlever Logiciel Prioritaire</value>
+  </data>
   <data name="CompleteBackup" xml:space="preserve">
     <value>Complète</value>
+  </data>
+  <data name="CurrentLanguage" xml:space="preserve">
+    <value>Langue sélectionnée</value>
+  </data>
+  <data name="CurrentPriorityProcess" xml:space="preserve">
+    <value>Processus Prioritaire Actuel</value>
   </data>
   <data name="Delete" xml:space="preserve">
     <value>Supprimer</value>
@@ -135,8 +144,14 @@
   <data name="Edit" xml:space="preserve">
     <value>Modifier</value>
   </data>
+  <data name="Encrypting" xml:space="preserve">
+    <value>Cryptage</value>
+  </data>
   <data name="Execute" xml:space="preserve">
     <value>Lancer</value>
+  </data>
+  <data name="FileExtensionPhrase" xml:space="preserve">
+    <value>Entrez les extensions de fichier à crypter</value>
   </data>
   <data name="JobName" xml:space="preserve">
     <value>Nom du travail</value>
@@ -144,6 +159,29 @@
   <data name="JobsTitle" xml:space="preserve">
     <value>Gestion des travaux</value>
   </data>
+  <data name="Language" xml:space="preserve">
+    <value>Langue</value>
+  </data>
+  <data name="NoPriorityProcess" xml:space="preserve">
+    <value>Aucun Processus Prioritaire</value>
+  </data>
+  <data name="PasswordEncryptingPhrase" xml:space="preserve">
+    <value>Entrez le mot de passe des fichiers cryptés</value>
+  </data>
+  <data name="PriorityProcess" xml:space="preserve">
+    <value>Processus Prioritaire</value>
+  </data>
+  <data name="RefreshProcessList" xml:space="preserve">
+    <value>Rafraichir Liste Processus</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Enregistrer</value>
+  </data>
+  <data name="SelectProcess" xml:space="preserve">
+    <value>Selectionner Processus</value>
+  </data>
+  <data name="Settings" xml:space="preserve">
+    <value>Paramètre</value>
   <data name="SelectAll" xml:space="preserve">
     <value>Tout sélectionner</value>
   </data>

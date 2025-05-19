@@ -123,8 +123,17 @@
   <data name="Cancel" xml:space="preserve">
     <value>Cancel</value>
   </data>
+  <data name="ClearPriority" xml:space="preserve">
+    <value>Clear Priority</value>
+  </data>
   <data name="CompleteBackup" xml:space="preserve">
     <value>Complete</value>
+  </data>
+  <data name="CurrentLanguage" xml:space="preserve">
+    <value>Current language</value>
+  </data>
+  <data name="CurrentPriorityProcess" xml:space="preserve">
+    <value>Current Priority Process</value>
   </data>
   <data name="Delete" xml:space="preserve">
     <value>Delete</value>
@@ -135,8 +144,14 @@
   <data name="Edit" xml:space="preserve">
     <value>Edit</value>
   </data>
+  <data name="Encrypting" xml:space="preserve">
+    <value>Encrypting</value>
+  </data>
   <data name="Execute" xml:space="preserve">
     <value>execute</value>
+  </data>
+  <data name="FileExtensionPhrase" xml:space="preserve">
+    <value>Enter the file extensions to encrypt</value>
   </data>
   <data name="JobName" xml:space="preserve">
     <value>Job Name</value>
@@ -144,8 +159,33 @@
   <data name="JobsTitle" xml:space="preserve">
     <value>Jobs Management</value>
   </data>
+  <data name="Language" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="NoPriorityProcess" xml:space="preserve">
+    <value>No Priority Process</value>
+  </data>
+  <data name="PasswordEncryptingPhrase" xml:space="preserve">
+    <value>Enter the password of the encrypted files</value>
+  </data>
+  <data name="PriorityProcess" xml:space="preserve">
+    <value>Priority Process</value>
+  </data>
+  <data name="RefreshProcessList" xml:space="preserve">
+    <value>Refresh Process List</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="SelectProcess" xml:space="preserve">
+    <value>Select Process</value>
+  </data>
+  <data name="Settings" xml:space="preserve">
+    <value>Settings</value>
+
   <data name="SelectAll" xml:space="preserve">
     <value>SelectAll</value>
+
   </data>
   <data name="SourcePath" xml:space="preserve">
     <value>Source Path</value>

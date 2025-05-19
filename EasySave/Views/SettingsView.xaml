@@ -1,0 +1,232 @@
+﻿<Page x:Class="EasySave.Views.SettingsView"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:EasySave.Views"
+      mc:Ignorable="d" 
+      d:DesignHeight="750" d:DesignWidth="800"
+      Title="Paramètres">
+
+    <Grid Background="#f4f4f4">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- En-tête -->
+        <TextBlock Grid.Row="0" 
+                   Text="{Binding LanguageViewModel[Settings]}" 
+                   FontSize="28" FontWeight="Bold" 
+                   HorizontalAlignment="Center" 
+                   Margin="0,20,0,30" 
+                   Foreground="#333"/>
+
+        <!-- Contenu principal -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="40,0,40,20">
+                <!-- Section Langue -->
+                <Border Background="White" BorderBrush="#ddd" BorderThickness="1" Margin="0,10" Padding="20" CornerRadius="5">
+                    <StackPanel>
+                        <TextBlock Text="{Binding LanguageViewModel[Language]}" 
+                                FontSize="18" FontWeight="SemiBold" 
+                                Margin="0,0,0,15" Foreground="#333"/>
+
+                        <TextBlock Text="{Binding LanguageViewModel[CurrentLanguage]}" 
+                                Margin="0,0,0,10"/>
+
+                        <TextBlock Text="{Binding CurrentLanguage, StringFormat='{}({0})'}" 
+                                Margin="0,0,0,20" FontStyle="Italic"/>
+
+                        <StackPanel Orientation="Horizontal">
+                            <Button Command="{Binding FrenchCommand}" 
+                                    Content="Français" 
+                                    Width="100" Margin="0,0,10,0" 
+                                    Padding="10,5" 
+                                    Background="#0275d8" Foreground="White"/>
+
+                            <Button Command="{Binding EnglishCommand}" 
+                                    Content="English" 
+                                    Width="100" 
+                                    Padding="10,5" 
+                                    Background="#0275d8" Foreground="White"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Section Chiffrement -->
+                <Border Background="White" BorderBrush="#ddd" BorderThickness="1" Margin="0,10" Padding="20" CornerRadius="5">
+                    <StackPanel>
+                        <TextBlock Text="{Binding LanguageViewModel[Encrypting]}" 
+                                FontSize="18" FontWeight="SemiBold" 
+                                Margin="0,0,0,15" Foreground="#333"/>
+
+                        <!-- Phrase de passe -->
+                        <TextBlock Text="{Binding LanguageViewModel[PasswordEncryptingPhrase]}" 
+                                Margin="0,0,0,5"/>
+
+                        <PasswordBox x:Name="PassphraseBox" 
+                                    Margin="0,0,0,20" 
+                                    Padding="5" 
+                                    Width="300" 
+                                    HorizontalAlignment="Left"/>
+
+                        <!-- Extensions à chiffrer -->
+                        <TextBlock Text="{Binding LanguageViewModel[FileExtensionPhrase]}" 
+                                Margin="0,0,0,10"/>
+
+                        <Grid Margin="0,0,0,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBox Grid.Column="0" 
+                                    Text="{Binding NewExtension, UpdateSourceTrigger=PropertyChanged}" 
+                                    Padding="5" 
+                                    Margin="0,0,10,0"
+                                    Width="200"
+                                    HorizontalAlignment="Left"/>
+
+                            <Button Grid.Column="1" 
+                                    Command="{Binding AddExtensionCommand}" 
+                                    Content="{Binding LanguageViewModel[Add]}" 
+                                    Padding="10,5" 
+                                    Margin="0,0,10,0"
+                                    Background="#5cb85c" 
+                                    Foreground="White"/>
+
+                            <Button Grid.Column="2" 
+                                    Command="{Binding RemoveExtensionCommand}" 
+                                    Content="{Binding LanguageViewModel[Delete]}" 
+                                    Padding="10,5" 
+                                    Background="#d9534f" 
+                                    Foreground="White"/>
+                        </Grid>
+
+                        <ListBox ItemsSource="{Binding EncryptedExtensions}" 
+                                SelectedItem="{Binding SelectedExtension}"
+                                Height="150" 
+                                Width="300"
+                                HorizontalAlignment="Left"
+                                ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                BorderBrush="#ddd"
+                                BorderThickness="1"
+                                Padding="5">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding}"/>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </StackPanel>
+                </Border>
+                
+                <!-- Section Processus prioritaire -->
+                <Border Background="White" BorderBrush="#ddd" BorderThickness="1" Margin="0,10" Padding="20" CornerRadius="5">
+                    <StackPanel>
+                        <TextBlock Text="{Binding LanguageViewModel[PriorityProcess]}" 
+                                FontSize="18" FontWeight="SemiBold" 
+                                Margin="0,0,0,15" Foreground="#333"/>
+
+                        <!-- Processus prioritaire actuel -->
+                        <TextBlock Text="{Binding LanguageViewModel[CurrentPriorityProcess]}" 
+                                Margin="0,0,0,5" FontWeight="SemiBold"/>
+
+                        <TextBlock Margin="0,0,0,15">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Text" Value="{Binding PriorityProcess}" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsPriorityProcessSelected}" Value="False">
+                                            <Setter Property="Text" Value="{Binding LanguageViewModel[NoPriorityProcess]}" />
+                                            <Setter Property="Foreground" Value="Gray" />
+                                            <Setter Property="FontStyle" Value="Italic" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        
+                        <!-- Processus actifs -->
+                        <TextBlock Text="{Binding LanguageViewModel[SelectProcess]}" 
+                                Margin="0,0,0,10"/>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                            <Button x:Name="RefreshProcessesButton" 
+                                    Command="{Binding RefreshProcessesCommand}" 
+                                    Content="{Binding LanguageViewModel[RefreshProcessList]}" 
+                                    Padding="10,5" 
+                                    Margin="0,0,10,0"
+                                    Background="#0275d8" 
+                                    Foreground="White"/>
+
+                            <Button x:Name="ClearPriorityButton" 
+                                    Content="{Binding LanguageViewModel[ClearPriority]}" 
+                                    Padding="10,5" 
+                                    Background="#f0ad4e" 
+                                    Foreground="White"
+                                    Click="ClearPriorityButton_Click"/>
+                        </StackPanel>
+                        
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <ListBox Grid.Column="0"
+                                   ItemsSource="{Binding RunningProcesses}" 
+                                   SelectedItem="{Binding SelectedProcess}"
+                                   Height="200" 
+                                   Width="400"
+                                   HorizontalAlignment="Left"
+                                   ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                   BorderBrush="#ddd"
+                                   BorderThickness="1"
+                                   Padding="5">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding DisplayText}"/>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                            
+                            <Button Grid.Column="1" 
+                                    x:Name="SetPriorityButton"
+                                    Content="{Binding LanguageViewModel[SetAsPriority]}" 
+                                    Padding="10,5" 
+                                    Margin="10,0,0,0"
+                                    VerticalAlignment="Top"
+                                    Background="#5cb85c" 
+                                    Foreground="White"
+                                    Click="SetPriorityButton_Click"
+                                    IsEnabled="{Binding SelectedProcess, Converter={StaticResource ResourceKey=NotNullConverter}}"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Boutons de navigation -->
+        <StackPanel Grid.Row="2" 
+                    Orientation="Horizontal" 
+                    HorizontalAlignment="Center" 
+                    Margin="0,20,0,30">
+
+            <Button Command="{Binding SaveCommand}" 
+                    Content="{Binding LanguageViewModel[Save]}" 
+                    Width="100" Margin="0,0,20,0" 
+                    Padding="10,5" 
+                    Background="#5cb85c" Foreground="White"/>
+
+            <Button Command="{Binding CancelCommand}" 
+                    Content="{Binding LanguageViewModel[Cancel]}" 
+                    Width="100" 
+                    Padding="10,5" 
+                    Background="#d9534f" Foreground="White"/>
+        </StackPanel>
+    </Grid>
+</Page>
