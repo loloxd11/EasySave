@@ -37,7 +37,7 @@ namespace EasySave
 
             // Reinitialize the ViewModel
             _viewModel = new MainMenuViewModel();
-            DataContext = _viewModel.LanguageViewModel;
+            DataContext = _viewModel;
 
             // Reset the name scope for the window
             NameScope.SetNameScope(this, new NameScope());
@@ -102,11 +102,15 @@ namespace EasySave
         }
 
         /// <summary>
-        /// Placeholder for opening the settings page.
+        /// Opens the settings page
+        /// Creates a new Frame and sets its content to the Settings page.
         /// </summary>
         private void SettingsButton_Click(object sender, RoutedEventArgs e)
         {
-            // Logic for opening settings
+            Frame settingsFrame = new Frame();
+            SettingsView settingsPage = new SettingsView();
+            settingsFrame.Content = settingsPage;
+            Content = settingsFrame;
         }
     }
 }

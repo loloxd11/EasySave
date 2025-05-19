@@ -1,6 +1,11 @@
 ﻿<Window x:Class="EasySave.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:viewmodels="clr-namespace:EasySave.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance Type=viewmodels:JobsViewModel}"
         Title="EasySave" Height="600" Width="900" Background="#f4f4f4" WindowStartupLocation="CenterScreen">
     <Grid Margin="10">
         <Grid.RowDefinitions>
@@ -21,7 +26,7 @@
         <!-- Top bar -->
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
             <Button x:Name="SettingsButton" Content="⚙ Settings" Width="100" Margin="0,0,10,0"
-                     Background="#ddd" BorderBrush="#aaa" Padding="5" />
+                     Background="#ddd" BorderBrush="#aaa" Padding="5" Click="SettingsButton_Click" />
         </StackPanel>
 
         <!-- Main area -->
@@ -44,8 +49,6 @@
                 <Button Content="{Binding LanguageViewModel[Edit]}" Click="EditBackupJob_Click" Margin="10" Padding="10,5" Background="#0275d8" Foreground="White"/>
                 <Button Content="{Binding LanguageViewModel[Delete]}" Click="DeleteBackupJob_Click" Margin="10" Padding="10,5" Background="#d9534f" Foreground="White"/>
                 <Button Content="{Binding LanguageViewModel[Execute]}" Click="ExecuteBackupJob_Click" Margin="10" Padding="10,5" Background="#f0ad4e" Foreground="White"/>
-                <Button Content="FR" Width="60" Margin="0,0,10,0" Click="TestChangeLanguageToFrench"/>
-                <Button Content="EN" Width="60" Click="TestChangeLanguageToEnglish"/>
             </WrapPanel>
         </StackPanel>
     </Grid>
