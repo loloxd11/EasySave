@@ -133,35 +133,35 @@ namespace EasySave
         {
             if (_viewModel.SelectedJobIndices.Count == 0)
             {
-                MessageBox.Show("Veuillez sélectionner au moins un travail de sauvegarde.",
-                              "Aucun travail sélectionné",
-                              MessageBoxButton.OK,
-                              MessageBoxImage.Information);
+                MessageBox.Show("Please select at least one backup job.",
+                                "No job selected",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Information);
                 return;
             }
 
-            // Désactiver le bouton pendant l'exécution
+            // Disable the button during execution
             Button executeButton = (Button)sender;
             executeButton.IsEnabled = false;
 
             try
             {
                 _viewModel.ExecuteSelectedJobs();
-                MessageBox.Show("Les travaux sélectionnés ont été exécutés avec succès.",
-                              "Exécution terminée",
-                              MessageBoxButton.OK,
-                              MessageBoxImage.Information);
+                MessageBox.Show("The selected jobs have been executed successfully.",
+                                "Execution completed",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Une erreur s'est produite lors de l'exécution des travaux : {ex.Message}",
-                              "Erreur",
-                              MessageBoxButton.OK,
-                              MessageBoxImage.Error);
+                MessageBox.Show($"An error occurred while executing the jobs: {ex.Message}",
+                                "Error",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Error);
             }
             finally
             {
-                // Réactiver le bouton
+                // Re-enable the button
                 executeButton.IsEnabled = true;
             }
         }
