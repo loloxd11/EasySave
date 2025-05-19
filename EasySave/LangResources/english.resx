@@ -182,10 +182,9 @@
   </data>
   <data name="Settings" xml:space="preserve">
     <value>Settings</value>
-
+</data>
   <data name="SelectAll" xml:space="preserve">
     <value>SelectAll</value>
-
   </data>
   <data name="SourcePath" xml:space="preserve">
     <value>Source Path</value>
