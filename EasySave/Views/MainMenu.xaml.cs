@@ -4,6 +4,9 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using EasySave.ViewModels;
 using EasySave.Views;
+using Button = System.Windows.Controls.Button;
+using CheckBox = System.Windows.Controls.CheckBox;
+using MessageBox = System.Windows.MessageBox;
 
 namespace EasySave
 {
@@ -37,7 +40,7 @@ namespace EasySave
 
             // Reinitialize the ViewModel
             _viewModel = new MainMenuViewModel();
-            DataContext = _viewModel.LanguageViewModel;
+            DataContext = _viewModel;
 
             // Reset the name scope for the window
             NameScope.SetNameScope(this, new NameScope());
@@ -93,13 +96,76 @@ namespace EasySave
             // Logic for deleting a backup job
         }
 
-        /// <summary>
-        /// Placeholder for executing a backup job.
-        /// </summary>
+        private void JobCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            if (sender is CheckBox checkBox)
+            {
+                var row = DataGridRow.GetRowContainingElement(checkBox);
+                if (row != null)
+                {
+                    int index = row.GetIndex();
+                    if (!_viewModel.IsJobSelected(index))
+                    {
+                        _viewModel.ToggleJobSelection(index);
+                    }
+                }
+            }
+        }
+
+        private void JobCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (sender is CheckBox checkBox)
+            {
+                var row = DataGridRow.GetRowContainingElement(checkBox);
+                if (row != null)
+                {
+                    int index = row.GetIndex();
+                    if (_viewModel.IsJobSelected(index))
+                    {
+                        _viewModel.ToggleJobSelection(index);
+                    }
+                }
+            }
+        }
+
+
         private void ExecuteBackupJob_Click(object sender, RoutedEventArgs e)
         {
-            // Logic for executing a backup job
+            if (_viewModel.SelectedJobIndices.Count == 0)
+            {
+                MessageBox.Show("Veuillez sélectionner au moins un travail de sauvegarde.",
+                              "Aucun travail sélectionné",
+                              MessageBoxButton.OK,
+                              MessageBoxImage.Information);
+                return;
+            }
+
+            // Désactiver le bouton pendant l'exécution
+            Button executeButton = (Button)sender;
+            executeButton.IsEnabled = false;
+
+            try
+            {
+                _viewModel.ExecuteSelectedJobs();
+                MessageBox.Show("Les travaux sélectionnés ont été exécutés avec succès.",
+                              "Exécution terminée",
+                              MessageBoxButton.OK,
+                              MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Une erreur s'est produite lors de l'exécution des travaux : {ex.Message}",
+                              "Erreur",
+                              MessageBoxButton.OK,
+                              MessageBoxImage.Error);
+            }
+            finally
+            {
+                // Réactiver le bouton
+                executeButton.IsEnabled = true;
+            }
         }
+
 
         /// <summary>
         /// Placeholder for opening the settings page.

@@ -1,9 +1,9 @@
 ﻿<Application x:Class="EasySave.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:EasySave"
+             xmlns:converters="clr-namespace:EasySave.Converters"
              StartupUri="Views/MainMenu.xaml">
     <Application.Resources>
-         
+        <converters:RowIndexToIsSelectedConverter x:Key="RowIndexToIsSelectedConverter"/>
     </Application.Resources>
 </Application>
