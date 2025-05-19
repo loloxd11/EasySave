@@ -161,10 +161,9 @@ namespace EasySave.Models
         {
             if (settings.ContainsKey(key) && settings[key] != null)
             {
-                return settings[key];
+                return value;
             }
-
-            return null!;
+            return string.Empty;
         }
 
         public void SetSetting(string key, string value)

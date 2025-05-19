@@ -19,15 +19,16 @@ namespace EasySave.Models
         {
             this.name = name;
             state = JobState.active;
+            EncryptionService encryptionService = EncryptionService.GetInstance();
 
             try
             {
                 // Obtenir tous les fichiers de la source
                 List<string> sourceFiles = ScanDirectory(sourcePath);
-                
+
                 // Calculer d'abord les fichiers qui devront être copiés
                 List<string> filesToCopy = new List<string>();
-                
+
                 foreach (string sourceFile in sourceFiles)
                 {
                     string relativePath = sourceFile.Substring(sourcePath.Length);
@@ -36,17 +37,17 @@ namespace EasySave.Models
                         relativePath = relativePath.Substring(1);
                     }
                     string destFile = Path.Combine(targetPath, relativePath);
-                    
+
                     // Vérifier si ce fichier doit être copié
-                    bool shouldCopy = !File.Exists(destFile) || 
+                    bool shouldCopy = !File.Exists(destFile) ||
                                      File.GetLastWriteTime(sourceFile) > File.GetLastWriteTime(destFile);
-                    
+
                     if (shouldCopy)
                     {
                         filesToCopy.Add(sourceFile);
                     }
                 }
-                
+
                 // Calculate total files and size (seulement pour les fichiers à copier)
                 totalFiles = sourceFiles.Count; // Pour la progression totale, on garde tous les fichiers
                 totalSize = CalculateTotalSize(sourcePath);
@@ -100,6 +101,14 @@ namespace EasySave.Models
 
                         long endTime = DateTime.Now.Ticks;
                         long transferTime = endTime - startTime;
+
+                        // Vérifier si le fichier doit être chiffré
+                        long encryptionTime = 0;
+                        if (encryptionService.ShouldEncryptFile(sourceFile))
+                        {
+                            // Chiffrer le fichier copié
+                            encryptionTime = encryptionService.EncryptFile(destinationFile);
+                        }
 
                         // Notify observers
                         NotifyObserver(BackupActions.Processing, name, state, sourceFile, destFile, totalFiles, totalSize, transferTime, 0, currentProgress);

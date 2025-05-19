@@ -216,4 +216,7 @@
   <data name="DeleteConfirmationTitle" xml:space="preserve">
     <value>Delete Jobs</value>
   </data>
+  <data name="Update" xml:space="preserve">
+    <value>Update</value>
+  </data>
 </root>

@@ -7,16 +7,16 @@ using EasySave.ViewModels;
 namespace EasySave.Views
 {
     /// <summary>
-    /// Logique d'interaction pour SettingsView.xaml
+    /// Interaction logic for SettingsView.xaml
     /// </summary>
     public partial class SettingsView : Page
     {
-        // Instance du ViewModel associé à cette page
+        // Instance of the ViewModel associated with this page
         private SettingsViewModel _viewModel;
 
         /// <summary>
-        /// Constructeur de la page des paramètres
-        /// Initialise le ViewModel et définit le contexte de données
+        /// Constructor for the settings page.
+        /// Initializes the ViewModel and sets the data context.
         /// </summary>
         public SettingsView()
         {
@@ -24,21 +24,41 @@ namespace EasySave.Views
             _viewModel = new SettingsViewModel();
             DataContext = _viewModel;
 
-            // Abonnement à l'événement de navigation vers le menu principal
+            // Subscribe to the event for navigation to the main menu
             _viewModel.NavigateToMainMenu += OnNavigateToMainMenu;
 
-            // Mettre à jour la PasswordBox avec la passphrase chargée du ViewModel
+            // Update the PasswordBox with the passphrase loaded from the ViewModel
             Loaded += SettingsView_Loaded;
+
+            // Reconfigure the Save command to handle the passphrase and other settings
+            _viewModel.SaveCommand = new EasySave.Commands.RelayCommand(() =>
+            {
+                // Capture the passphrase from the PasswordBox
+                _viewModel.EncryptionPassphrase = PassphraseBox.Password;
+
+                // Save the settings
+                _viewModel.SaveEncryptedExtensions();
+                _viewModel.SaveEncryptionPassphrase();
+                _viewModel.SavePriorityProcess();
+                _viewModel.SaveLogFormat(); // Save the log format
+
+                // Navigate to the main menu
+                //_viewModel.NavigateToMainMenu?.Invoke(this, EventArgs.Empty);
+            });
         }
 
+        /// <summary>
+        /// Event handler for the Loaded event.
+        /// Initializes the PasswordBox with the saved passphrase.
+        /// </summary>
         private void SettingsView_Loaded(object sender, RoutedEventArgs e)
         {
-            // Initialiser la PasswordBox avec la passphrase sauvegardée
             PassphraseBox.Password = _viewModel.EncryptionPassphrase;
         }
 
         /// <summary>
-        /// Gestionnaire d'événement pour définir le processus prioritaire
+        /// Event handler for setting the priority process.
+        /// Calls the ViewModel method to set the selected process as priority.
         /// </summary>
         private void SetPriorityButton_Click(object sender, RoutedEventArgs e)
         {
@@ -46,7 +66,8 @@ namespace EasySave.Views
         }
 
         /// <summary>
-        /// Gestionnaire d'événement pour effacer le processus prioritaire
+        /// Event handler for clearing the priority process.
+        /// Calls the ViewModel method to clear the priority process.
         /// </summary>
         private void ClearPriorityButton_Click(object sender, RoutedEventArgs e)
         {
@@ -54,31 +75,63 @@ namespace EasySave.Views
         }
 
         /// <summary>
-        /// Gestionnaire d'événement pour la navigation vers le menu principal
-        /// Si la page est hébergée dans une fenêtre, réinitialise le contenu au menu principal
+        /// Event handler for navigation to the main menu.
+        /// If the page is hosted in a window, resets the content to the main menu.
         /// </summary>
-        /// <param name="sender">L'émetteur de l'événement</param>
-        /// <param name="e">Arguments de l'événement</param>
+        /// <param name="sender">The event sender</param>
+        /// <param name="e">Event arguments</param>
         private void OnNavigateToMainMenu(object sender, EventArgs e)
         {
-            // Vérifie si la page est hébergée dans une fenêtre et réinitialise son contenu au menu principal
+            // Check if the page is hosted in a window and reset its content to the main menu
             if (Window.GetWindow(this) is MainWindow mainWindow)
             {
                 mainWindow.ResetToMainMenu();
             }
         }
+
+        /// <summary>
+        /// Event handler for saving settings.
+        /// Retrieves the passphrase from the PasswordBox and triggers the ViewModel's SaveCommand.
+        /// </summary>
+        private void SaveSettings_Click(object sender, RoutedEventArgs e)
+        {
+            var viewModel = (SettingsViewModel)DataContext;
+
+            // Retrieve the passphrase from the PasswordBox (not bindable)
+            string passphrase = PassphraseBox.Password;
+            if (!string.IsNullOrEmpty(passphrase))
+            {
+                // Temporarily store in the ViewModel for saving
+                viewModel.EncryptionPassphrase = passphrase;
+            }
+
+            // Execute the SaveCommand from the ViewModel
+            viewModel.SaveCommand.Execute(null);
+        }
+
     }
 
     /// <summary>
-    /// Convertisseur pour vérifier si une valeur n'est pas nulle
+    /// Converter to check if a value is not null.
     /// </summary>
     public class NotNullConverter : IValueConverter
     {
+        /// <summary>
+        /// Converts a value to a boolean indicating if it is not null.
+        /// </summary>
+        /// <param name="value">The value to check</param>
+        /// <param name="targetType">The target type</param>
+        /// <param name="parameter">Optional parameter</param>
+        /// <param name="culture">Culture info</param>
+        /// <returns>True if value is not null, otherwise false</returns>
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             return value != null;
         }
 
+        /// <summary>
+        /// Not implemented. Throws NotImplementedException.
+        /// </summary>
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             throw new NotImplementedException();
