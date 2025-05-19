@@ -159,7 +159,7 @@ namespace EasySave.Models
 
         public string GetSetting(string key)
         {
-            if (settings.ContainsKey(key) && settings[key] != null)
+            if (settings.TryGetValue(key, out string value))
             {
                 return value;
             }

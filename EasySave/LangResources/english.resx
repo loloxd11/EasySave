@@ -219,4 +219,10 @@
   <data name="Update" xml:space="preserve">
     <value>Update</value>
   </data>
+  <data name="PriorityJobsPhrase" xml:space="preserve">
+    <value>The Priority Jobs is currently up</value>
+  </data>
+  <data name="PriorityJobs" xml:space="preserve">
+    <value>Can't Execute</value>
+  </data>
 </root>

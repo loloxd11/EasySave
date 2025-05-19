@@ -219,9 +219,18 @@ namespace EasySave.ViewModels
         /// </summary>
         public void ExecuteSelectedJobs()
         {
-            if (_selectedJobIndices.Count > 0)
+            if (_selectedJobIndices.Count > 0 && _backupManager.CanExecuteJobs() == true)
             {
                 _backupManager.ExecuteBackupJob(_selectedJobIndices.ToList(), "sequential");
+            }
+            else
+            {
+                System.Windows.MessageBox.Show(
+                LanguageViewModel["PriorityJobsPhrase"],
+                LanguageViewModel["PriorityJobs"],
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Warning);
+                return;
             }
         }
 
