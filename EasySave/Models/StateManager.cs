@@ -31,7 +31,6 @@ namespace EasySave.Models
             public string TargetPath { get; set; }
             public int TotalFiles { get; set; }      // Nombre total de fichiers à copier (statique)
             public long TotalSize { get; set; }
-            public int FilesLeftToDo { get; set; }   // Nombre de fichiers restant à copier (dynamique)
             public int Progression { get; set; }     // En pourcentage (0-100)
         }
 
@@ -80,7 +79,7 @@ namespace EasySave.Models
                     UpdateJobState(name, type, state, sourcePath, targetPath, totalFiles, totalSize, progression);
                 }
 
-                NotifyObservers();
+                 NotifyObservers();
             }
         }
 
@@ -104,12 +103,8 @@ namespace EasySave.Models
 
             jobState.TotalSize = totalSize;
 
-            // Calcul correct des fichiers restants
-            // progression contient le nombre de fichiers déjà traités
-            jobState.FilesLeftToDo = Math.Max(0, jobState.TotalFiles - progression);
-
             // Calculer la progression en pourcentage
-            jobState.Progression = progression;
+            jobState.Progression = (int)Math.Min(100, Math.Round((double)progression / jobState.TotalFiles * 100));
 
             SaveStateFile();
         }
@@ -126,7 +121,6 @@ namespace EasySave.Models
             jobState.TargetPath = targetPath;
             jobState.TotalFiles = totalFiles;
             jobState.TotalSize = totalSize;
-            jobState.FilesLeftToDo = totalFiles; // Au début, tous les fichiers restent à copier
             jobState.Progression = 0; // Progression initiale à 0%
 
             SaveStateFile();
@@ -153,13 +147,10 @@ namespace EasySave.Models
             // Pour un job complété, aucun fichier ne reste à traiter
             if (state == JobState.completed)
             {
-                jobState.FilesLeftToDo = 0;
                 jobState.Progression = 100;
             }
             else
             {
-                // En cas d'erreur, calculer correctement les fichiers restants
-                jobState.FilesLeftToDo = Math.Max(0, jobState.TotalFiles - progression);
 
                 // Calculer la progression en pourcentage
                 jobState.Progression = jobState.TotalFiles > 0

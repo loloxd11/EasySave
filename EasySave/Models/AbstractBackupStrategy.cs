@@ -13,7 +13,7 @@ namespace EasySave.Models
         protected JobState state;
         protected int totalFiles;
         protected long totalSize;
-        protected int progression;
+        protected int currentProgress;
         protected long LastFileTime;
         protected string name;
 
@@ -50,18 +50,15 @@ namespace EasySave.Models
         public void NotifyObserver(
             string action,
             string name,
+            JobState state, 
             string sourcePath = "",
             string targetPath = "",
-            long fileSize = 0,
+            int totalFiles = 0,
+            long totalSize = 0,
             long transferTime = 0,
             long encryptionTime = 0,
-            int? currentProgress = null)
+            int currentProgress = 0)
         {
-            // Si une valeur de progression est fournie, mettre à jour la progression
-            if (currentProgress.HasValue)
-            {
-                progression = currentProgress.Value;
-            }
 
             // Déterminer le type de sauvegarde en cours
             BackupType backupType = this is CompleteBackupStrategy ? BackupType.Complete : BackupType.Differential;
@@ -71,23 +68,24 @@ namespace EasySave.Models
             foreach (var observer in observers)
             {
                 observer.Update(action, name, backupType, state, sourcePath, targetPath,
-                    totalFiles, totalSize, progression);
+                    totalFiles, totalSize, currentProgress);
             }
         }
 
 
-        public void UpdateProgress(int files, long size)
+        /*public void UpdateProgress(int files, long size)
         {
             progression = files;
             // Notifier les observateurs du changement de progression
             NotifyObserver(BackupActions.Progress, name, currentProgress: files);
-        }
+        }*/
 
         public void UpdateCurrentFile(string source, string target)
         {
             // Update current file being processed
             LastFileTime = DateTime.Now.Ticks;
-            NotifyObserver(BackupActions.Processing, name, source, target);
+            // Utiliser les constantes standardisées et passer l'état correctement
+            NotifyObserver(BackupActions.Processing, name, state, source, target);
         }
 
         public abstract bool Execute(string name, string src, string dst, string order);
