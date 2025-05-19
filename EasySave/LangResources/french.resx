@@ -182,6 +182,7 @@
   </data>
   <data name="Settings" xml:space="preserve">
     <value>Paramètre</value>
+  </data>
   <data name="SelectAll" xml:space="preserve">
     <value>Tout sélectionner</value>
   </data>
@@ -193,5 +194,11 @@
   </data>
   <data name="Validate" xml:space="preserve">
     <value>Valider</value>
+  </data>
+  <data name="DeleteJobConfirmation" xml:space="preserve">
+    <value>Êtes-vous sure ? </value>
+  </data>
+  <data name="DeleteConfirmationTitle" xml:space="preserve">
+    <value>Supprimer des travaux</value>
   </data>
 </root>

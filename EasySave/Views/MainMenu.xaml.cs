@@ -15,9 +15,6 @@ namespace EasySave
         // Un seul ViewModel principal
         private MainMenuViewModel _viewModel;
 
-
-        public static object SharedLanguageViewModel { get; internal set; }
-
         /// <summary>
         /// Constructor for MainWindow.
         /// Initializes the DataContext with the LanguageViewModel from MainMenuViewModel.
@@ -52,21 +49,6 @@ namespace EasySave
             );
         }
 
-        /// <summary>
-        /// Changes the application language to English.
-        /// </summary>
-        private void TestChangeLanguageToEnglish(object sender, RoutedEventArgs e)
-        {
-            _viewModel.LanguageViewModel.ChangeLanguage("english");
-        }
-
-        /// <summary>
-        /// Changes the application language to French.
-        /// </summary>
-        private void TestChangeLanguageToFrench(object sender, RoutedEventArgs e)
-        {
-            _viewModel.LanguageViewModel.ChangeLanguage("french");
-        }
 
         /// <summary>
         /// Navigates to the Add Backup Job page.

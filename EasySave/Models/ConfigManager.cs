@@ -126,11 +126,25 @@ namespace EasySave.Models
             try
             {
                 configData.Settings = settings;
+                configData.BackupJobs = BackupManager.GetInstance().ListBackups()
+                    .Select(job => new ConfigDataWithJobs.BackupJobConfig
+                    {
+                        Name = job.Name,
+                        Source = job.Source,
+                        Destination = job.Destination,
+                        Type = job.Type
+                    }).ToList();
 
-                // Update backup jobs in config data
-                // This would typically be called from BackupManager
+                JsonSerializerOptions options = new JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                    Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, allowIntegerValues: false) }
+                };
 
-                string json = JsonSerializer.Serialize(configData);
+                string json = JsonSerializer.Serialize(configData, options);
+
+                // Assurez-vous que le répertoire existe
+                Directory.CreateDirectory(Path.GetDirectoryName(configFilePath));
                 File.WriteAllText(configFilePath, json);
 
                 return true;
