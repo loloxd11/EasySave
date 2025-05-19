@@ -70,11 +70,50 @@ namespace EasySave.ViewModels
         /// Commande pour actualiser la liste des processus en cours d'exécution
         /// </summary>
         public ICommand RefreshProcessesCommand { get; }
+        
+        /// <summary>
+        /// Commande pour définir le format de log en XML
+        /// </summary>
+        public ICommand SetXmlFormatCommand { get; }
+        
+        /// <summary>
+        /// Commande pour définir le format de log en JSON
+        /// </summary>
+        public ICommand SetJsonFormatCommand { get; }
 
         /// <summary>
         /// Langue actuelle de l'application
         /// </summary>
         public string CurrentLanguage => LanguageViewModel.CurrentLanguage;
+
+        private LogFormat _selectedLogFormat;
+        /// <summary>
+        /// Format de log sélectionné
+        /// </summary>
+        public LogFormat SelectedLogFormat
+        {
+            get => _selectedLogFormat;
+            set
+            {
+                if (_selectedLogFormat != value)
+                {
+                    _selectedLogFormat = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(IsXmlSelected));
+                    OnPropertyChanged(nameof(IsJsonSelected));
+                }
+            }
+        }
+        
+        /// <summary>
+        /// Indique si le format XML est sélectionné
+        /// </summary>
+        public bool IsXmlSelected => _selectedLogFormat == LogFormat.XML;
+        
+        /// <summary>
+        /// Indique si le format JSON est sélectionné
+        /// </summary>
+        public bool IsJsonSelected => _selectedLogFormat == LogFormat.JSON;
 
         private string _newExtension;
         /// <summary>
@@ -198,6 +237,9 @@ namespace EasySave.ViewModels
             // Charger le processus prioritaire
             LoadPriorityProcess();
 
+            // Charger le format de log actuel depuis la configuration
+            LoadLogFormat();
+
             // Initialiser la liste des processus en cours d'exécution
             LoadRunningProcesses();
 
@@ -210,6 +252,9 @@ namespace EasySave.ViewModels
                 
                 // Sauvegarder le processus prioritaire
                 SavePriorityProcess();
+                
+                // Sauvegarder le format de log
+                SaveLogFormat();
                 
                 NavigateToMainMenu?.Invoke(this, EventArgs.Empty);
             });
@@ -259,6 +304,16 @@ namespace EasySave.ViewModels
 
             RefreshProcessesCommand = new RelayCommand(() => {
                 LoadRunningProcesses();
+            });
+
+            // Commande pour définir le format de log en XML
+            SetXmlFormatCommand = new RelayCommand(() => {
+                SelectedLogFormat = LogFormat.XML;
+            });
+            
+            // Commande pour définir le format de log en JSON
+            SetJsonFormatCommand = new RelayCommand(() => {
+                SelectedLogFormat = LogFormat.JSON;
             });
         }
 
@@ -378,6 +433,35 @@ namespace EasySave.ViewModels
         public void SavePriorityProcess()
         {
             //_configManager.SetSetting("PriorityProcess", PriorityProcess ?? string.Empty);
+        }
+
+        /// <summary>
+        /// Charge le format de log depuis la configuration
+        /// </summary>
+        private void LoadLogFormat()
+        {
+            string formatString = _configManager.GetSetting("LogFormat");
+            if (!string.IsNullOrEmpty(formatString) && Enum.TryParse<LogFormat>(formatString, true, out LogFormat format))
+            {
+                SelectedLogFormat = format;
+            }
+            else
+            {
+                // Par défaut, utiliser XML
+                SelectedLogFormat = LogFormat.XML;
+            }
+        }
+        
+        /// <summary>
+        /// Sauvegarde le format de log dans la configuration
+        /// </summary>
+        public void SaveLogFormat()
+        {
+            _configManager.SetSetting("LogFormat", SelectedLogFormat.ToString());
+            
+            // Réinitialiser le singleton LogManager pour qu'il prenne en compte le nouveau format
+            // Cette ligne peut être facultative selon l'architecture
+            // LogManager.ResetInstance();
         }
 
         /// <summary>

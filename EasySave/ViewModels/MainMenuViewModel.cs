@@ -1,7 +1,10 @@
+using EasySave.Commands;
+using EasySave.Models;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using EasySave.Models;
+using System.Windows;
+using System.Windows.Input;
 
 namespace EasySave.ViewModels
 {
@@ -24,7 +27,7 @@ namespace EasySave.ViewModels
         public LanguageViewModel LanguageViewModel { get; }
 
         private readonly BackupManager _backupManager;
-
+        public ICommand DeleteJobCommand { get; private set; }
         // Collection observable pour les jobs de sauvegarde
         private ObservableCollection<BackupJob> _backupJobs;
         public ObservableCollection<BackupJob> BackupJobs
@@ -37,7 +40,6 @@ namespace EasySave.ViewModels
             }
         }
 
-        // Job s�lectionn� pour l'�dition ou la suppression
         private BackupJob _selectedJob;
         public BackupJob SelectedJob
         {
@@ -60,8 +62,8 @@ namespace EasySave.ViewModels
 
             // Initialiser la collection des jobs
             LoadBackupJobs();
+            DeleteJobCommand = new RelayCommand(DeleteSelectedJobs, CanDeleteJobs);
         }
-        // M�thode pour r�cup�rer la liste des jobs de sauvegarde et les afficher
         public void LoadBackupJobs()
         {
             // R�cup�rer la liste des jobs depuis le BackupManager
@@ -176,5 +178,38 @@ namespace EasySave.ViewModels
                 _backupManager.ExecuteBackupJob(_selectedJobIndices.ToList(), "sequential");
             }
         }
+        private bool CanDeleteJobs()
+        {
+            return SelectedJobIndices.Count > 0;
+        }
+
+        public void DeleteSelectedJobs()
+        {
+            if (SelectedJobIndices.Count == 0)
+                return;
+
+            // Demander confirmation avant suppression
+            MessageBoxResult result = System.Windows.MessageBox.Show(
+                LanguageViewModel["DeleteJobConfirmation"],
+                LanguageViewModel["DeleteConfirmationTitle"],
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                var indicesToRemove = SelectedJobIndices.OrderByDescending(i => i).ToList();
+
+                foreach (var index in indicesToRemove)
+                {
+                    _backupManager.RemoveBackup(index);
+                }
+
+                RefreshJobsList();
+
+                SelectedJobIndices.Clear();
+                UpdateAllJobsSelectedState();
+            }
+        }
+
     }
 }

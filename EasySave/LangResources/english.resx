@@ -182,7 +182,7 @@
   </data>
   <data name="Settings" xml:space="preserve">
     <value>Settings</value>
-</data>
+  </data>
   <data name="SelectAll" xml:space="preserve">
     <value>SelectAll</value>
   </data>
@@ -194,5 +194,23 @@
   </data>
   <data name="Validate" xml:space="preserve">
     <value>Validate</value>
+  </data>
+  <data name="LogFormat" xml:space="preserve">
+    <value>Log Format</value>
+  </data>
+  <data name="SelectLogFormat" xml:space="preserve">
+    <value>Select Log Format</value>
+  </data>
+  <data name="XMLFormat" xml:space="preserve">
+    <value>XML</value>
+  </data>
+  <data name="JSONFormat" xml:space="preserve">
+    <value>JSON</value>
+  </data>
+  <data name="DeleteJobConfirmation" xml:space="preserve">
+    <value>Are you sure ?</value>
+  </data>
+  <data name="DeleteConfirmationTitle" xml:space="preserve">
+    <value>Delete Jobs</value>
   </data>
 </root>
