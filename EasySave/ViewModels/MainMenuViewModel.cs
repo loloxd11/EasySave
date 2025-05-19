@@ -1,7 +1,11 @@
+using EasySave.Commands;
+using EasySave.Models;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using EasySave.Models;
+using System.Windows;
+using System.Windows.Input;
+using MessageBox = System.Windows.MessageBox;
 
 namespace EasySave.ViewModels
 {
@@ -24,7 +28,8 @@ namespace EasySave.ViewModels
         public LanguageViewModel LanguageViewModel { get; }
 
         private readonly BackupManager _backupManager;
-
+        public ICommand DeleteJobCommand { get; private set; }
+        public ICommand EditJobCommand { get; private set; }
         // Collection observable pour les jobs de sauvegarde
         private ObservableCollection<BackupJob> _backupJobs;
         public ObservableCollection<BackupJob> BackupJobs
@@ -37,7 +42,6 @@ namespace EasySave.ViewModels
             }
         }
 
-        // Job s�lectionn� pour l'�dition ou la suppression
         private BackupJob _selectedJob;
         public BackupJob SelectedJob
         {
@@ -60,8 +64,9 @@ namespace EasySave.ViewModels
 
             // Initialiser la collection des jobs
             LoadBackupJobs();
+            DeleteJobCommand = new RelayCommand(DeleteSelectedJobs, CanDeleteJobs);
+            EditJobCommand = new RelayCommand(EditSelectedJob, CanEditJob);
         }
-        // M�thode pour r�cup�rer la liste des jobs de sauvegarde et les afficher
         public void LoadBackupJobs()
         {
             // R�cup�rer la liste des jobs depuis le BackupManager
@@ -176,5 +181,67 @@ namespace EasySave.ViewModels
                 _backupManager.ExecuteBackupJob(_selectedJobIndices.ToList(), "sequential");
             }
         }
+        private bool CanDeleteJobs()
+        {
+            return SelectedJobIndices.Count > 0;
+        }
+
+        public void DeleteSelectedJobs()
+        {
+            if (SelectedJobIndices.Count == 0)
+                return;
+
+            // Demander confirmation avant suppression
+            MessageBoxResult result = System.Windows.MessageBox.Show(
+                LanguageViewModel["DeleteJobConfirmation"],
+                LanguageViewModel["DeleteConfirmationTitle"],
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                var indicesToRemove = SelectedJobIndices.OrderByDescending(i => i).ToList();
+
+                foreach (var index in indicesToRemove)
+                {
+                    _backupManager.RemoveBackup(index);
+                }
+
+                RefreshJobsList();
+
+                SelectedJobIndices.Clear();
+                UpdateAllJobsSelectedState();
+            }
+        }
+
+        private bool CanEditJob()
+        {
+            return SelectedJob != null;
+        }
+
+        public void EditSelectedJob()
+        {
+            if (SelectedJob == null)
+                return;
+
+            // Trouver l'index du job sélectionné
+            int selectedIndex = _backupJobs.IndexOf(SelectedJob);
+
+            if (selectedIndex >= 0)
+            {
+                // Créer une nouvelle instance de Jobs avec le job à éditer
+                var jobsView = new EasySave.Views.Jobs(SelectedJob, selectedIndex);
+
+                // Accéder à la fenêtre principale
+                if (App.Current.MainWindow is MainWindow mainWindow)
+                {
+                    // Remplacer le contenu actuel par la vue d'édition de job
+                    mainWindow.Content = jobsView;
+                    mainWindow.Title = LanguageViewModel["EditJobTitle"];
+                }
+            }
+        }
+
+
     }
 }

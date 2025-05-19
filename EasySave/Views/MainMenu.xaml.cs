@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -100,21 +100,6 @@ namespace EasySave
             _stateManager.AttachObserver(this);
         }
 
-        /// <summary>
-        /// Changes the application language to English.
-        /// </summary>
-        private void TestChangeLanguageToEnglish(object sender, RoutedEventArgs e)
-        {
-            _viewModel.LanguageViewModel.ChangeLanguage("english");
-        }
-
-        /// <summary>
-        /// Changes the application language to French.
-        /// </summary>
-        private void TestChangeLanguageToFrench(object sender, RoutedEventArgs e)
-        {
-            _viewModel.LanguageViewModel.ChangeLanguage("french");
-        }
 
         /// <summary>
         /// Navigates to the Add Backup Job page.
@@ -129,11 +114,15 @@ namespace EasySave
         }
 
         /// <summary>
-        /// Placeholder for editing a backup job.
-        /// </summary>
+        /// Navigates to the Edit Backup Job page.
+        /// Creates a new Frame and sets its content to the Jobs page.
+        /// </summary
         private void EditBackupJob_Click(object sender, RoutedEventArgs e)
         {
-            // Logic for editing a backup job
+            Frame jobsFrame = new Frame();
+            Jobs jobsPage = new Jobs();
+            jobsFrame.Content = jobsPage;
+            Content = jobsFrame;
         }
 
         /// <summary>

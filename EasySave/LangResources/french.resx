@@ -198,4 +198,10 @@
   <data name="Progress" xml:space="preserve">
     <value>Progression</value>
   </data>
+  <data name="DeleteJobConfirmation" xml:space="preserve">
+    <value>Êtes-vous sure ? </value>
+  </data>
+  <data name="DeleteConfirmationTitle" xml:space="preserve">
+    <value>Supprimer des travaux</value>
+  </data>
 </root>

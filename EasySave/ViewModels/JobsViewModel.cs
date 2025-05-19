@@ -1,50 +1,26 @@
 ﻿using EasySave.Commands;
 using EasySave.Models;
+using System;
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
-using System.Windows.Navigation;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace EasySave.ViewModels
 {
-    /// <summary>
-    /// ViewModel for managing backup jobs in the EasySave application.
-    /// Handles user input, validation, and interaction with the BackupManager.
-    /// </summary>
     public class JobsViewModel : INotifyPropertyChanged
     {
-        /// <summary>
-        /// Event triggered when a property value changes.
-        /// </summary>
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// Instance of the LanguageViewModel for managing application language.
-        /// </summary>
-        public LanguageViewModel LanguageViewModel { get; }
-
-        /// <summary>
-        /// Notifies listeners of property changes.
-        /// </summary>
-        /// <param name="name">The name of the property that changed.</param>
+        public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string name = "") =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
-        /// <summary>
-        /// Singleton instance of the BackupManager for managing backup jobs.
-        /// </summary>
+        public LanguageViewModel LanguageViewModel { get; }
         private BackupManager backupManager = BackupManager.GetInstance();
-
-        /// <summary>
-        /// Event triggered to navigate back to the main menu.
-        /// </summary>
         public event EventHandler NavigateToMainMenu;
 
         private string jobName;
-        /// <summary>
-        /// Name of the backup job.
-        /// </summary>
         public string JobName
         {
             get => jobName;
@@ -52,9 +28,6 @@ namespace EasySave.ViewModels
         }
 
         private string sourcePath;
-        /// <summary>
-        /// Source path for the backup job.
-        /// </summary>
         public string SourcePath
         {
             get => sourcePath;
@@ -62,144 +35,179 @@ namespace EasySave.ViewModels
         }
 
         private string targetPath;
-        /// <summary>
-        /// Target path for the backup job.
-        /// </summary>
         public string TargetPath
         {
             get => targetPath;
             set { targetPath = value; OnPropertyChanged(); }
         }
 
-        /// <summary>
-        /// List of available backup types (Complete, Differential).
-        /// </summary>
         public IEnumerable<BackupType> BackupTypes { get; } = Enum.GetValues(typeof(BackupType)).Cast<BackupType>();
 
         private BackupType selectedBackupType;
-        /// <summary>
-        /// Selected backup type for the job.
-        /// </summary>
         public BackupType SelectedBackupType
         {
             get => selectedBackupType;
             set { selectedBackupType = value; OnPropertyChanged(); }
         }
 
-        /// <summary>
-        /// Command to validate and add a new backup job.
-        /// </summary>
         public ICommand ValidateCommand { get; }
-
-        /// <summary>
-        /// Command to cancel the operation and navigate back to the main menu.
-        /// </summary>
         public ICommand CancelCommand { get; }
 
+        // Pour l'édition
+        private bool isEditMode;
+        public bool IsEditMode => isEditMode;
+
+        private string originalJobName;
+        private int editJobIndex;
+
         /// <summary>
-        /// Constructor for the JobsViewModel.
-        /// Initializes commands and sets up the LanguageViewModel instance.
+        /// Constructeur standard pour l'ajout d'un nouveau job
         /// </summary>
         public JobsViewModel()
         {
             LanguageViewModel = LanguageViewModel.Instance;
+            isEditMode = false;
 
-            ValidateCommand = new RelayCommand(() =>
+            ValidateCommand = new RelayCommand(ValidateJob);
+            CancelCommand = new RelayCommand(() =>
             {
-                // Validate the job name
-                if (string.IsNullOrWhiteSpace(JobName))
-                {
-                    System.Windows.MessageBox.Show(
-                        "The job name cannot be empty.",
-                        "Missing Field",
-                        System.Windows.MessageBoxButton.OK,
-                        System.Windows.MessageBoxImage.Warning);
-                    return;
-                }
+                NavigateToMainMenu?.Invoke(this, EventArgs.Empty);
+            });
+        }
 
-                // Validate the source path
-                if (string.IsNullOrWhiteSpace(SourcePath))
-                {
-                    System.Windows.MessageBox.Show(
-                        "The source path cannot be empty.",
-                        "Missing Field",
-                        System.Windows.MessageBoxButton.OK,
-                        System.Windows.MessageBoxImage.Warning);
-                    return;
-                }
+        /// <summary>
+        /// Constructeur pour l'édition d'un job existant
+        /// </summary>
+        public JobsViewModel(BackupJob jobToEdit, int jobIndex)
+        {
+            LanguageViewModel = LanguageViewModel.Instance;
+            isEditMode = true;
+            editJobIndex = jobIndex;
 
-                // Validate the target path
-                if (string.IsNullOrWhiteSpace(TargetPath))
-                {
-                    System.Windows.MessageBox.Show(
-                        "The target path cannot be empty.",
-                        "Missing Field",
-                        System.Windows.MessageBoxButton.OK,
-                        System.Windows.MessageBoxImage.Warning);
-                    return;
-                }
+            // Charger les valeurs du job à éditer
+            originalJobName = jobToEdit.Name;
+            JobName = jobToEdit.Name;
+            SourcePath = jobToEdit.Source;
+            TargetPath = jobToEdit.Destination;
+            SelectedBackupType = jobToEdit.Type;
 
-                // Check if the source directory exists
-                if (!Directory.Exists(SourcePath))
-                {
-                    System.Windows.MessageBox.Show(
-                        "The source directory does not exist.",
-                        "Invalid Directory",
-                        System.Windows.MessageBoxButton.OK,
-                        System.Windows.MessageBoxImage.Error);
-                    return;
-                }
+            ValidateCommand = new RelayCommand(ValidateJob);
+            CancelCommand = new RelayCommand(() =>
+            {
+                NavigateToMainMenu?.Invoke(this, EventArgs.Empty);
+            });
+        }
 
-                // Validate the target path
-                try
-                {
-                    // Check if the target directory exists, otherwise create it
-                    if (!Directory.Exists(TargetPath))
-                    {
-                        // Validate the path before attempting to create the directory
-                        Path.GetFullPath(TargetPath);
+        private void ValidateJob()
+        {
+            // Validation des champs
+            if (string.IsNullOrWhiteSpace(JobName))
+            {
+                System.Windows.MessageBox.Show(
+                    LanguageViewModel["JobNameEmptyError"] ?? "The job name cannot be empty.",
+                    LanguageViewModel["MissingField"] ?? "Missing Field",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Warning);
+                return;
+            }
 
-                        // Optionally, create the directory
-                        // Directory.CreateDirectory(TargetPath);
-                    }
-                    else
-                    {
-                        Directory.CreateDirectory(TargetPath);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    System.Windows.MessageBox.Show(
-                        $"The target path is invalid: {ex.Message}",
-                        "Invalid Path",
-                        System.Windows.MessageBoxButton.OK,
-                        System.Windows.MessageBoxImage.Error);
-                    return;
-                }
+            if (string.IsNullOrWhiteSpace(SourcePath))
+            {
+                System.Windows.MessageBox.Show(
+                    LanguageViewModel["SourcePathEmptyError"] ?? "The source path cannot be empty.",
+                    LanguageViewModel["MissingField"] ?? "Missing Field",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Warning);
+                return;
+            }
 
-                // Add the backup job if all validations pass
-                bool success = backupManager.AddBackupJob(JobName, SourcePath, TargetPath, SelectedBackupType);
+            if (string.IsNullOrWhiteSpace(TargetPath))
+            {
+                System.Windows.MessageBox.Show(
+                    LanguageViewModel["TargetPathEmptyError"] ?? "The target path cannot be empty.",
+                    LanguageViewModel["MissingField"] ?? "Missing Field",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Warning);
+                return;
+            }
 
-                if (success)
+            if (!Directory.Exists(SourcePath))
+            {
+                System.Windows.MessageBox.Show(
+                    LanguageViewModel["SourceDirNotExistError"] ?? "The source directory does not exist.",
+                    LanguageViewModel["InvalidDirectory"] ?? "Invalid Directory",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
+                return;
+            }
+
+            try
+            {
+                if (!Directory.Exists(TargetPath))
                 {
-                    // Trigger the event to navigate back to the main menu
-                    NavigateToMainMenu?.Invoke(this, EventArgs.Empty);
+                    Path.GetFullPath(TargetPath);
                 }
                 else
                 {
-                    System.Windows.MessageBox.Show(
-                        "Error adding the job. A job with this name may already exist.",
-                        "Error",
-                        System.Windows.MessageBoxButton.OK,
-                        System.Windows.MessageBoxImage.Error);
+                    Directory.CreateDirectory(TargetPath);
                 }
-            });
-
-            CancelCommand = new RelayCommand(() =>
+            }
+            catch (Exception ex)
             {
-                // Navigate back to the main menu without saving
+                System.Windows.MessageBox.Show(
+                    $"{LanguageViewModel["TargetPathInvalidError"] ?? "The target path is invalid:"} {ex.Message}",
+                    LanguageViewModel["InvalidPath"] ?? "Invalid Path",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
+                return;
+            }
+
+            bool success;
+
+            if (isEditMode)
+            {
+                // En mode édition
+                if (originalJobName != JobName)
+                {
+                    // Le nom a changé, vérifier si le nouveau nom existe déjà
+                    if (backupManager.ListBackups().Any(j => j.Name == JobName && j.Name != originalJobName))
+                    {
+                        System.Windows.MessageBox.Show(
+                            LanguageViewModel["JobNameExistsError"] ?? "A job with this name already exists.",
+                            LanguageViewModel["Error"] ?? "Error",
+                            System.Windows.MessageBoxButton.OK,
+                            System.Windows.MessageBoxImage.Error);
+                        return;
+                    }
+
+                    // Supprimer l'ancien job et en créer un nouveau avec le même index
+                    backupManager.RemoveBackup(editJobIndex);
+                    success = backupManager.AddBackupJob(JobName, SourcePath, TargetPath, SelectedBackupType);
+                }
+                else
+                {
+                    // Mettre à jour le job existant avec les mêmes valeurs
+                    success = backupManager.UpdateBackupJob(JobName, SourcePath, TargetPath, SelectedBackupType);
+                }
+            }
+            else
+            {
+                // En mode ajout
+                success = backupManager.AddBackupJob(JobName, SourcePath, TargetPath, SelectedBackupType);
+            }
+
+            if (success)
+            {
                 NavigateToMainMenu?.Invoke(this, EventArgs.Empty);
-            });
+            }
+            else
+            {
+                System.Windows.MessageBox.Show(
+                    LanguageViewModel["JobSaveError"] ?? "Error saving the job.",
+                    LanguageViewModel["Error"] ?? "Error",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
+            }
         }
     }
 }

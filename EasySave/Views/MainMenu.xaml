@@ -89,8 +89,8 @@
             <!-- Le reste du code reste inchangé -->
             <WrapPanel HorizontalAlignment="Center" Margin="0,10,0,0">
                 <Button Content="{Binding LanguageViewModel[Add]}" Click="AddBackupJob_Click" Margin="10" Padding="10,5" Background="#5cb85c" Foreground="White"/>
-                <Button Content="{Binding LanguageViewModel[Edit]}" Click="EditBackupJob_Click" Margin="10" Padding="10,5" Background="#0275d8" Foreground="White"/>
-                <Button Content="{Binding LanguageViewModel[Delete]}" Click="DeleteBackupJob_Click" Margin="10" Padding="10,5" Background="#d9534f" Foreground="White"/>
+                <Button Content="{Binding LanguageViewModel[Edit]}" Command="{Binding EditJobCommand}" Margin="10" Padding="10,5" Background="#0275d8" Foreground="White"/>
+                <Button Content="{Binding LanguageViewModel[Delete]}" Command="{Binding DeleteJobCommand}" Margin="10" Padding="10,5" Background="#d9534f" Foreground="White"/>
                 <Button Content="{Binding LanguageViewModel[Execute]}" Click="ExecuteBackupJob_Click" Margin="10" Padding="10,5" Background="#f0ad4e" Foreground="White"/>
             </WrapPanel>
         </StackPanel>

@@ -168,7 +168,7 @@ namespace EasySave.Models
                     Name = job.Name,
                     Source = job.Source,
                     Destination = job.Destination,
-                    Type = job.Type  // Enlever .ToString()
+                    Type = job.Type.ToString()
                 })
             };
 

@@ -30,7 +30,7 @@ namespace EasySave.Views
             // Mettre à jour la PasswordBox avec la passphrase chargée du ViewModel
             Loaded += SettingsView_Loaded;
             
-            // Reconfigurer la commande Save pour gérer la passphrase
+            // Reconfigurer la commande Save pour gérer la passphrase et autres paramètres
             _viewModel.SaveCommand = new EasySave.Commands.RelayCommand(() => {
                 // Capturer la passphrase depuis la PasswordBox
                 _viewModel.EncryptionPassphrase = PassphraseBox.Password;
@@ -39,6 +39,7 @@ namespace EasySave.Views
                 _viewModel.SaveEncryptedExtensions();
                 _viewModel.SaveEncryptionPassphrase();
                 _viewModel.SavePriorityProcess();
+                _viewModel.SaveLogFormat(); // Sauvegarder le format de log
                 
                 // Naviguer vers le menu principal
                 //_viewModel.NavigateToMainMenu?.Invoke(this, EventArgs.Empty);

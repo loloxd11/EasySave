@@ -120,6 +120,15 @@ namespace EasySave.Models
         }
 
         /// <summary>
+        /// Sets the log format to be used by the logger.
+        /// </summary>
+        /// <param name="format">The log format to set.</param>
+        public void SetFormat(LogFormat format)
+        {
+            _logger.SetFormat((LogLibrary.Enums.LogFormat)format);
+        }
+
+        /// <summary>
         /// Récupère le chemin du fichier de log actuel.
         /// </summary>
         /// <returns>Le chemin du fichier de log actuel</returns>
