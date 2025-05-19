@@ -63,11 +63,15 @@ namespace EasySave
         }
 
         /// <summary>
-        /// Placeholder for editing a backup job.
-        /// </summary>
+        /// Navigates to the Edit Backup Job page.
+        /// Creates a new Frame and sets its content to the Jobs page.
+        /// </summary
         private void EditBackupJob_Click(object sender, RoutedEventArgs e)
         {
-            // Logic for editing a backup job
+            Frame jobsFrame = new Frame();
+            Jobs jobsPage = new Jobs();
+            jobsFrame.Content = jobsPage;
+            Content = jobsFrame;
         }
 
         /// <summary>
