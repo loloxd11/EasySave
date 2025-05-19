@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EasySave.Models
 {
@@ -19,6 +17,7 @@ namespace EasySave.Models
         {
             this.name = name;
             state = JobState.active;
+            EncryptionService encryptionService = EncryptionService.GetInstance();
 
             try
             {
@@ -62,60 +61,84 @@ namespace EasySave.Models
                     Directory.CreateDirectory(targetPath);
                 }
 
-                // Traiter tous les fichiers pour la progression
-                foreach (string sourceFile in sourceFiles)
+                // Identify files that need to be copied
+                List<string> filesToCopy = new List<string>();
+                int filesProcessed = 0;
+
+                foreach (string sourceFile in allSourceFiles)
                 {
                     // Create relative path
-                    string relativePath = sourceFile.Substring(sourcePath.Length);
-                    if (relativePath.StartsWith("\\") || relativePath.StartsWith("/"))
+                    string relativePath = sourceFile.Substring(sourcePath.Length).TrimStart('\\', '/');
+                    string destinationFile = Path.Combine(targetPath, relativePath);
+
+                    // If file doesn't exist in destination or has been modified, copy it
+                    bool needsCopy = !File.Exists(destinationFile) ||
+                                    File.GetLastWriteTime(sourceFile) > File.GetLastWriteTime(destinationFile);
+
+                    if (needsCopy)
                     {
-                        relativePath = relativePath.Substring(1);
+                        filesToCopy.Add(sourceFile);
                     }
 
-                    // Create destination file path
-                    string destFile = Path.Combine(targetPath, relativePath);
-                    string destDir = Path.GetDirectoryName(destFile);
+                    // Update UI progress
+                    filesProcessed++;
+                    progression = filesProcessed;
+                }
 
-                    // Only copy if the file doesn't exist or is newer
-                    bool shouldCopy = !File.Exists(destFile) ||
-                                     File.GetLastWriteTime(sourceFile) > File.GetLastWriteTime(destFile);
+                // Set counter for remaining files to copy
+                remainingFiles = filesToCopy.Count;
 
-                    if (shouldCopy)
+                // Copy and process each needed file
+                foreach (string sourceFile in filesToCopy)
+                {
+                    // Create directory structure
+                    string relativePath = sourceFile.Substring(sourcePath.Length).TrimStart('\\', '/');
+                    string destinationFile = Path.Combine(targetPath, relativePath);
+                    string destinationDir = Path.GetDirectoryName(destinationFile);
+
+                    if (!Directory.Exists(destinationDir))
                     {
-                        // Create destination directory if it doesn't exist
-                        if (!Directory.Exists(destDir))
-                        {
-                            Directory.CreateDirectory(destDir);
-                        }
+                        Directory.CreateDirectory(destinationDir);
+                    }
 
                         // Update current file
                         currentFile = sourceFile;
                         destinationFile = destFile;
 
-                        // Copy file
-                        long fileSize = GetFileSize(sourceFile);
-                        long startTime = DateTime.Now.Ticks;
+                    // Copy file and measure time
+                    long fileSize = GetFileSize(sourceFile);
+                    long startTime = DateTime.Now.Ticks;
 
-                        File.Copy(sourceFile, destFile, true);
+                    File.Copy(sourceFile, destinationFile, true);
 
-                        long endTime = DateTime.Now.Ticks;
-                        long transferTime = endTime - startTime;
+                    long endTime = DateTime.Now.Ticks;
+                    long transferTime = endTime - startTime;
 
-                        // Notify observers
-                        NotifyObserver(BackupActions.Processing, name, state, sourceFile, destFile, totalFiles, totalSize, transferTime, 0, currentProgress);
+                    // Vérifier si le fichier doit être chiffré
+                    long encryptionTime = 0;
+                    if (encryptionService.ShouldEncryptFile(sourceFile))
+                    {
+                        // Chiffrer le fichier copié
+                        encryptionTime = encryptionService.EncryptFile(destinationFile);
                     }
+           
 
                     // Update progress (une seule fois par fichier)
                     remainFiles--;
                     currentProgress = totalFiles - remainFiles;
+                    
+                     // Notify observers
+                    NotifyObserver(BackupActions.Processing, name, state, sourceFile, destFile, totalFiles, totalSize, transferTime, 0, currentProgress);
                 }
 
+                // Mark job as completed
                 state = JobState.completed;
                 NotifyObserver(BackupActions.Complete, name, state, sourcePath, targetPath, totalFiles, totalSize, 0, 0, totalFiles);
                 return true;
             }
             catch (Exception ex)
             {
+                // Handle errors
                 state = JobState.error;
                 NotifyObserver(BackupActions.Error, name, state, sourcePath, targetPath, totalFiles, totalSize, 0, 0, currentProgress);
                 Console.WriteLine($"Error executing differential backup: {ex.Message}");
@@ -124,3 +147,4 @@ namespace EasySave.Models
         }
     }
 }
+

@@ -10,17 +10,43 @@ using System.Collections.Generic;
 
 namespace EasySave.ViewModels
 {
+    /// <summary>
+    /// ViewModel for managing backup jobs (add/edit) in the EasySave application.
+    /// Handles job creation, validation, and editing logic.
+    /// </summary>
     public class JobsViewModel : INotifyPropertyChanged
     {
+        /// <summary>
+        /// Event triggered when a property value changes.
+        /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// Notifies listeners that a property value has changed.
+        /// </summary>
+        /// <param name="name">The name of the property that changed.</param>
         private void OnPropertyChanged([CallerMemberName] string name = "") =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
+        /// <summary>
+        /// Singleton instance for language management.
+        /// </summary>
         public LanguageViewModel LanguageViewModel { get; }
+
+        /// <summary>
+        /// Singleton instance for backup job management.
+        /// </summary>
         private BackupManager backupManager = BackupManager.GetInstance();
+
+        /// <summary>
+        /// Event to navigate back to the main menu.
+        /// </summary>
         public event EventHandler NavigateToMainMenu;
 
         private string jobName;
+        /// <summary>
+        /// Name of the backup job.
+        /// </summary>
         public string JobName
         {
             get => jobName;
@@ -28,6 +54,9 @@ namespace EasySave.ViewModels
         }
 
         private string sourcePath;
+        /// <summary>
+        /// Source directory path for the backup job.
+        /// </summary>
         public string SourcePath
         {
             get => sourcePath;
@@ -35,33 +64,52 @@ namespace EasySave.ViewModels
         }
 
         private string targetPath;
+        /// <summary>
+        /// Target directory path for the backup job.
+        /// </summary>
         public string TargetPath
         {
             get => targetPath;
             set { targetPath = value; OnPropertyChanged(); }
         }
 
+        /// <summary>
+        /// List of available backup types (Complete, Differential).
+        /// </summary>
         public IEnumerable<BackupType> BackupTypes { get; } = Enum.GetValues(typeof(BackupType)).Cast<BackupType>();
 
         private BackupType selectedBackupType;
+        /// <summary>
+        /// Selected backup type for the job.
+        /// </summary>
         public BackupType SelectedBackupType
         {
             get => selectedBackupType;
             set { selectedBackupType = value; OnPropertyChanged(); }
         }
 
+        /// <summary>
+        /// Command to validate and save the job.
+        /// </summary>
         public ICommand ValidateCommand { get; }
+
+        /// <summary>
+        /// Command to cancel the operation and return to the main menu.
+        /// </summary>
         public ICommand CancelCommand { get; }
 
-        // Pour l'édition
+        // For edit mode
         private bool isEditMode;
+        /// <summary>
+        /// Indicates if the ViewModel is in edit mode.
+        /// </summary>
         public bool IsEditMode => isEditMode;
 
         private string originalJobName;
         private int editJobIndex;
 
         /// <summary>
-        /// Constructeur standard pour l'ajout d'un nouveau job
+        /// Default constructor for adding a new job.
         /// </summary>
         public JobsViewModel()
         {
@@ -76,15 +124,17 @@ namespace EasySave.ViewModels
         }
 
         /// <summary>
-        /// Constructeur pour l'édition d'un job existant
+        /// Constructor for editing an existing job.
         /// </summary>
+        /// <param name="jobToEdit">The job to edit.</param>
+        /// <param name="jobIndex">The index of the job in the list.</param>
         public JobsViewModel(BackupJob jobToEdit, int jobIndex)
         {
             LanguageViewModel = LanguageViewModel.Instance;
             isEditMode = true;
             editJobIndex = jobIndex;
 
-            // Charger les valeurs du job à éditer
+            // Load values from the job to edit
             originalJobName = jobToEdit.Name;
             JobName = jobToEdit.Name;
             SourcePath = jobToEdit.Source;
@@ -98,9 +148,13 @@ namespace EasySave.ViewModels
             });
         }
 
+        /// <summary>
+        /// Validates the job fields and saves or updates the job accordingly.
+        /// Shows error messages if validation fails.
+        /// </summary>
         private void ValidateJob()
         {
-            // Validation des champs
+            // Validate job name
             if (string.IsNullOrWhiteSpace(JobName))
             {
                 System.Windows.MessageBox.Show(
@@ -111,6 +165,7 @@ namespace EasySave.ViewModels
                 return;
             }
 
+            // Validate source path
             if (string.IsNullOrWhiteSpace(SourcePath))
             {
                 System.Windows.MessageBox.Show(
@@ -121,6 +176,7 @@ namespace EasySave.ViewModels
                 return;
             }
 
+            // Validate target path
             if (string.IsNullOrWhiteSpace(TargetPath))
             {
                 System.Windows.MessageBox.Show(
@@ -131,6 +187,7 @@ namespace EasySave.ViewModels
                 return;
             }
 
+            // Check if source directory exists
             if (!Directory.Exists(SourcePath))
             {
                 System.Windows.MessageBox.Show(
@@ -141,6 +198,7 @@ namespace EasySave.ViewModels
                 return;
             }
 
+            // Validate target path (try to get full path or create directory)
             try
             {
                 if (!Directory.Exists(TargetPath))
@@ -166,10 +224,9 @@ namespace EasySave.ViewModels
 
             if (isEditMode)
             {
-                // En mode édition
+                // Edit mode: check if job name changed and if new name already exists
                 if (originalJobName != JobName)
                 {
-                    // Le nom a changé, vérifier si le nouveau nom existe déjà
                     if (backupManager.ListBackups().Any(j => j.Name == JobName && j.Name != originalJobName))
                     {
                         System.Windows.MessageBox.Show(
@@ -180,19 +237,19 @@ namespace EasySave.ViewModels
                         return;
                     }
 
-                    // Supprimer l'ancien job et en créer un nouveau avec le même index
+                    // Remove old job and add new one at the same index
                     backupManager.RemoveBackup(editJobIndex);
                     success = backupManager.AddBackupJob(JobName, SourcePath, TargetPath, SelectedBackupType);
                 }
                 else
                 {
-                    // Mettre à jour le job existant avec les mêmes valeurs
+                    // Update existing job with new values
                     success = backupManager.UpdateBackupJob(JobName, SourcePath, TargetPath, SelectedBackupType);
                 }
             }
             else
             {
-                // En mode ajout
+                // Add mode: add new job
                 success = backupManager.AddBackupJob(JobName, SourcePath, TargetPath, SelectedBackupType);
             }
 

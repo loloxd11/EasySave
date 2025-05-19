@@ -15,7 +15,7 @@ namespace EasySave
 {
     public partial class MainWindow : Window, IStateObserver
     {
-        // Un seul ViewModel principal
+        // Main ViewModel instance for the main menu
         private MainMenuViewModel _viewModel;
         private StateManager _stateManager;
 
@@ -23,7 +23,7 @@ namespace EasySave
 
         /// <summary>
         /// Constructor for MainWindow.
-        /// Initializes the DataContext with the LanguageViewModel from MainMenuViewModel.
+        /// Initializes the DataContext with the MainMenuViewModel.
         /// </summary>
         public MainWindow()
         {
@@ -100,13 +100,15 @@ namespace EasySave
             _stateManager.AttachObserver(this);
         }
 
-
         /// <summary>
         /// Navigates to the Add Backup Job page.
         /// Creates a new Frame and sets its content to the Jobs page.
         /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">Event arguments.</param>
         private void AddBackupJob_Click(object sender, RoutedEventArgs e)
         {
+            // Create a new frame and navigate to the Jobs page
             Frame jobsFrame = new Frame();
             Jobs jobsPage = new Jobs();
             jobsFrame.Content = jobsPage;
@@ -116,9 +118,12 @@ namespace EasySave
         /// <summary>
         /// Navigates to the Edit Backup Job page.
         /// Creates a new Frame and sets its content to the Jobs page.
-        /// </summary
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">Event arguments.</param>
         private void EditBackupJob_Click(object sender, RoutedEventArgs e)
         {
+            // Create a new frame and navigate to the Jobs page
             Frame jobsFrame = new Frame();
             Jobs jobsPage = new Jobs();
             jobsFrame.Content = jobsPage;
@@ -128,11 +133,19 @@ namespace EasySave
         /// <summary>
         /// Placeholder for deleting a backup job.
         /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">Event arguments.</param>
         private void DeleteBackupJob_Click(object sender, RoutedEventArgs e)
         {
-            // Logic for deleting a backup job
+            // Logic for deleting a backup job (to be implemented)
         }
 
+        /// <summary>
+        /// Handles the event when a job checkbox is checked.
+        /// Selects the corresponding job in the ViewModel.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">Event arguments.</param>
         private void JobCheckBox_Checked(object sender, RoutedEventArgs e)
         {
             if (sender is CheckBox checkBox)
@@ -149,6 +162,12 @@ namespace EasySave
             }
         }
 
+        /// <summary>
+        /// Handles the event when a job checkbox is unchecked.
+        /// Deselects the corresponding job in the ViewModel.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">Event arguments.</param>
         private void JobCheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
             if (sender is CheckBox checkBox)
@@ -165,7 +184,12 @@ namespace EasySave
             }
         }
 
-
+        /// <summary>
+        /// Executes the selected backup jobs.
+        /// Disables the execute button during execution and shows a message box on completion or error.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">Event arguments.</param>
         private void ExecuteBackupJob_Click(object sender, RoutedEventArgs e)
         {
             if (_viewModel.SelectedJobIndices.Count == 0)
@@ -203,13 +227,15 @@ namespace EasySave
             }
         }
 
-
         /// <summary>
-        /// Opens the settings page
+        /// Opens the settings page.
         /// Creates a new Frame and sets its content to the Settings page.
         /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">Event arguments.</param>
         private void SettingsButton_Click(object sender, RoutedEventArgs e)
         {
+            // Create a new frame and navigate to the Settings page
             Frame settingsFrame = new Frame();
             SettingsView settingsPage = new SettingsView();
             settingsFrame.Content = settingsPage;
