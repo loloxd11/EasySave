@@ -53,6 +53,10 @@ namespace EasySave.Models
                 StateManager stateManager = StateManager.GetInstance();
                 strategy.AttachObserver(stateManager);
 
+                // Add log observer to the backup strategy
+                LogManager logManager = LogManager.GetInstance();
+                strategy.AttachObserver(logManager);
+
                 // Save the backup job to configuration
                 SaveBackupJobsToConfig();
 
@@ -82,6 +86,10 @@ namespace EasySave.Models
                 // Add a state observer to the backup strategy
                 StateManager stateManager = StateManager.GetInstance();
                 strategy.AttachObserver(stateManager);
+
+                // Add log observer to the backup strategy
+                LogManager logManager = LogManager.GetInstance();
+                strategy.AttachObserver(logManager);
 
                 // Save the backup job to configuration
                 SaveBackupJobsToConfig();
@@ -160,14 +168,15 @@ namespace EasySave.Models
                     Name = job.Name,
                     Source = job.Source,
                     Destination = job.Destination,
-                    Type = job.Type.ToString()
+                    Type = job.Type  // Enlever .ToString()
                 })
             };
 
             // Serialize data to JSON
             string json = System.Text.Json.JsonSerializer.Serialize(configData, new System.Text.Json.JsonSerializerOptions
             {
-                WriteIndented = true
+                WriteIndented = true,
+                Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() } // Ajouter ce convertisseur
             });
 
             // Define the configuration file path
@@ -178,6 +187,7 @@ namespace EasySave.Models
             // Write data to the file
             File.WriteAllText(configFilePath, json);
         }
+
 
         public void AddToStateObserver(IStateObserver observer)
         {

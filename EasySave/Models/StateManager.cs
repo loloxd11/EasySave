@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace EasySave.Models
@@ -20,12 +21,15 @@ namespace EasySave.Models
         {
             public string Name { get; set; }
             public BackupType Type { get; set; }
+
+            [JsonConverter(typeof(JsonStringEnumConverter))]
             public JobState State { get; set; }
+
             public string SourcePath { get; set; }
             public string TargetPath { get; set; }
             public int TotalFiles { get; set; }
             public long TotalSize { get; set; }
-            public int Progression { get; set; }
+            public int Progression { get; set; } // En pourcentage (0-100)
         }
 
         private StateManager(string path)
@@ -81,7 +85,9 @@ namespace EasySave.Models
             jobState.TargetPath = targetPath;
             jobState.TotalFiles = totalFiles;
             jobState.TotalSize = totalSize;
-            jobState.Progression = progression;
+
+            // Calcul de la progression en pourcentage (0-100)
+            jobState.Progression = totalFiles > 0 ? (int)Math.Round(((double)progression / totalFiles) * 100) : 0;
 
             SaveStateFile();
         }
@@ -97,7 +103,7 @@ namespace EasySave.Models
             jobState.TargetPath = targetPath;
             jobState.TotalFiles = totalFiles;
             jobState.TotalSize = totalSize;
-            jobState.Progression = 0;
+            jobState.Progression = 0; // Progression initiale à 0%
 
             SaveStateFile();
         }
@@ -113,7 +119,10 @@ namespace EasySave.Models
             jobState.TargetPath = targetPath;
             jobState.TotalFiles = totalFiles;
             jobState.TotalSize = totalSize;
-            jobState.Progression = totalFiles; // Completed
+
+            // Si terminé avec succès, progression à 100%
+            jobState.Progression = state == JobState.completed ? 100 :
+                totalFiles > 0 ? (int)Math.Round(((double)progression / totalFiles) * 100) : 0;
 
             SaveStateFile();
         }
@@ -135,7 +144,12 @@ namespace EasySave.Models
                 if (File.Exists(stateFilePath))
                 {
                     string json = File.ReadAllText(stateFilePath);
-                    stateData = JsonSerializer.Deserialize<Dictionary<string, JobStateInfo>>(json)
+                    var options = new JsonSerializerOptions
+                    {
+                        Converters = { new JsonStringEnumConverter() }
+                    };
+
+                    stateData = JsonSerializer.Deserialize<Dictionary<string, JobStateInfo>>(json, options)
                         ?? new Dictionary<string, JobStateInfo>();
                 }
             }
@@ -150,7 +164,19 @@ namespace EasySave.Models
         {
             try
             {
-                string json = JsonSerializer.Serialize(stateData);
+                string directory = Path.GetDirectoryName(stateFilePath);
+                if (!Directory.Exists(directory))
+                {
+                    Directory.CreateDirectory(directory);
+                }
+
+                var options = new JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                    Converters = { new JsonStringEnumConverter() }
+                };
+
+                string json = JsonSerializer.Serialize(stateData, options);
                 File.WriteAllText(stateFilePath, json);
             }
             catch (Exception ex)
@@ -169,6 +195,14 @@ namespace EasySave.Models
                         jobState.SourcePath, jobState.TargetPath, jobState.TotalFiles,
                         jobState.TotalSize, jobState.Progression);
                 }
+            }
+        }
+
+        public void AttachObserver(IStateObserver observer)
+        {
+            if (!stateObservers.Contains(observer))
+            {
+                stateObservers.Add(observer);
             }
         }
     }

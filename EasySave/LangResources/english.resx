@@ -144,6 +144,9 @@
   <data name="JobsTitle" xml:space="preserve">
     <value>Jobs Management</value>
   </data>
+  <data name="SelectAll" xml:space="preserve">
+    <value>SelectAll</value>
+  </data>
   <data name="SourcePath" xml:space="preserve">
     <value>Source Path</value>
   </data>
