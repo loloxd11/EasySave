@@ -32,6 +32,11 @@ namespace EasySave.ViewModels
         private readonly ConfigManager _configManager;
 
         /// <summary>
+        /// Instance du LogManager
+        /// </summary>
+        private readonly LogManager _logManager;
+
+        /// <summary>
         /// Événement pour naviguer vers le menu principal
         /// </summary>
         public event EventHandler NavigateToMainMenu;
@@ -227,7 +232,8 @@ namespace EasySave.ViewModels
         {
             LanguageViewModel = LanguageViewModel.Instance;
             _configManager = ConfigManager.GetInstance();
-            
+            _logManager = LogManager.GetInstance();
+
             // Charger les extensions chiffrées depuis la configuration
             LoadEncryptedExtensions();
             
@@ -458,10 +464,14 @@ namespace EasySave.ViewModels
         public void SaveLogFormat()
         {
             _configManager.SetSetting("LogFormat", SelectedLogFormat.ToString());
-            
+
             // Réinitialiser le singleton LogManager pour qu'il prenne en compte le nouveau format
             // Cette ligne peut être facultative selon l'architecture
             // LogManager.ResetInstance();
+
+            _logManager.SetFormat(SelectedLogFormat);
+
+
         }
 
         /// <summary>
