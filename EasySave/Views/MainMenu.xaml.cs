@@ -2,19 +2,22 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using EasySave.Models;
 using EasySave.ViewModels;
 using EasySave.Views;
+using System;
+using System.Linq;
 using Button = System.Windows.Controls.Button;
 using CheckBox = System.Windows.Controls.CheckBox;
 using MessageBox = System.Windows.MessageBox;
 
 namespace EasySave
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, IStateObserver
     {
         // Un seul ViewModel principal
         private MainMenuViewModel _viewModel;
-
+        private StateManager _stateManager;
 
         public static object SharedLanguageViewModel { get; internal set; }
 
@@ -27,6 +30,48 @@ namespace EasySave
             InitializeComponent();
             _viewModel = new MainMenuViewModel();
             DataContext = _viewModel;
+
+            // S'abonner aux mises à jour d'état
+            _stateManager = StateManager.GetInstance();
+            _stateManager.AttachObserver(this);
+        }
+
+        /// <summary>
+        /// Met à jour l'état et la progression des jobs dans l'interface utilisateur
+        /// </summary>
+        public void Update(string action, string name, BackupType type, JobState state,
+            string sourcePath, string targetPath, int totalFiles, long totalSize, int progression)
+        {
+            // S'assurer que l'update est exécuté sur le thread UI
+            Dispatcher.Invoke(() =>
+            {
+                // Rechercher le job concerné dans la liste
+                var job = _viewModel.BackupJobs.FirstOrDefault(j => j.Name == name);
+
+                if (job != null)
+                {
+                    // Mise à jour de l'état
+                    if (action == "start")
+                    {
+                        job.State = JobState.active;
+                        job.Progress = 0;
+                    }
+                    else if (action == "complete")
+                    {
+                        job.State = JobState.completed;
+                        job.Progress = 100;
+                    }
+                    else if (action == "error")
+                    {
+                        job.State = JobState.error;
+                    }
+                    else if (action == "update" || action == "transfer" || action == "processing")
+                    {
+                        job.State = state;
+                        job.Progress = progression;
+                    }
+                }
+            });
         }
 
         /// <summary>
@@ -50,6 +95,9 @@ namespace EasySave
                 this,
                 new Uri("/EasySave;component/Views/MainMenu.xaml", UriKind.Relative)
             );
+
+            // Réattacher l'observateur après avoir rechargé la vue
+            _stateManager.AttachObserver(this);
         }
 
         /// <summary>

@@ -10,5 +10,6 @@ namespace EasySave.Models
     {
         void Update(string action, string name, BackupType type, JobState state,
             string sourcePath, string targetPath, int totalFiles, long totalSize, int progression);
+
     }
 }

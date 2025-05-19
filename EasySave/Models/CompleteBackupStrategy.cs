@@ -75,10 +75,10 @@ namespace EasySave.Models
 
                     // Update progress
                     remainFiles--;
-                    progression = totalFiles - remainFiles;
+                    progression = totalFiles - remainFiles; // Cette ligne est correcte
 
-                    // Notify observers
-                    NotifyObserver("transfer", name, sourceFile, destFile, fileSize, transferTime, 0);
+                    // Notifier les observateurs après chaque fichier copié pour mettre à jour la progression en temps réel
+                    NotifyObserver("transfer", name, sourceFile, destFile, fileSize, transferTime, 0, progression);
                 }
 
                 state = JobState.completed;

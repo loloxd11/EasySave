@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using EasySave.Views;
 
 namespace EasySave.Models
 {
@@ -17,6 +18,7 @@ namespace EasySave.Models
         private Dictionary<string, JobStateInfo> stateData;
         private readonly object lockObject = new object();
 
+        // Dans Models/StateManager.cs
         private class JobStateInfo
         {
             public string Name { get; set; }
@@ -27,10 +29,12 @@ namespace EasySave.Models
 
             public string SourcePath { get; set; }
             public string TargetPath { get; set; }
-            public int TotalFiles { get; set; }
+            public int TotalFiles { get; set; }      // Nombre total de fichiers à copier (statique)
             public long TotalSize { get; set; }
-            public int Progression { get; set; } // En pourcentage (0-100)
+            public int FilesLeftToDo { get; set; }   // Nombre de fichiers restant à copier (dynamique)
+            public int Progression { get; set; }     // En pourcentage (0-100)
         }
+
 
         private StateManager(string path)
         {
@@ -57,6 +61,8 @@ namespace EasySave.Models
         {
             lock (lockObject)
             {
+                Console.WriteLine($"Received update: action={action}, name={name}, progression={progression}");
+
                 if (action == "start")
                 {
                     InitializeJobState(name, type, state, sourcePath, targetPath, totalFiles, totalSize, progression);
@@ -64,6 +70,10 @@ namespace EasySave.Models
                 else if (action == "complete" || action == "error")
                 {
                     FinalizeJobState(name, type, state, sourcePath, targetPath, totalFiles, totalSize, progression);
+                }
+                else if (action == "transfer" || action == "processing")  // Assurez-vous que "transfer" est bien traité
+                {
+                    UpdateJobState(name, type, state, sourcePath, targetPath, totalFiles, totalSize, progression);
                 }
                 else
                 {
@@ -74,6 +84,7 @@ namespace EasySave.Models
             }
         }
 
+
         public void UpdateJobState(string name, BackupType type, JobState state,
             string sourcePath, string targetPath, int totalFiles, long totalSize, int progression)
         {
@@ -83,14 +94,26 @@ namespace EasySave.Models
             jobState.State = state;
             jobState.SourcePath = sourcePath;
             jobState.TargetPath = targetPath;
-            jobState.TotalFiles = totalFiles;
+
+            // Assurez-vous que TotalFiles soit toujours initialisé avec la valeur correcte
+            // et ne change pas pendant l'exécution
+            if (jobState.TotalFiles == 0 && totalFiles > 0)
+            {
+                jobState.TotalFiles = totalFiles;
+            }
+
             jobState.TotalSize = totalSize;
 
-            // Calcul de la progression en pourcentage (0-100)
-            jobState.Progression = totalFiles > 0 ? (int)Math.Round(((double)progression / totalFiles) * 100) : 0;
+            // Calcul correct des fichiers restants
+            // progression contient le nombre de fichiers déjà traités
+            jobState.FilesLeftToDo = Math.Max(0, jobState.TotalFiles - progression);
+
+            // Calculer la progression en pourcentage
+            jobState.Progression = progression;
 
             SaveStateFile();
         }
+
 
         public void InitializeJobState(string name, BackupType type, JobState state,
             string sourcePath, string targetPath, int totalFiles, long totalSize, int progression)
@@ -103,13 +126,14 @@ namespace EasySave.Models
             jobState.TargetPath = targetPath;
             jobState.TotalFiles = totalFiles;
             jobState.TotalSize = totalSize;
+            jobState.FilesLeftToDo = totalFiles; // Au début, tous les fichiers restent à copier
             jobState.Progression = 0; // Progression initiale à 0%
 
             SaveStateFile();
         }
 
         public void FinalizeJobState(string name, BackupType type, JobState state,
-            string sourcePath, string targetPath, int totalFiles, long totalSize, int progression)
+    string sourcePath, string targetPath, int totalFiles, long totalSize, int progression)
         {
             JobStateInfo jobState = GetOrCreateJobState(name);
 
@@ -117,12 +141,31 @@ namespace EasySave.Models
             jobState.State = state;
             jobState.SourcePath = sourcePath;
             jobState.TargetPath = targetPath;
-            jobState.TotalFiles = totalFiles;
+
+            // Ne pas modifier TotalFiles lors de la finalisation
+            if (jobState.TotalFiles == 0 && totalFiles > 0)
+            {
+                jobState.TotalFiles = totalFiles;
+            }
+
             jobState.TotalSize = totalSize;
 
-            // Si terminé avec succès, progression à 100%
-            jobState.Progression = state == JobState.completed ? 100 :
-                totalFiles > 0 ? (int)Math.Round(((double)progression / totalFiles) * 100) : 0;
+            // Pour un job complété, aucun fichier ne reste à traiter
+            if (state == JobState.completed)
+            {
+                jobState.FilesLeftToDo = 0;
+                jobState.Progression = 100;
+            }
+            else
+            {
+                // En cas d'erreur, calculer correctement les fichiers restants
+                jobState.FilesLeftToDo = Math.Max(0, jobState.TotalFiles - progression);
+
+                // Calculer la progression en pourcentage
+                jobState.Progression = jobState.TotalFiles > 0
+                    ? (int)Math.Min(100, Math.Round((double)progression / jobState.TotalFiles * 100))
+                    : 0;
+            }
 
             SaveStateFile();
         }

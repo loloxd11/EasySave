@@ -79,8 +79,11 @@ namespace EasySave.Models
                         long endTime = DateTime.Now.Ticks;
                         long transferTime = endTime - startTime;
 
+                        remainFiles--;
+                        progression = totalFiles - remainFiles;
+
                         // Notify observers
-                        NotifyObserver("transfer", name, sourceFile, destFile, fileSize, transferTime, 0);
+                        NotifyObserver("transfer", name, sourceFile, destFile, fileSize, transferTime, 0, progression);
                     }
 
                     // Update progress

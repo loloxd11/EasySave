@@ -182,7 +182,7 @@
   </data>
   <data name="Settings" xml:space="preserve">
     <value>Settings</value>
-</data>
+  </data>
   <data name="SelectAll" xml:space="preserve">
     <value>SelectAll</value>
   </data>
@@ -194,5 +194,8 @@
   </data>
   <data name="Validate" xml:space="preserve">
     <value>Validate</value>
+  </data>
+  <data name="Progress" xml:space="preserve">
+    <value>Progress</value>
   </data>
 </root>
