@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
+using MessageBox = System.Windows.MessageBox;
 
 namespace EasySave.ViewModels
 {
@@ -28,6 +29,7 @@ namespace EasySave.ViewModels
 
         private readonly BackupManager _backupManager;
         public ICommand DeleteJobCommand { get; private set; }
+        public ICommand EditJobCommand { get; private set; }
         // Collection observable pour les jobs de sauvegarde
         private ObservableCollection<BackupJob> _backupJobs;
         public ObservableCollection<BackupJob> BackupJobs
@@ -63,6 +65,7 @@ namespace EasySave.ViewModels
             // Initialiser la collection des jobs
             LoadBackupJobs();
             DeleteJobCommand = new RelayCommand(DeleteSelectedJobs, CanDeleteJobs);
+            EditJobCommand = new RelayCommand(EditSelectedJob, CanEditJob);
         }
         public void LoadBackupJobs()
         {
@@ -210,6 +213,35 @@ namespace EasySave.ViewModels
                 UpdateAllJobsSelectedState();
             }
         }
+
+        private bool CanEditJob()
+        {
+            return SelectedJob != null;
+        }
+
+        public void EditSelectedJob()
+        {
+            if (SelectedJob == null)
+                return;
+
+            // Trouver l'index du job sélectionné
+            int selectedIndex = _backupJobs.IndexOf(SelectedJob);
+
+            if (selectedIndex >= 0)
+            {
+                // Créer une nouvelle instance de Jobs avec le job à éditer
+                var jobsView = new EasySave.Views.Jobs(SelectedJob, selectedIndex);
+
+                // Accéder à la fenêtre principale
+                if (App.Current.MainWindow is MainWindow mainWindow)
+                {
+                    // Remplacer le contenu actuel par la vue d'édition de job
+                    mainWindow.Content = jobsView;
+                    mainWindow.Title = LanguageViewModel["EditJobTitle"];
+                }
+            }
+        }
+
 
     }
 }

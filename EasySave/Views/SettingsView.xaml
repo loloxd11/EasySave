@@ -4,9 +4,14 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:EasySave.Views"
+      xmlns:converters="clr-namespace:EasySave.Converters"
       mc:Ignorable="d" 
       d:DesignHeight="750" d:DesignWidth="800"
       Title="Paramètres">
+
+    <Page.Resources>
+        <converters:NotNullConverter x:Key="NotNullConverter"/>
+    </Page.Resources>
 
     <Grid Background="#f4f4f4">
         <Grid.RowDefinitions>
