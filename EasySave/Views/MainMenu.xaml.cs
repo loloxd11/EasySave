@@ -42,15 +42,12 @@ namespace EasySave
         public void Update(string action, string name, BackupType type, JobState state,
             string sourcePath, string targetPath, int totalFiles, long totalSize, int progression)
         {
-            // S'assurer que l'update est exécuté sur le thread UI
             Dispatcher.Invoke(() =>
             {
-                // Rechercher le job concerné dans la liste
                 var job = _viewModel.BackupJobs.FirstOrDefault(j => j.Name == name);
 
                 if (job != null)
                 {
-                    // Mise à jour de l'état
                     if (action == "start")
                     {
                         job.State = JobState.active;

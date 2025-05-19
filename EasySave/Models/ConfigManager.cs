@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -158,7 +159,7 @@ namespace EasySave.Models
 
         public string GetSetting(string key)
         {
-            if (settings.TryGetValue(key, out string value))
+            if (settings.ContainsKey(key) && settings[key] != null)
             {
                 return value;
             }
@@ -169,6 +170,35 @@ namespace EasySave.Models
         {
             settings[key] = value;
             SaveConfiguration();
+        }
+
+        /// <summary>
+        /// Vérifie si le processus prioritaire configuré est en cours d'exécution
+        /// </summary>
+        /// <returns>True si le processus prioritaire est en cours d'exécution, sinon False</returns>
+        public bool PriorityProcessIsRunning()
+        {
+            string priorityProcess = GetSetting("PriorityProcess");
+            if (string.IsNullOrWhiteSpace(priorityProcess))
+                return false;
+
+            try
+            {
+                // Si l'extension .exe est incluse, la supprimer
+                if (priorityProcess.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
+                    priorityProcess = priorityProcess.Substring(0, priorityProcess.Length - 4);
+
+                // Récupérer tous les processus en cours d'exécution
+                var processes = Process.GetProcesses();
+
+                // Vérifier si le processus prioritaire est en cours d'exécution
+                return processes.Any(p => string.Equals(p.ProcessName, priorityProcess, StringComparison.OrdinalIgnoreCase));
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Erreur lors de la vérification du processus prioritaire : {ex.Message}");
+                return false;
+            }
         }
     }
 }

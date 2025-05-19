@@ -148,7 +148,7 @@
     <value>Encrypting</value>
   </data>
   <data name="Execute" xml:space="preserve">
-    <value>execute</value>
+    <value>Execute</value>
   </data>
   <data name="FileExtensionPhrase" xml:space="preserve">
     <value>Enter the file extensions to encrypt</value>
