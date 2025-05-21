@@ -148,7 +148,7 @@
     <value>Encrypting</value>
   </data>
   <data name="Execute" xml:space="preserve">
-    <value>execute</value>
+    <value>Execute</value>
   </data>
   <data name="FileExtensionPhrase" xml:space="preserve">
     <value>Enter the file extensions to encrypt</value>
@@ -218,5 +218,11 @@
   </data>
   <data name="Update" xml:space="preserve">
     <value>Update</value>
+  </data>
+  <data name="PriorityJobsPhrase" xml:space="preserve">
+    <value>The Priority Jobs is currently up</value>
+  </data>
+  <data name="PriorityJobs" xml:space="preserve">
+    <value>Can't Execute</value>
   </data>
 </root>

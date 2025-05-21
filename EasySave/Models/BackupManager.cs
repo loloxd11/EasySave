@@ -244,6 +244,19 @@ namespace EasySave.Models
             File.WriteAllText(configFilePath, json);
         }
 
+        public bool CanExecuteJobs()
+        {
+            if (_configManager.PriorityProcessIsRunning())
+            {
+               return false;
+            }
+            else
+            {
+                return true;
+            }
+            
+        }
+
         /// <summary>
         /// Adds an observer to be notified of backup job state changes.
         /// </summary>

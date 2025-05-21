@@ -207,4 +207,10 @@
   <data name="Update" xml:space="preserve">
     <value>Modifier</value>
   </data>
+  <data name="PriorityJobsPhrase" xml:space="preserve">
+    <value>Le logiciel prioritaire est en cours d'execution</value>
+  </data>
+  <data name="PriorityJobs" xml:space="preserve">
+    <value>Impossible d'executer </value>
+  </data>
 </root>
