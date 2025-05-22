@@ -40,24 +40,43 @@ namespace EasySave.Models
             _configManager = ConfigManager.GetInstance();
             LoadConfiguration();
 
-            string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            string cryptoSoftPath = Path.Combine(
-                appDataPath,
-                "EasySave",
-                "CryptoSoft",
-                "bin",
-                "Release",
-                "net8.0",
-                "win-x64",
-                "CryptoSoft.exe"
-            );
-            _cryptoSoftPath = cryptoSoftPath;
+            // Essayer de récupérer le chemin de CryptoSoft depuis la configuration
+            _cryptoSoftPath = _configManager.GetSetting("CryptoSoftPath");
 
+            // Si le chemin n'est pas défini ou si le fichier n'existe pas à cet emplacement
+            if (string.IsNullOrEmpty(_cryptoSoftPath) || !File.Exists(_cryptoSoftPath))
+            {
+                // Essayer différents emplacements possibles
+                string[] possiblePaths = new string[]
+                {
+                    // Chemin absolu standard
+                    @"C:\Program Files\CryptoSoft\CryptoSoft.exe",
+            
+                    // Chemin relatif par rapport au répertoire de l'application
+                    Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "CryptoSoft", "CryptoSoft.exe"),
+            
+                    // Chemin relatif par rapport au répertoire parent de l'application
+                    Path.Combine(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).FullName, "CryptoSoft", "CryptoSoft.exe"),
+            
+                    // Dans le dossier AppData
+                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EasySave", "CryptoSoft", "CryptoSoft.exe")
+                };
 
+                // Chercher le premier chemin valide
+                foreach (string path in possiblePaths)
+                {
+                    if (File.Exists(path))
+                    {
+                        _cryptoSoftPath = path;
+                        break;
+                    }
+                }
+            }
 
-            // Sauvegarde du chemin dans la configuration
+            // Sauvegarde du chemin trouvé dans la configuration
             _configManager.SetSetting("CryptoSoftPath", _cryptoSoftPath);
         }
+
 
         /// <summary>
         /// Charge la configuration de chiffrement depuis le ConfigManager
@@ -145,8 +164,6 @@ namespace EasySave.Models
         /// </summary>
         /// <param name="filePath">Chemin du fichier à chiffrer</param>
         /// <returns>Durée du chiffrement en millisecondes</returns>
-        // Dans EncryptionService.cs, modifiez la méthode suivante pour ajouter du logging :
-
         public long EncryptFile(string filePath)
         {
             if (string.IsNullOrEmpty(_encryptionKey))
@@ -164,19 +181,7 @@ namespace EasySave.Models
             if (!File.Exists(_cryptoSoftPath))
             {
                 Console.WriteLine($"Erreur: exécutable CryptoSoft introuvable: {_cryptoSoftPath}");
-                // Essayer de localiser CryptoSoft ailleurs
-                string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-                string alternativePath = Path.Combine(appDataPath, "EasySave", @"..\..\..\CryptoSoft\bin\Release\net8.0\win-x64\CryptoSoft.exe");
-                if (File.Exists(alternativePath))
-                {
-                    Console.WriteLine($"CryptoSoft trouvé à l'emplacement alternatif: {alternativePath}");
-                    _cryptoSoftPath = alternativePath;
-                    _configManager.SetSetting("CryptoSoftPath", _cryptoSoftPath);
-                }
-                else
-                {
-                    return 0;
-                }
+                return 0;
             }
 
             long startTime = DateTime.Now.Ticks;
@@ -231,7 +236,5 @@ namespace EasySave.Models
             long endTime = DateTime.Now.Ticks;
             return (endTime - startTime) / TimeSpan.TicksPerMillisecond;
         }
-
     }
 }
-

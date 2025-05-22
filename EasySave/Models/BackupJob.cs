@@ -91,6 +91,10 @@ namespace EasySave.Models
             }
         }
 
+        /// <summary>
+        /// Gets or sets the progress of the backup job as a percentage.
+        /// Notifies property change listeners when the value changes.
+        /// </summary>
         public int Progress
         {
             get => _progress;

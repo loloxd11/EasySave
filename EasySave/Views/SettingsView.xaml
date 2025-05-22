@@ -236,10 +236,11 @@
                     Margin="0,20,0,30">
 
             <Button Command="{Binding SaveCommand}" 
-                    Content="{Binding LanguageViewModel[Save]}" 
-                    Width="100" Margin="0,0,20,0" 
-                    Padding="10,5" 
-                    Background="#5cb85c" Foreground="White"/>
+                Content="{Binding LanguageViewModel[Save]}" 
+                Width="100" Margin="0,0,20,0" 
+                Padding="10,5" 
+                Background="#5cb85c" Foreground="White"
+                Click="SaveSettings_Click"/>
 
             <Button Command="{Binding CancelCommand}" 
                     Content="{Binding LanguageViewModel[Cancel]}" 
