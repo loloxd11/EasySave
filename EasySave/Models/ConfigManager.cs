@@ -182,7 +182,6 @@ namespace EasySave.Models
             string priorityProcess = ConfigManager.GetInstance().GetSetting("PriorityProcess");
             if (string.IsNullOrWhiteSpace(priorityProcess))
                 return false;
-
             try
             {
                 // Si l'extension .exe est incluse, la supprimer
