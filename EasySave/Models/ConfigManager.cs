@@ -187,7 +187,6 @@ namespace EasySave.Models
                 // Si l'extension .exe est incluse, la supprimer
                 if (priorityProcess.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
                     priorityProcess = priorityProcess.Substring(0, priorityProcess.Length - 4);
-
                 // Récupérer tous les processus en cours d'exécution
                 var processes = Process.GetProcesses();
 
