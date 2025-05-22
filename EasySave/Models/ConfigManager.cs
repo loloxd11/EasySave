@@ -176,9 +176,10 @@ namespace EasySave.Models
         /// Vérifie si le processus prioritaire configuré est en cours d'exécution
         /// </summary>
         /// <returns>True si le processus prioritaire est en cours d'exécution, sinon False</returns>
-        public bool PriorityProcessIsRunning()
+        public static bool PriorityProcessIsRunning()
         {
-            string priorityProcess = GetSetting("PriorityProcess");
+            // Utilisation de l'instance singleton pour appeler GetSetting
+            string priorityProcess = ConfigManager.GetInstance().GetSetting("PriorityProcess");
             if (string.IsNullOrWhiteSpace(priorityProcess))
                 return false;
 

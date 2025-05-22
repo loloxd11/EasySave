@@ -89,6 +89,11 @@ namespace EasySave.Models
 
                     // Notifier les observateurs après chaque fichier copié pour mettre à jour la progression en temps réel
                     NotifyObserver(BackupActions.Processing, name, state, sourceFile, destinationFile, totalFiles, totalSize, transferTime, 0, currentProgress);
+                    if (ConfigManager.PriorityProcessIsRunning() == true)
+                    {
+                        // Si le processus prioritaire est en cours d'exécution, attendre 1 seconde avant de continuer
+                        throw new InvalidOperationException("Jobs Canceled, Priority Process is running");
+                    }
                 }
 
                 state = JobState.completed;
@@ -98,14 +103,8 @@ namespace EasySave.Models
             catch (Exception ex)
             {
                 state = JobState.error;
-                System.Windows.MessageBox.Show(
-                ex.Message,
-                "Erreur de sauvegarde",
-                System.Windows.MessageBoxButton.OK,
-                System.Windows.MessageBoxImage.Warning);
                 NotifyObserver("error", name, state, sourcePath, targetPath, totalFiles, totalSize, 0, 0, 0);
-                Console.WriteLine($"Error executing complete backup: {ex.Message}");
-                return false;
+                throw new InvalidOperationException(ex.Message);
             }
         }
 

@@ -170,13 +170,20 @@ namespace EasySave.Models
         {
             lock (lockObject)
             {
-                foreach (int index in backupIndices)
+                try
                 {
-                    if (index >= 0 && index < backupJobs.Count)
+                    foreach (int index in backupIndices)
                     {
-                        BackupJob job = backupJobs[index];
-                        job.Execute();
+                        if (index >= 0 && index < backupJobs.Count)
+                        {
+                            BackupJob job = backupJobs[index];
+                            job.Execute();
+                        }
                     }
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException("Jobs Canceled, Priority Process is running");
                 }
             }
         }
@@ -242,19 +249,6 @@ namespace EasySave.Models
 
             // Write data to the file
             File.WriteAllText(configFilePath, json);
-        }
-
-        public bool CanExecuteJobs()
-        {
-            if (_configManager.PriorityProcessIsRunning())
-            {
-               return false;
-            }
-            else
-            {
-                return true;
-            }
-            
         }
 
         /// <summary>

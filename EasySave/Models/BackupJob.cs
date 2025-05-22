@@ -51,9 +51,15 @@ namespace EasySave.Models
         /// Executes the backup job using the specified strategy.
         /// </summary>
         /// <returns>True if the backup was successful; otherwise, false.</returns>
-        public bool Execute()
+        public void Execute()
         {
-            return backupStrategy.Execute(name, src, dst, "default");
+            try {
+                backupStrategy.Execute(name, src, dst, "default");
+                    }
+            catch
+            {
+                throw new InvalidOperationException("Jobs Canceled, Priority Process is running");
+            }
         }
 
         // Properties to access private fields

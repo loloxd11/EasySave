@@ -219,18 +219,20 @@ namespace EasySave.ViewModels
         /// </summary>
         public void ExecuteSelectedJobs()
         {
-            if (_selectedJobIndices.Count > 0 && _backupManager.CanExecuteJobs() == true)
+            try
             {
-                _backupManager.ExecuteBackupJob(_selectedJobIndices.ToList(), "sequential");
+                if (_selectedJobIndices.Count <= 0 || ConfigManager.PriorityProcessIsRunning() == true)
+                {
+                    throw new InvalidOperationException("Jobs Canceled, Priority Process is running");
+                }
+                else
+                {
+                    _backupManager.ExecuteBackupJob(_selectedJobIndices.ToList(), "sequential");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                System.Windows.MessageBox.Show(
-                LanguageViewModel["PriorityJobsPhrase"],
-                LanguageViewModel["PriorityJobs"],
-                System.Windows.MessageBoxButton.OK,
-                System.Windows.MessageBoxImage.Warning);
-                return;
+                throw new InvalidOperationException(!string.IsNullOrEmpty(ex.Message) ? ex.Message : "No jobs selected or jobs are already running.");
             }
         }
 
