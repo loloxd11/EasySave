@@ -41,7 +41,8 @@ namespace EasySave
                 AllocConsole();
                 // Redirige la sortie standard vers la nouvelle console
                 var stdOut = System.Console.OpenStandardOutput();
-                var writer = new System.IO.StreamWriter(stdOut) { AutoFlush = true };
+                var writer = new System.IO.StreamWriter(stdOut, System.Text.Encoding.UTF8) { AutoFlush = true };
+                System.Console.OutputEncoding = System.Text.Encoding.UTF8;
                 System.Console.SetOut(writer);
                 System.Console.SetError(writer);
 
@@ -105,9 +106,10 @@ namespace EasySave
         private List<int> ParseJobArguments(string arg, int maxJob)
         {
             var result = new List<int>();
-            if (arg.Contains('-'))
+            string completeArg = arg;
+            if (completeArg.Contains('-'))
             {
-                var parts = arg.Split('-');
+                var parts = completeArg.Split('-');
                 if (parts.Length == 2 &&
                     int.TryParse(parts[0], out int start) &&
                     int.TryParse(parts[1], out int end))
@@ -116,14 +118,15 @@ namespace EasySave
                         result.Add(i);
                 }
             }
-            else if (arg.Contains(';'))
+            else if (completeArg.Contains(';'))
             {
-                var parts = arg.Split(';');
+                // Par celle-ci pour ignorer les éléments vides et les espaces :
+                var parts = completeArg.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
                 foreach (var p in parts)
                     if (int.TryParse(p, out int idx))
                         result.Add(idx);
             }
-            else if (int.TryParse(arg, out int single))
+            else if (int.TryParse(completeArg, out int single))
             {
                 result.Add(single);
             }
