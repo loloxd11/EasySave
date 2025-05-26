@@ -22,9 +22,11 @@ namespace EasySave.Models
         /// <param name="targetPath">The target path of the backup.</param>
         /// <param name="totalFiles">The total number of files involved in the backup.</param>
         /// <param name="totalSize">The total size of the files in bytes.</param>
+        /// <param name="transferTime">The time taken for file transfer, if applicable.</param>
+        /// <param name="encryptionTime">The time taken for encryption, if applicable.</param>
         /// <param name="progression">The progression percentage of the backup job.</param>
         void Update(string action, string name, BackupType type, JobState state,
-            string sourcePath, string targetPath, int totalFiles, long totalSize, int progression);
+            string sourcePath, string targetPath, int totalFiles, long totalSize, long transferTime, long encryptionTime, int progression);
 
     }
 }

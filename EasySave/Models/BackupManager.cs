@@ -199,6 +199,7 @@ namespace EasySave.Models
                     // Lance chaque job dans un thread séparé
                     tasks.Add(Task.Run(() => job.ExecuteJob()));
                 }
+            }
 
             await Task.WhenAll(tasks);
         }

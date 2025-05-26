@@ -113,7 +113,7 @@ namespace EasySave.Models
         }
 
         public void Update(string action, string name, BackupType type, JobState state,
-            string sourcePath, string targetPath, int totalFiles, long totalSize, int progression)
+            string sourcePath, string targetPath, int totalFiles, long totalSize, long transferTime, long encryptionTime, int progression)
         {
             switch (action)
             {
@@ -135,8 +135,8 @@ namespace EasySave.Models
                             sourcePath,
                             targetPath,
                             fileSize,
-                            0,
-                            0
+                            transferTime,
+                            encryptionTime
                         );
                     }
                     break;
