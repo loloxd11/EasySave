@@ -70,7 +70,8 @@
                           HorizontalAlignment="Stretch"
                           VerticalAlignment="Top"
                           Margin="0"
-                          BorderThickness="0">
+                          BorderThickness="0"
+                          GridLinesVisibility="All">
                     <DataGrid.Columns>
                         <!-- Colonne checkbox -->
                         <DataGridTemplateColumn Width="40">
@@ -94,59 +95,51 @@
                         <DataGridTextColumn Header="{Binding LanguageViewModel[BackupType]}" Binding="{Binding Type}" Width="*"/>
                         <DataGridTextColumn Header="{Binding LanguageViewModel[Status]}" Binding="{Binding State}" Width="*"/>
 
-                        <!-- Colonne progression + boutons -->
-                        <DataGridTemplateColumn Header="{Binding LanguageViewModel[Progress]}" Width="2*">
+                        <!-- Colonne progression -->
+                        <DataGridTemplateColumn Header="{Binding LanguageViewModel[Progress]}" Width="*">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <Grid VerticalAlignment="Center">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-                                        <!-- ProgressBar + % -->
-                                        <Grid Grid.Column="0" VerticalAlignment="Center">
-                                            <ProgressBar Value="{Binding Progress}" Maximum="100" Height="18" Margin="2"/>
-                                            <TextBlock Text="{Binding Progress, StringFormat={}{0}%}"
-                                                       HorizontalAlignment="Center"
-                                                       VerticalAlignment="Center"
-                                                       FontWeight="SemiBold"/>
-                                        </Grid>
-                                        <!-- Séparateur vertical (ligne fine) -->
-                                        <Border Grid.Column="1"
-                                                Width="1"
-                                                Margin="6,2"
-                                                Background="#CCC"
-                                                HorizontalAlignment="Center"
-                                                VerticalAlignment="Stretch"/>
-                                        <!-- Boutons -->
-                                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                                            <!-- Play button -->
-                                            <Button Style="{StaticResource ActionButtonStyle}"
-                                                    ToolTip="Start"
-                                                    Command="{Binding DataContext.PlayJobCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                    CommandParameter="{Binding}">
-                                                <Path Data="M0,0 L0,20 L17,10 Z" Fill="#4CAF50"/>
-                                            </Button>
-                                            <!-- Pause button -->
-                                            <Button Style="{StaticResource ActionButtonStyle}"
-                                                    ToolTip="Pause"
-                                                    Command="{Binding DataContext.PauseJobCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                    CommandParameter="{Binding}">
-                                                <Grid>
-                                                    <Rectangle Width="6" Height="18" Fill="#FFC107" Margin="2,0,0,0"/>
-                                                    <Rectangle Width="6" Height="18" Fill="#FFC107" Margin="10,0,0,0"/>
-                                                </Grid>
-                                            </Button>
-                                            <!-- Stop button -->
-                                            <Button Style="{StaticResource ActionButtonStyle}"
-                                                    ToolTip="Stop"
-                                                    Command="{Binding DataContext.StopJobCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                    CommandParameter="{Binding}">
-                                                <Rectangle Width="16" Height="16" Fill="#F44336"/>
-                                            </Button>
-                                        </StackPanel>
+                                        <ProgressBar Value="{Binding Progress}" Maximum="100" Height="18" Margin="2"/>
+                                        <TextBlock Text="{Binding Progress, StringFormat={}{0}%}"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"
+                                                   FontWeight="SemiBold"/>
                                     </Grid>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- Colonne boutons -->
+                        <DataGridTemplateColumn Width="Auto">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <!-- Play button -->
+                                        <Button Style="{StaticResource ActionButtonStyle}"
+                                                ToolTip="Start"
+                                                Command="{Binding DataContext.PlayJobCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                CommandParameter="{Binding}">
+                                            <Path Data="M0,0 L0,20 L17,10 Z" Fill="#4CAF50"/>
+                                        </Button>
+                                        <!-- Pause button -->
+                                        <Button Style="{StaticResource ActionButtonStyle}"
+                                                ToolTip="Pause"
+                                                Command="{Binding DataContext.PauseJobCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                CommandParameter="{Binding}">
+                                            <Grid>
+                                                <Rectangle Width="6" Height="18" Fill="#FFC107" Margin="2,0,0,0"/>
+                                                <Rectangle Width="6" Height="18" Fill="#FFC107" Margin="10,0,0,0"/>
+                                            </Grid>
+                                        </Button>
+                                        <!-- Stop button -->
+                                        <Button Style="{StaticResource ActionButtonStyle}"
+                                                ToolTip="Stop"
+                                                Command="{Binding DataContext.StopJobCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                CommandParameter="{Binding}">
+                                            <Rectangle Width="16" Height="16" Fill="#F44336"/>
+                                        </Button>
+                                    </StackPanel>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
