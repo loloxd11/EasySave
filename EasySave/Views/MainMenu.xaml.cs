@@ -183,7 +183,15 @@ namespace EasySave
         {
             try
             {
-                await _viewModel.ExecuteSelectedJobsAsync();
+                // Exécuter les jobs sélectionnés et récupérer le résultat
+                var result = await _viewModel.ExecuteSelectedJobsAsync();
+                // Afficher le message approprié en fonction du résultat
+                MessageBoxImage icon = result.Success ? MessageBoxImage.Information : MessageBoxImage.Warning;
+                MessageBox.Show(
+                    result.Message,
+                    result.Success ? "Succès" : "Attention",
+                    MessageBoxButton.OK,
+                    icon);
             }
             catch (Exception ex)
             {

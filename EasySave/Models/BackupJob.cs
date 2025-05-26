@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EasySave.Models
@@ -23,7 +24,42 @@ namespace EasySave.Models
         private JobState _state = JobState.inactive;
         private int _progress = 0;
 
+        // Référence au BackupManager pour vérifier l'état de pause
+        private BackupManager _backupManager;
+        // Index du job dans la liste du BackupManager
+        private int _jobIndex = -1;
+
         public event PropertyChangedEventHandler PropertyChanged;
+
+
+        // Méthode pour configurer la connexion avec le BackupManager
+        public void SetManagerInfo(int jobIndex, BackupManager backupManager)
+        {
+            _jobIndex = jobIndex;
+            _backupManager = backupManager;
+        }
+
+        // Méthode pour vérifier si le job devrait être en pause
+        public bool IsPaused => _backupManager != null && _jobIndex >= 0 && _backupManager.IsJobPaused(_jobIndex);
+
+        // Méthode pour attendre si le job est en pause
+        public void WaitIfPaused()
+        {
+            if (_backupManager == null || _jobIndex < 0)
+                return;
+
+            // Tant que le job est en pause, on attend
+            while (_backupManager.IsJobPaused(_jobIndex))
+            {
+                Console.WriteLine($"Job '{Name}' (indice {_jobIndex}) en attente de reprise...");
+                
+                // Utiliser CancellationToken.None car nous voulons juste attendre la reprise
+                _backupManager.WaitForJobResume(_jobIndex, CancellationToken.None);
+                
+                // Courte pause pour éviter une consommation CPU excessive
+                Thread.Sleep(100);
+            }
+        }
 
         protected virtual void OnPropertyChanged(string propertyName)
         {
@@ -97,6 +133,9 @@ namespace EasySave.Models
 
                 foreach (var sourceFile in filesToCopy)
                 {
+                    // Vérifier si le job doit être en pause et attendre si nécessaire
+                    WaitIfPaused();
+                    
                     string relativePath = Path.GetRelativePath(sourcePath, sourceFile);
                     string destFile = Path.Combine(targetPath, relativePath);
                     string destDir = Path.GetDirectoryName(destFile);
