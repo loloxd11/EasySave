@@ -187,28 +187,11 @@ namespace EasySave
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">Event arguments.</param>
-        private void ExecuteBackupJob_Click(object sender, RoutedEventArgs e)
+        private async void ExecuteBackupJob_Click(object sender, RoutedEventArgs e)
         {
-            if (_viewModel.SelectedJobIndices.Count == 0)
-            {
-                MessageBox.Show("Please select at least one backup job.",
-                                "No job selected",
-                                MessageBoxButton.OK,
-                                MessageBoxImage.Information);
-                return;
-            }
-
-            // Disable the button during execution
-            Button executeButton = (Button)sender;
-            executeButton.IsEnabled = false;
-
             try
             {
-                _viewModel.ExecuteSelectedJobs();
-                MessageBox.Show("The selected jobs have been executed successfully.",
-                                "Execution completed",
-                                MessageBoxButton.OK,
-                                MessageBoxImage.Information);
+                await _viewModel.ExecuteSelectedJobsAsync();
             }
             catch (Exception ex)
             {
@@ -216,11 +199,6 @@ namespace EasySave
                                 "Error",
                                 MessageBoxButton.OK,
                                 MessageBoxImage.Error);
-            }
-            finally
-            {
-                // Re-enable the button
-                executeButton.IsEnabled = true;
             }
         }
 
