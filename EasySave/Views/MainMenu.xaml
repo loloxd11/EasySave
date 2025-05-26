@@ -5,10 +5,11 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance Type=viewmodels:JobsViewModel}"
         Title="EasySave" Height="720" Width="1020" Background="#f4f4f4" WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
-        <!-- Style for action buttons inside the DataGrid -->
+        <!-- Style pour les boutons d'action -->
         <Style x:Key="ActionButtonStyle" TargetType="Button">
             <Setter Property="Width" Value="24"/>
             <Setter Property="Height" Value="24"/>
@@ -27,7 +28,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Application title -->
+        <!-- Titre de l'application -->
         <Border Grid.Row="0" CornerRadius="8" Background="#D0E6FF" Padding="10" Margin="0,10,0,20">
             <TextBlock Text="EASYSAVE BY PROSOFT"
                        FontSize="36"
@@ -37,7 +38,7 @@
                        FontFamily="Segoe UI Black"/>
         </Border>
 
-        <!-- Settings button -->
+        <!-- Bouton paramètres -->
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
             <Button x:Name="SettingsButton"
                     Content="⚙ Settings"
@@ -49,15 +50,15 @@
                     Click="SettingsButton_Click"/>
         </StackPanel>
 
-        <!-- Main content: DataGrid and control buttons -->
+        <!-- Contenu principal -->
         <StackPanel Grid.Row="2" Orientation="Vertical">
-            <!-- Checkbox to select all jobs -->
+            <!-- Checkbox sélectionner tout -->
             <CheckBox Content="{Binding LanguageViewModel[SelectAll]}"
                       IsChecked="{Binding AreAllJobsSelected, Mode=TwoWay}"
                       Margin="0,0,0,10"
                       FontWeight="Bold"/>
 
-            <!-- DataGrid containing the jobs -->
+            <!-- DataGrid des jobs -->
             <Border CornerRadius="8" BorderThickness="1" BorderBrush="#ccc" Background="White" Height="278">
                 <DataGrid x:Name="BackupJobsGrid"
                           ItemsSource="{Binding BackupJobs}"
@@ -71,7 +72,7 @@
                           Margin="0"
                           BorderThickness="0">
                     <DataGrid.Columns>
-                        <!-- Checkbox column for selecting jobs -->
+                        <!-- Colonne checkbox -->
                         <DataGridTemplateColumn Width="40">
                             <DataGridTemplateColumn.Header>
                                 <TextBlock Text="✓" FontWeight="Bold" HorizontalAlignment="Center"/>
@@ -86,24 +87,40 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
-                        <!-- Other columns -->
+                        <!-- Autres colonnes -->
                         <DataGridTextColumn Header="{Binding LanguageViewModel[JobName]}" Binding="{Binding Name}" Width="*"/>
                         <DataGridTextColumn Header="{Binding LanguageViewModel[SourcePath]}" Binding="{Binding Source}" Width="2*"/>
                         <DataGridTextColumn Header="{Binding LanguageViewModel[TargetPath]}" Binding="{Binding Destination}" Width="2*"/>
                         <DataGridTextColumn Header="{Binding LanguageViewModel[BackupType]}" Binding="{Binding Type}" Width="*"/>
                         <DataGridTextColumn Header="{Binding LanguageViewModel[Status]}" Binding="{Binding State}" Width="*"/>
 
-                        <!-- Progress and control buttons -->
+                        <!-- Colonne progression + boutons -->
                         <DataGridTemplateColumn Header="{Binding LanguageViewModel[Progress]}" Width="2*">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <Grid>
-                                        <ProgressBar Value="{Binding Progress}" Maximum="100" Height="18" Margin="2"/>
-                                        <TextBlock Text="{Binding Progress, StringFormat={}{0}%}"
-                                                   HorizontalAlignment="Center"
-                                                   VerticalAlignment="Center"
-                                                   FontWeight="SemiBold"/>
-                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                    <Grid VerticalAlignment="Center">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <!-- ProgressBar + % -->
+                                        <Grid Grid.Column="0" VerticalAlignment="Center">
+                                            <ProgressBar Value="{Binding Progress}" Maximum="100" Height="18" Margin="2"/>
+                                            <TextBlock Text="{Binding Progress, StringFormat={}{0}%}"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center"
+                                                       FontWeight="SemiBold"/>
+                                        </Grid>
+                                        <!-- Séparateur vertical (ligne fine) -->
+                                        <Border Grid.Column="1"
+                                                Width="1"
+                                                Margin="6,2"
+                                                Background="#CCC"
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Stretch"/>
+                                        <!-- Boutons -->
+                                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
                                             <!-- Play button -->
                                             <Button Style="{StaticResource ActionButtonStyle}"
                                                     ToolTip="Start"
@@ -111,7 +128,6 @@
                                                     CommandParameter="{Binding}">
                                                 <Path Data="M0,0 L0,20 L17,10 Z" Fill="#4CAF50"/>
                                             </Button>
-
                                             <!-- Pause button -->
                                             <Button Style="{StaticResource ActionButtonStyle}"
                                                     ToolTip="Pause"
@@ -122,7 +138,6 @@
                                                     <Rectangle Width="6" Height="18" Fill="#FFC107" Margin="10,0,0,0"/>
                                                 </Grid>
                                             </Button>
-
                                             <!-- Stop button -->
                                             <Button Style="{StaticResource ActionButtonStyle}"
                                                     ToolTip="Stop"
@@ -139,7 +154,7 @@
                 </DataGrid>
             </Border>
 
-            <!-- Control buttons below the DataGrid -->
+            <!-- Boutons de contrôle en bas -->
             <WrapPanel HorizontalAlignment="Center" Margin="0,10,0,0">
                 <Button Content="{Binding LanguageViewModel[Add]}"
                         Click="AddBackupJob_Click"
@@ -169,7 +184,7 @@
                         Command="{Binding PauseAllJobsCommand}"
                         Margin="10"
                         Padding="10,5"
-                        Background="#000000"
+                        Background="#000"
                         Foreground="White"
                         IsEnabled="{Binding IsAnyJobSelected}"/>
                 <Button Content="{Binding LanguageViewModel[StopAll]}"

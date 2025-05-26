@@ -46,6 +46,13 @@ namespace EasySave.ViewModels
         /// </summary>
         public ICommand EditJobCommand { get; private set; }
 
+        public ICommand PlayJobCommand { get; }
+        public ICommand PauseJobCommand { get; }
+        public ICommand StopJobCommand { get; }
+        public ICommand PauseAllJobsCommand { get; }
+        public ICommand StopAllJobsCommand { get; }
+
+
         // Observable collection for backup jobs
         private ObservableCollection<BackupJob> _backupJobs;
 
@@ -91,8 +98,33 @@ namespace EasySave.ViewModels
             LoadBackupJobs();
             DeleteJobCommand = new RelayCommand(DeleteSelectedJobs, CanDeleteJobs);
             EditJobCommand = new RelayCommand(EditSelectedJob, CanEditJob);
+            PlayJobCommand = new RelayCommand<BackupJob>(PlayJob);
+            PauseJobCommand = new RelayCommand<BackupJob>(PauseJob);
+            StopJobCommand = new RelayCommand<BackupJob>(StopJob);
+        }
+        private void PlayJob(BackupJob job)
+        {
+            if (job != null)
+            {
+                job?.Resume(); // À implémenter dans votre modèle
+            }
         }
 
+        private void PauseJob(BackupJob job)
+        {
+            if (job != null)
+            {
+                job?.Pause(); // À implémenter dans votre modèle
+            }
+        }
+
+        private void StopJob(BackupJob job)
+        {
+            if (job != null)
+            {
+                job?.Stop(); // À implémenter dans votre modèle
+            }
+        }
         /// <summary>
         /// Loads the list of backup jobs from the BackupManager.
         /// </summary>

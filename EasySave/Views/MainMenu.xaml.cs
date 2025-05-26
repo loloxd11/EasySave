@@ -19,7 +19,7 @@ namespace EasySave
         private MainMenuViewModel _viewModel;
         private StateManager _stateManager;
 
-        public static object SharedLanguageViewModel { get; internal set; }
+        public static object? SharedLanguageViewModel { get; internal set; }
 
         /// <summary>
         /// Constructor for MainWindow.

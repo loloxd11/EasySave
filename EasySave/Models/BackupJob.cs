@@ -60,6 +60,7 @@ namespace EasySave.Models
         }
 
 
+
         /// <summary>
         /// Initializes a new instance of the <see cref="BackupJob"/> class.
         /// </summary>
@@ -119,6 +120,21 @@ namespace EasySave.Models
                 NotifyObservers("error", Name, State, sourcePath, targetPath, 0, 0, 0, 0, 0);
                 return false;
             }
+        }
+
+        internal void Resume()
+        {
+           // throw new NotImplementedException();
+        }
+
+        internal void Pause()
+        {
+            //throw new NotImplementedException();
+        }
+
+        internal void Stop()
+        {
+            //throw new NotImplementedException();
         }
 
 
