@@ -73,11 +73,11 @@ namespace EasySave.Models
 
                 // Add a state observer to the backup strategy
                 StateManager stateManager = StateManager.GetInstance();
-                strategy.AttachObserver(stateManager);
+                job.AttachObserver(stateManager);
 
                 // Add log observer to the backup strategy
                 LogManager logManager = LogManager.GetInstance();
-                strategy.AttachObserver(logManager);
+                job.AttachObserver(logManager);
 
                 // Save the backup job to configuration
                 SaveBackupJobsToConfig();
@@ -117,11 +117,11 @@ namespace EasySave.Models
 
                 // Add a state observer to the backup strategy
                 StateManager stateManager = StateManager.GetInstance();
-                strategy.AttachObserver(stateManager);
+                job.AttachObserver(stateManager);
 
                 // Add log observer to the backup strategy
                 LogManager logManager = LogManager.GetInstance();
-                strategy.AttachObserver(logManager);
+                job.AttachObserver(logManager);
 
                 // Save the backup job to configuration
                 SaveBackupJobsToConfig();
@@ -162,23 +162,25 @@ namespace EasySave.Models
         }
 
         /// <summary>
-        /// Executes the backup jobs specified by their indices.
+        /// Exécute les jobs de sauvegarde spécifiés par leurs indices, en suivant la logique détaillée.
         /// </summary>
-        /// <param name="backupIndices">List of indices of jobs to execute.</param>
-        /// <param name="order">Execution order (not used in current implementation).</param>
-        public void ExecuteBackupJob(List<int> backupIndices, string order)
+        /// <param name="jobIndexes">Liste des indices des jobs à exécuter.</param>
+        public async Task ExecuteJobsAsync(List<int> jobIndexes)
         {
-            lock (lockObject)
+            var tasks = new List<Task>();
+
+            foreach (var index in jobIndexes)
             {
-                foreach (int index in backupIndices)
+                // Vérifie que l'index est valide
+                if (index >= 0 && index < backupJobs.Count)
                 {
-                    if (index >= 0 && index < backupJobs.Count)
-                    {
-                        BackupJob job = backupJobs[index];
-                        job.Execute();
-                    }
+                    var job = backupJobs[index];
+                    // Lance chaque job dans un thread séparé
+                    tasks.Add(Task.Run(() => job.ExecuteJob()));
                 }
             }
+
+            await Task.WhenAll(tasks);
         }
 
         /// <summary>

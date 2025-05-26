@@ -61,6 +61,8 @@ namespace EasySave.Models
             }
         }
 
+        public abstract List<string> GetFilesToCopy(string sourcePath, string targetPath);
+
         /// <summary>
         /// Méthode unifiée pour notifier tous les observateurs avec différents types de mises à jour
         /// </summary>
@@ -116,16 +118,6 @@ namespace EasySave.Models
             // Utiliser les constantes standardisées et passer l'état correctement
             NotifyObserver(BackupActions.Processing, name, state, source, target);
         }
-
-        /// <summary>
-        /// Execute the backup strategy.
-        /// </summary>
-        /// <param name="name">Name of the backup job.</param>
-        /// <param name="src">Source directory path.</param>
-        /// <param name="dst">Destination directory path.</param>
-        /// <param name="order">Order or mode of execution.</param>
-        /// <returns>True if the backup was successful, false otherwise.</returns>
-        public abstract bool Execute(string name, string src, string dst, string order);
 
         /// <summary>
         /// Calculate the total number of files in the source directory (recursively).
