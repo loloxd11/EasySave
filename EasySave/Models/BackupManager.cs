@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Forms;
 using System.Xml.Linq;
 
 namespace EasySave.Models
@@ -18,6 +20,10 @@ namespace EasySave.Models
         private List<BackupJob> backupJobs;
         private static ConfigManager _configManager;
         private readonly object lockObject = new object();
+        private SM_Detector _smDetector;
+        private CancellationTokenSource _detectorTokenSource;
+        private Thread _detectorThread;
+
 
         /// <summary>
         /// Private constructor to enforce singleton pattern.
@@ -26,6 +32,15 @@ namespace EasySave.Models
         private BackupManager()
         {
             backupJobs = new List<BackupJob>();
+
+            // Initialisation du détecteur de logiciel métier
+            _detectorTokenSource = new CancellationTokenSource();
+            _smDetector = new SM_Detector(this);
+
+            // Création et démarrage du thread de surveillance
+            _detectorThread = new Thread(() => _smDetector.StartMonitoring(_detectorTokenSource.Token));
+            _detectorThread.IsBackground = true;
+            _detectorThread.Start();
         }
 
         /// <summary>
@@ -162,6 +177,12 @@ namespace EasySave.Models
         }
 
         /// <summary>
+        /// Executes the backup jobs specified by their indices.
+        /// Checks if business software is running before executing backups.
+        /// </summary>
+        /// <param name="backupIndices">List of indices of jobs to execute.</param>
+        /// <param name="order">Execution order (not used in current implementation).</param>
+        /// <returns>Tuple contenant le résultat de l'opération (succès/échec) et un message explicatif</returns>
         /// Exécute les jobs de sauvegarde spécifiés par leurs indices, en suivant la logique détaillée.
         /// </summary>
         /// <param name="jobIndexes">Liste des indices des jobs à exécuter.</param>
@@ -178,7 +199,6 @@ namespace EasySave.Models
                     // Lance chaque job dans un thread séparé
                     tasks.Add(Task.Run(() => job.ExecuteJob()));
                 }
-            }
 
             await Task.WhenAll(tasks);
         }
@@ -246,26 +266,11 @@ namespace EasySave.Models
             File.WriteAllText(configFilePath, json);
         }
 
-        public bool CanExecuteJobs()
+        public void SM_Detected()
         {
-            if (_configManager.PriorityProcessIsRunning())
-            {
-               return false;
-            }
-            else
-            {
-                return true;
-            }
-            
         }
-
-        /// <summary>
-        /// Adds an observer to be notified of backup job state changes.
-        /// </summary>
-        /// <param name="observer">The observer to add.</param>
-        public void AddToStateObserver(IStateObserver observer)
+        public void SM_Undetected()
         {
-            // Logic to add state observer
         }
     }
 }

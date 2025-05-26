@@ -14,7 +14,6 @@ namespace EasySave.Models
         private string destinationFile;
         private int totalFiles;
         private int remainFiles;
-        private BackupType backupType = BackupType.Complete;
 
 
         public override List<string> GetFilesToCopy(string sourcePath, string targetPath)

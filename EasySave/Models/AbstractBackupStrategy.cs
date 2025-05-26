@@ -77,7 +77,7 @@ namespace EasySave.Models
         public void NotifyObserver(
             string action,
             string name,
-            JobState state, 
+            JobState state,
             string sourcePath = "",
             string targetPath = "",
             int totalFiles = 0,
@@ -98,13 +98,6 @@ namespace EasySave.Models
                     totalFiles, totalSize, currentProgress);
             }
         }
-
-        /*public void UpdateProgress(int files, long size)
-        {
-            progression = files;
-            // Notifier les observateurs du changement de progression
-            NotifyObserver(BackupActions.Progress, name, currentProgress: files);
-        }*/
 
         /// <summary>
         /// Update the current file being processed and notify observers.

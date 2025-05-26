@@ -1,12 +1,13 @@
-using System.Collections.ObjectModel;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
 using EasySave.Models;
 using EasySave.ViewModels;
 using EasySave.Views;
 using System;
+using System.Collections.ObjectModel;
 using System.Linq;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Forms;
+using System.Windows.Input;
 using Button = System.Windows.Controls.Button;
 using CheckBox = System.Windows.Controls.CheckBox;
 using MessageBox = System.Windows.MessageBox;
@@ -127,15 +128,6 @@ namespace EasySave
             Content = jobsFrame;
         }
 
-        /// <summary>
-        /// Placeholder for deleting a backup job.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">Event arguments.</param>
-        private void DeleteBackupJob_Click(object sender, RoutedEventArgs e)
-        {
-            // Logic for deleting a backup job (to be implemented)
-        }
 
         /// <summary>
         /// Handles the event when a job checkbox is checked.
