@@ -30,7 +30,7 @@ namespace EasySave.Models
                 currentProgress = 0;
 
                 // Notify observers
-                NotifyObserver("start", name, state, sourcePath, targetPath, totalFiles, totalSize,0, 0, 0);
+                NotifyObserver("start", name, state, sourcePath, targetPath, totalFiles, totalSize, 0, 0, 0);
 
                 // Get all files from source directory
                 List<string> files = ScanDirectory(sourcePath);

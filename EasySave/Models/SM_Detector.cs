@@ -45,8 +45,8 @@ namespace EasySave.Models
             // Notification immédiate si le logiciel est déjà lancé
             if (IsRunning)
 
-            // Démarrer la tâche de surveillance en arrière-plan
-            _monitoringTask = Task.Run(MonitorProcessAsync, _cancellationTokenSource.Token);
+                // Démarrer la tâche de surveillance en arrière-plan
+                _monitoringTask = Task.Run(MonitorProcessAsync, _cancellationTokenSource.Token);
         }
 
         /// <summary>

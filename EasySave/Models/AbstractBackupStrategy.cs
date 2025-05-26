@@ -75,7 +75,7 @@ namespace EasySave.Models
         public void NotifyObserver(
             string action,
             string name,
-            JobState state, 
+            JobState state,
             string sourcePath = "",
             string targetPath = "",
             int totalFiles = 0,

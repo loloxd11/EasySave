@@ -25,10 +25,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Management" Version="9.0.5" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Reference Include="LogLibrary">
       <HintPath>..\ClassLibraryProjects\LogLibrary\obj\Release\net8.0\LogLibrary.dll</HintPath>
     </Reference>
