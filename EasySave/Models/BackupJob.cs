@@ -30,6 +30,36 @@ namespace EasySave.Models
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
+        private List<IObserver> observers = new List<IObserver>();
+
+        public void AttachObserver(IObserver observer)
+        {
+            if (!observers.Contains(observer))
+                observers.Add(observer);
+        }
+
+        private void NotifyObservers(string action, string name, JobState state,
+                                        string sourcePath = "", string targetPath = "", int totalFiles = 0,
+                                        long totalSize = 0, long transferTime = 0, long encryptionTime = 0,
+                                        int currentProgress = 0)
+        {
+            foreach (var observer in observers)
+            {
+                observer.Update(
+                    action,
+                    name,
+                    type,
+                    state,
+                    sourcePath,
+                    targetPath,
+                    totalFiles,
+                    totalSize,
+                    currentProgress
+                );
+            }
+        }
+
+
         /// <summary>
         /// Initializes a new instance of the <see cref="BackupJob"/> class.
         /// </summary>
@@ -47,14 +77,50 @@ namespace EasySave.Models
             this.backupStrategy = strategy;
         }
 
-        /// <summary>
-        /// Executes the backup job using the specified strategy.
-        /// </summary>
-        /// <returns>True if the backup was successful; otherwise, false.</returns>
-        public bool Execute()
+        public bool ExecuteJob()
         {
-            return backupStrategy.Execute(name, src, dst, "default");
+            var filesToCopy = backupStrategy.GetFilesToCopy(src, dst);
+            return CopyFiles(filesToCopy, src, dst);
         }
+
+
+        public bool CopyFiles(List<string> filesToCopy, string sourcePath, string targetPath)
+        {
+            try
+            {
+                int totalFiles = filesToCopy.Count;
+                long totalSize = filesToCopy.Sum(f => new FileInfo(f).Length);
+                int currentProgress = 0;
+
+                // Notifier le début
+                NotifyObservers("start", Name, State, sourcePath, targetPath, totalFiles, totalSize, 0, 0, 0);
+
+                foreach (var sourceFile in filesToCopy)
+                {
+                    string relativePath = Path.GetRelativePath(sourcePath, sourceFile);
+                    string destFile = Path.Combine(targetPath, relativePath);
+                    string destDir = Path.GetDirectoryName(destFile);
+                    if (!Directory.Exists(destDir))
+                        Directory.CreateDirectory(destDir);
+
+                    File.Copy(sourceFile, destFile, true);
+
+                    currentProgress++;
+                    // Notifier la progression
+                    NotifyObservers("processing", Name, State, sourceFile, destFile, totalFiles, totalSize, 0, 0, currentProgress);
+                }
+
+                // Notifier la fin
+                NotifyObservers("complete", Name, State, sourcePath, targetPath, totalFiles, totalSize, 0, 0, currentProgress);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                NotifyObservers("error", Name, State, sourcePath, targetPath, 0, 0, 0, 0, 0);
+                return false;
+            }
+        }
+
 
         // Properties to access private fields
 
@@ -91,6 +157,10 @@ namespace EasySave.Models
             }
         }
 
+        /// <summary>
+        /// Gets or sets the progress of the backup job as a percentage.
+        /// Notifies property change listeners when the value changes.
+        /// </summary>
         public int Progress
         {
             get => _progress;

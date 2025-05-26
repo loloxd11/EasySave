@@ -217,29 +217,14 @@ namespace EasySave.ViewModels
         /// <summary>
         /// Executes the selected backup jobs.
         /// </summary>
-        public (bool Success, string Message) ExecuteSelectedJobs()
+        public async Task ExecuteSelectedJobsAsync()
         {
-            if (_selectedJobIndices.Count > 0)
-            {
-                var (success, message) = _backupManager.ExecuteBackupJob(_selectedJobIndices.ToList(), "sequential");
+            if (SelectedJobIndices.Count == 0)
+                return;
 
-                if (!success)
-                {
-                    return (false, message);
-                }
-                else
-                {
-                    // Refresh the jobs list after execution
-                    RefreshJobsList();
-                    SelectedJobIndices.Clear();
-                    UpdateAllJobsSelectedState();
-                    return (true, LanguageViewModel["ExecutionSuccessMessage"]);
-                }
-            }
-
-            // Return a default value if no jobs are selected
-            return (false, LanguageViewModel["NoJobsSelectedMessage"]);
+            await _backupManager.ExecuteJobsAsync(SelectedJobIndices.ToList());
         }
+
 
         /// <summary>
         /// Determines if jobs can be deleted (at least one selected).

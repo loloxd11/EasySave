@@ -88,11 +88,11 @@ namespace EasySave.Models
 
                 // Add a state observer to the backup strategy
                 StateManager stateManager = StateManager.GetInstance();
-                strategy.AttachObserver(stateManager);
+                job.AttachObserver(stateManager);
 
                 // Add log observer to the backup strategy
                 LogManager logManager = LogManager.GetInstance();
-                strategy.AttachObserver(logManager);
+                job.AttachObserver(logManager);
 
                 // Save the backup job to configuration
                 SaveBackupJobsToConfig();
@@ -132,11 +132,11 @@ namespace EasySave.Models
 
                 // Add a state observer to the backup strategy
                 StateManager stateManager = StateManager.GetInstance();
-                strategy.AttachObserver(stateManager);
+                job.AttachObserver(stateManager);
 
                 // Add log observer to the backup strategy
                 LogManager logManager = LogManager.GetInstance();
-                strategy.AttachObserver(logManager);
+                job.AttachObserver(logManager);
 
                 // Save the backup job to configuration
                 SaveBackupJobsToConfig();
@@ -183,33 +183,24 @@ namespace EasySave.Models
         /// <param name="backupIndices">List of indices of jobs to execute.</param>
         /// <param name="order">Execution order (not used in current implementation).</param>
         /// <returns>Tuple contenant le résultat de l'opération (succès/échec) et un message explicatif</returns>
-        public (bool Success, string Message) ExecuteBackupJob(List<int> backupIndices, string order)
+        /// Exécute les jobs de sauvegarde spécifiés par leurs indices, en suivant la logique détaillée.
+        /// </summary>
+        /// <param name="jobIndexes">Liste des indices des jobs à exécuter.</param>
+        public async Task ExecuteJobsAsync(List<int> jobIndexes)
         {
-            lock (lockObject)
+            var tasks = new List<Task>();
+
+            foreach (var index in jobIndexes)
             {
-                // Vérifier d'abord si le logiciel métier est en cours d'exécution
-                if (_smDetector.IsRunning)
+                // Vérifie que l'index est valide
+                if (index >= 0 && index < backupJobs.Count)
                 {
-                    return (false, "Jobs annulés : le logiciel métier prioritaire est en cours d'exécution");
+                    var job = backupJobs[index];
+                    // Lance chaque job dans un thread séparé
+                    tasks.Add(Task.Run(() => job.ExecuteJob()));
                 }
 
-                // Vérifier que les indices sont valides
-                foreach (int index in backupIndices)
-                {
-                    if (index < 0 || index >= backupJobs.Count)
-                    {
-                        return (false, $"Index de sauvegarde invalide : {index}");
-                    }
-                }
-
-                // Si toutes les vérifications sont passées, exécuter les sauvegardes
-                foreach (int index in backupIndices)
-                {
-                    backupJobs[index].Execute();
-                }
-
-                return (true, "Sauvegardes exécutées avec succès");
-            }
+            await Task.WhenAll(tasks);
         }
 
         /// <summary>

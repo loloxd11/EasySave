@@ -94,31 +94,4 @@ namespace EasySave.Views
         }
 
     }
-
-    /// <summary>
-    /// Converter to check if a value is not null.
-    /// </summary>
-    public class NotNullConverter : IValueConverter
-    {
-        /// <summary>
-        /// Converts a value to a boolean indicating if it is not null.
-        /// </summary>
-        /// <param name="value">The value to check</param>
-        /// <param name="targetType">The target type</param>
-        /// <param name="parameter">Optional parameter</param>
-        /// <param name="culture">Culture info</param>
-        /// <returns>True if value is not null, otherwise false</returns>
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            return value != null;
-        }
-
-        /// <summary>
-        /// Not implemented. Throws NotImplementedException.
-        /// </summary>
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
-    }
 }
