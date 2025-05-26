@@ -73,11 +73,11 @@ namespace EasySave.Models
 
                 // Add a state observer to the backup strategy
                 StateManager stateManager = StateManager.GetInstance();
-                strategy.AttachObserver(stateManager);
+                job.AttachObserver(stateManager);
 
                 // Add log observer to the backup strategy
                 LogManager logManager = LogManager.GetInstance();
-                strategy.AttachObserver(logManager);
+                job.AttachObserver(logManager);
 
                 // Save the backup job to configuration
                 SaveBackupJobsToConfig();
@@ -117,11 +117,11 @@ namespace EasySave.Models
 
                 // Add a state observer to the backup strategy
                 StateManager stateManager = StateManager.GetInstance();
-                strategy.AttachObserver(stateManager);
+                job.AttachObserver(stateManager);
 
                 // Add log observer to the backup strategy
                 LogManager logManager = LogManager.GetInstance();
-                strategy.AttachObserver(logManager);
+                job.AttachObserver(logManager);
 
                 // Save the backup job to configuration
                 SaveBackupJobsToConfig();
@@ -175,7 +175,7 @@ namespace EasySave.Models
                     if (index >= 0 && index < backupJobs.Count)
                     {
                         BackupJob job = backupJobs[index];
-                        job.Execute();
+                        job.ExecuteJob();
                     }
                 }
             }

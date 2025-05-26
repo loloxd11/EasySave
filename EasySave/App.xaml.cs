@@ -97,7 +97,7 @@ namespace EasySave
                 Console.WriteLine($"Source: {job.Source}");
                 Console.WriteLine($"Destination: {job.Destination}");
                 Console.WriteLine($"Type: {job.Type}");
-                bool result = job.Execute();
+                bool result = job.ExecuteJob();
                 Console.WriteLine(result ? "Succès" : "Échec");
             }
             return true;

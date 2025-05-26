@@ -16,98 +16,19 @@ namespace EasySave.Models
         private int remainFiles;
         private BackupType backupType = BackupType.Complete;
 
-        public override bool Execute(string name, string sourcePath, string targetPath, string order)
+
+        public override List<string> GetFilesToCopy(string sourcePath, string targetPath)
         {
-            this.name = name;
-            state = JobState.active;
-            EncryptionService encryptionService = EncryptionService.GetInstance();
-
-            try
+            if (Directory.Exists(targetPath))
             {
-                // Calculate total files and size
-                totalFiles = CalculateTotalFiles(sourcePath);
-                totalSize = CalculateTotalSize(sourcePath);
-                remainFiles = totalFiles;
-                currentProgress = 0;
-
-                // Notify observers
-                NotifyObserver("start", name, state, sourcePath, targetPath, totalFiles, totalSize,0, 0, 0);
-
-                // Get all files from source directory
-                List<string> files = ScanDirectory(sourcePath);
-
-                // Create target directory if it doesn't exist
-                if (!Directory.Exists(targetPath))
-                {
-                    Directory.CreateDirectory(targetPath);
-                }
-
-                // Copy each file
-                foreach (string sourceFile in files)
-                {
-                    // Create relative path
-                    string relativePath = sourceFile.Substring(sourcePath.Length);
-                    if (relativePath.StartsWith("\\") || relativePath.StartsWith("/"))
-                    {
-                        relativePath = relativePath.Substring(1);
-                    }
-
-                    // Create destination file path
-                    string destFile = Path.Combine(targetPath, relativePath);
-                    string destDir = Path.GetDirectoryName(destFile);
-
-                    // Create destination directory if it doesn't exist
-                    if (!Directory.Exists(destDir))
-                    {
-                        Directory.CreateDirectory(destDir);
-                    }
-
-                    // Update current file
-                    currentFile = sourceFile;
-                    destinationFile = destFile;
-
-                    // Copy file
-                    long fileSize = GetFileSize(sourceFile);
-                    long startTime = DateTime.Now.Ticks;
-
-                    File.Copy(sourceFile, destFile, true);
-
-                    long endTime = DateTime.Now.Ticks;
-                    long transferTime = endTime - startTime;
-
-                    // Vérifier si le fichier doit être chiffré
-                    long encryptionTime = 0;
-                    if (encryptionService.ShouldEncryptFile(sourceFile))
-                    {
-                        // Chiffrer le fichier copié
-                        encryptionTime = encryptionService.EncryptFile(destFile);
-                    }
-
-                    // Update progress
-                    remainFiles--;
-                    currentProgress = totalFiles - remainFiles;
-
-                    // Notifier les observateurs après chaque fichier copié pour mettre à jour la progression en temps réel
-                    NotifyObserver(BackupActions.Processing, name, state, sourceFile, destinationFile, totalFiles, totalSize, transferTime, 0, currentProgress);
-                }
-
-                state = JobState.completed;
-                NotifyObserver("complete", name, state, sourcePath, targetPath, totalFiles, totalSize, 0, 0, 0);
-                return true;
+                Directory.Delete(targetPath, true);
             }
-            catch (Exception ex)
+            else
             {
-                state = JobState.error;
-                System.Windows.MessageBox.Show(
-                ex.Message,
-                "Erreur de sauvegarde",
-                System.Windows.MessageBoxButton.OK,
-                System.Windows.MessageBoxImage.Warning);
-                NotifyObserver("error", name, state, sourcePath, targetPath, totalFiles, totalSize, 0, 0, 0);
-                Console.WriteLine($"Error executing complete backup: {ex.Message}");
-                return false;
+                Directory.CreateDirectory(targetPath);
             }
+
+            return ScanDirectory(sourcePath);
         }
-
     }
 }
