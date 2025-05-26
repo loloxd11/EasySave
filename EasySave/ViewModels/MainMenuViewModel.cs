@@ -217,23 +217,28 @@ namespace EasySave.ViewModels
         /// <summary>
         /// Executes the selected backup jobs.
         /// </summary>
-        public void ExecuteSelectedJobs()
+        public (bool Success, string Message) ExecuteSelectedJobs()
         {
-            try
+            if (_selectedJobIndices.Count > 0)
             {
-                if (_selectedJobIndices.Count <= 0 || ConfigManager.PriorityProcessIsRunning() == true)
+                var (success, message) = _backupManager.ExecuteBackupJob(_selectedJobIndices.ToList(), "sequential");
+
+                if (!success)
                 {
-                    throw new InvalidOperationException("Jobs Canceled, Priority Process is running");
+                    return (false, message);
                 }
                 else
                 {
-                    _backupManager.ExecuteBackupJob(_selectedJobIndices.ToList(), "sequential");
+                    // Refresh the jobs list after execution
+                    RefreshJobsList();
+                    SelectedJobIndices.Clear();
+                    UpdateAllJobsSelectedState();
+                    return (true, LanguageViewModel["ExecutionSuccessMessage"]);
                 }
             }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException(!string.IsNullOrEmpty(ex.Message) ? ex.Message : "No jobs selected or jobs are already running.");
-            }
+
+            // Return a default value if no jobs are selected
+            return (false, LanguageViewModel["NoJobsSelectedMessage"]);
         }
 
         /// <summary>

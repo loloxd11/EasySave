@@ -97,13 +97,6 @@ namespace EasySave.Models
             }
         }
 
-        /*public void UpdateProgress(int files, long size)
-        {
-            progression = files;
-            // Notifier les observateurs du changement de progression
-            NotifyObserver(BackupActions.Progress, name, currentProgress: files);
-        }*/
-
         /// <summary>
         /// Update the current file being processed and notify observers.
         /// </summary>

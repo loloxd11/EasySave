@@ -14,7 +14,6 @@ namespace EasySave.Models
         private string destinationFile;
         private int totalFiles;
         private int remainFiles;
-        private BackupType backupType = BackupType.Complete;
 
         public override bool Execute(string name, string sourcePath, string targetPath, string order)
         {
@@ -89,11 +88,6 @@ namespace EasySave.Models
 
                     // Notifier les observateurs après chaque fichier copié pour mettre à jour la progression en temps réel
                     NotifyObserver(BackupActions.Processing, name, state, sourceFile, destinationFile, totalFiles, totalSize, transferTime, 0, currentProgress);
-                    if (ConfigManager.PriorityProcessIsRunning() == true)
-                    {
-                        // Si le processus prioritaire est en cours d'exécution, attendre 1 seconde avant de continuer
-                        throw new InvalidOperationException("Jobs Canceled, Priority Process is running");
-                    }
                 }
 
                 state = JobState.completed;
