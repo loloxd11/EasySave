@@ -54,6 +54,8 @@ namespace EasySave.Models
                     targetPath,
                     totalFiles,
                     totalSize,
+                    transferTime,
+                    encryptionTime,
                     currentProgress
                 );
             }
@@ -95,6 +97,8 @@ namespace EasySave.Models
                 // Notifier le début
                 NotifyObservers("start", Name, State, sourcePath, targetPath, totalFiles, totalSize, 0, 0, 0);
 
+                var encryptionService = EncryptionService.GetInstance();
+
                 foreach (var sourceFile in filesToCopy)
                 {
                     string relativePath = Path.GetRelativePath(sourcePath, sourceFile);
@@ -103,11 +107,22 @@ namespace EasySave.Models
                     if (!Directory.Exists(destDir))
                         Directory.CreateDirectory(destDir);
 
+                    // Mesurer le temps de transfert
+                    var sw = System.Diagnostics.Stopwatch.StartNew();
                     File.Copy(sourceFile, destFile, true);
+                    sw.Stop();
+                    long transferTime = sw.ElapsedMilliseconds;
+
+                    long encryptionTime = 0;
+                    // Vérifier si le fichier doit être chiffré
+                    if (encryptionService.ShouldEncryptFile(destFile))
+                    {
+                        encryptionTime = encryptionService.EncryptFile(destFile);
+                    }
 
                     currentProgress++;
-                    // Notifier la progression
-                    NotifyObservers("processing", Name, State, sourceFile, destFile, totalFiles, totalSize, 0, 0, currentProgress);
+                    // Notifier la progression avec le temps de transfert et de chiffrement
+                    NotifyObservers("processing", Name, State, sourceFile, destFile, totalFiles, totalSize, transferTime, encryptionTime, currentProgress);
                 }
 
                 // Notifier la fin

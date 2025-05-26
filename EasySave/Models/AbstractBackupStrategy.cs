@@ -95,7 +95,7 @@ namespace EasySave.Models
             foreach (var observer in observers)
             {
                 observer.Update(action, name, backupType, state, sourcePath, targetPath,
-                    totalFiles, totalSize, currentProgress);
+                    totalFiles, totalSize, transferTime, encryptionTime, currentProgress);
             }
         }
 

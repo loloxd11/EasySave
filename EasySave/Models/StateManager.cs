@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -82,6 +83,10 @@ namespace EasySave.Models
             /// </summary>
             public long TotalSize { get; set; }
 
+            public long TransfertTime { get; set; }
+
+            public long EncryptionTime { get; set; }
+
             /// <summary>
             /// Progression of the backup in percent (0-100).
             /// </summary>
@@ -127,9 +132,11 @@ namespace EasySave.Models
         /// <param name="targetPath">Target path.</param>
         /// <param name="totalFiles">Total files.</param>
         /// <param name="totalSize">Total size.</param>
+        /// <param name="transfertTime">The time to tranfert file</param>
+        /// <param name="encryptionTime">The time to encrypt the file if needed</param>
         /// <param name="progression">Progression value.</param>
         public void Update(string action, string name, BackupType type, JobState state,
-            string sourcePath, string targetPath, int totalFiles, long totalSize, int progression)
+            string sourcePath, string targetPath, int totalFiles, long totalSize, long transfertTime, long encryptionTime, int progression)
         {
             lock (lockObject)
             {
