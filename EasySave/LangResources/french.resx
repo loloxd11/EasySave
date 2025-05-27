@@ -213,4 +213,13 @@
   <data name="PriorityJobs" xml:space="preserve">
     <value>Impossible d'executer </value>
   </data>
+  <data name="PriorityFiles" xml:space="preserve">
+    <value>Fichiers prioritaires</value>
+  </data>
+  <data name="PriorityExtensionsPhrase" xml:space="preserve">
+    <value>Entrez les extensions de fichiers prioritaires (ex: .docx,.pdf)</value>
+  </data>
+  <data name="MaxParallelSizePhrase" xml:space="preserve">
+    <value>Limite de taille pour transfert simultané (en Ko)</value>
+  </data>
 </root>

@@ -206,6 +206,63 @@
 
                 <Border Background="White" BorderBrush="#ddd" BorderThickness="1" Margin="0,10" Padding="20" CornerRadius="5">
                     <StackPanel>
+                        <TextBlock Text="{Binding LanguageViewModel[PriorityFiles]}"
+                                FontSize="18" FontWeight="SemiBold"
+                                Margin="0,0,0,15" Foreground="#333"/>
+                        <TextBlock Text="{Binding LanguageViewModel[PriorityExtensionsPhrase]}"
+                                Margin="0,0,0,10"/>
+                        <Grid Margin="0,0,0,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox Grid.Column="0"
+                                    Text="{Binding NewPriorityExtension, UpdateSourceTrigger=PropertyChanged}"
+                                    Padding="5"
+                                    Margin="0,0,10,0"
+                                    Width="200"
+                                    HorizontalAlignment="Left"/>
+                            <Button Grid.Column="1"
+                                    Command="{Binding AddPriorityExtensionCommand}"
+                                    Content="{Binding LanguageViewModel[Add]}"
+                                    Padding="10,5"
+                                    Margin="0,0,10,0"
+                                    Background="#5cb85c"
+                                    Foreground="White"/>
+                            <Button Grid.Column="2"
+                                    Command="{Binding RemovePriorityExtensionCommand}"
+                                    Content="{Binding LanguageViewModel[Delete]}"
+                                    Padding="10,5"
+                                    Background="#d9534f"
+                                    Foreground="White"/>
+                        </Grid>
+                        <ListBox ItemsSource="{Binding PriorityExtensions}"
+                                SelectedItem="{Binding SelectedPriorityExtension}"
+                                Height="100"
+                                Width="300"
+                                HorizontalAlignment="Left"
+                                ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                BorderBrush="#ddd"
+                                BorderThickness="1"
+                                Padding="5">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding}"/>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                        <TextBlock Text="{Binding LanguageViewModel[MaxParallelSizePhrase]}"
+                                Margin="0,15,0,5"/>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBox Text="{Binding MaxParallelSizeKB, UpdateSourceTrigger=PropertyChanged}" Width="80"/>
+                            <TextBlock Text="Ko" Margin="5,0,0,0" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <Border Background="White" BorderBrush="#ddd" BorderThickness="1" Margin="0,10" Padding="20" CornerRadius="5">
+                    <StackPanel>
                         <TextBlock Text="{Binding LanguageViewModel[LogFormat]}" 
                                 FontSize="18" FontWeight="SemiBold" 
                                 Margin="0,0,0,15" Foreground="#333"/>
