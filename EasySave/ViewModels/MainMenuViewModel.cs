@@ -34,7 +34,7 @@ namespace EasySave.ViewModels
         /// </summary>
         public LanguageViewModel LanguageViewModel { get; }
 
-        private readonly BackupManager _backupManager;
+        public readonly BackupManager _backupManager;
 
         /// <summary>
         /// Command to delete selected backup jobs.
