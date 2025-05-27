@@ -1,91 +1,116 @@
 ﻿<Page x:Class="EasySave.Views.Jobs"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      Title="{Binding LanguageViewModel[JobsTitle]}" Background="#cfe6ff" Height="318" Width="400">
+      Title="{Binding LanguageViewModel[JobsTitle]}"
+      Background="#cfe6ff">
 
     <Page.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisConverter" />
     </Page.Resources>
 
-    <StackPanel Margin="18,20,20,-40">
-        <TextBlock FontSize="18" FontWeight="Bold" Margin="0,0,0,15" HorizontalAlignment="Center">
-            <TextBlock.Style>
-                <Style TargetType="TextBlock">
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding IsEditMode}" Value="True">
-                            <Setter Property="Text" Value="{Binding LanguageViewModel[EditJob]}" />
-                        </DataTrigger>
-                        <DataTrigger Binding="{Binding IsEditMode}" Value="False">
-                            <Setter Property="Text" Value="{Binding LanguageViewModel[AddNewJob]}" />
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </TextBlock.Style>
-        </TextBlock>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-        <Label Content="{Binding LanguageViewModel[JobName]}" Margin="0,0,0,5"/>
-        <Grid Margin="0,0,0,10">
-            <TextBox Text="{Binding JobName, UpdateSourceTrigger=PropertyChanged}" Height="30"/>
-        </Grid>
-
-        <Label Content="{Binding LanguageViewModel[SourcePath]}" Margin="0,0,0,5"/>
-        <Grid Margin="0,0,0,10">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <TextBox Grid.Column="0" Text="{Binding SourcePath, UpdateSourceTrigger=PropertyChanged}" Height="30" IsReadOnly="True"/>
-            <Button Grid.Column="1" Content="..." Width="30" Margin="5,0,0,0" Click="SelectSourceFolder_Click"/>
-        </Grid>
-
-        <Label Content="{Binding LanguageViewModel[TargetPath]}" Margin="0,0,0,5"/>
-        <Grid Margin="0,0,0,10">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <TextBox Grid.Column="0" Text="{Binding TargetPath, UpdateSourceTrigger=PropertyChanged}" Height="30" IsReadOnly="True"/>
-            <Button Grid.Column="1" Content="..." Width="30" Margin="5,0,0,0" Click="SelectTargetFolder_Click"/>
-        </Grid>
-
-        <ComboBox ItemsSource="{Binding BackupTypes}" 
-          SelectedItem="{Binding SelectedBackupType}"
-          Margin="0,0,0,10">
-            <ComboBox.ItemTemplate>
-                <DataTemplate>
-                    <TextBlock>
-                        <TextBlock.Style>
-                            <Style TargetType="TextBlock">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding}" Value="Complete">
-                                        <Setter Property="Text" Value="{Binding DataContext.LanguageViewModel[CompleteBackup], RelativeSource={RelativeSource AncestorType=Page}}" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding}" Value="Differential">
-                                        <Setter Property="Text" Value="{Binding DataContext.LanguageViewModel[DifferentialBackup], RelativeSource={RelativeSource AncestorType=Page}}" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBlock.Style>
-                    </TextBlock>
-                </DataTemplate>
-            </ComboBox.ItemTemplate>
-        </ComboBox>
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
-            <Button Command="{Binding ValidateCommand}" Width="100" Height="30" Margin="0,0,10,0">
-                <Button.Style>
-                    <Style TargetType="Button">
+        <!-- Centered title at the top -->
+        <StackPanel Grid.Row="0" Margin="0,32,0,0" HorizontalAlignment="Center">
+            <TextBlock Text="EasySave"
+                       FontSize="32"
+                       FontWeight="Bold"
+                       Foreground="#222"
+                       HorizontalAlignment="Center"/>
+            <TextBlock FontSize="20" FontWeight="Bold" Margin="0,8,0,0" HorizontalAlignment="Center">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding IsEditMode}" Value="True">
-                                <Setter Property="Content" Value="{Binding LanguageViewModel[Update]}" />
+                                <Setter Property="Text" Value="{Binding LanguageViewModel[EditJob]}" />
                             </DataTrigger>
                             <DataTrigger Binding="{Binding IsEditMode}" Value="False">
-                                <Setter Property="Content" Value="{Binding LanguageViewModel[Validate]}" />
+                                <Setter Property="Text" Value="{Binding LanguageViewModel[AddNewJob]}" />
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
-                </Button.Style>
-            </Button>
-            <Button Content="{Binding LanguageViewModel[Cancel]}" Command="{Binding CancelCommand}" Width="100" Height="30"/>
+                </TextBlock.Style>
+            </TextBlock>
         </StackPanel>
-    </StackPanel>
+
+        <!-- Centered form in a card -->
+        <Border Grid.Row="1"
+                Background="White"
+                CornerRadius="16"
+                Padding="32"
+                Margin="0,32,0,0"
+                VerticalAlignment="Top"
+                HorizontalAlignment="Center"
+                MaxWidth="600">
+            <StackPanel>
+                <Label Content="{Binding LanguageViewModel[JobName]}" Margin="0,0,0,5"/>
+                <TextBox Text="{Binding JobName, UpdateSourceTrigger=PropertyChanged}" Height="32" FontSize="15" Padding="8,0" Background="#f8fafd" BorderBrush="#b0c4de" BorderThickness="1.2" Margin="0,0,0,16"/>
+
+                <Label Content="{Binding LanguageViewModel[SourcePath]}" Margin="0,0,0,5"/>
+                <Grid Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox Grid.Column="0" Text="{Binding SourcePath, UpdateSourceTrigger=PropertyChanged}" Height="32" FontSize="15" Padding="8,0" Background="#f8fafd" BorderBrush="#b0c4de" BorderThickness="1.2" IsReadOnly="True"/>
+                    <Button Grid.Column="1" Content="..." Width="34" Height="32" Margin="8,0,0,0" Click="SelectSourceFolder_Click"/>
+                </Grid>
+
+                <Label Content="{Binding LanguageViewModel[TargetPath]}" Margin="0,0,0,5"/>
+                <Grid Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox Grid.Column="0" Text="{Binding TargetPath, UpdateSourceTrigger=PropertyChanged}" Height="32" FontSize="15" Padding="8,0" Background="#f8fafd" BorderBrush="#b0c4de" BorderThickness="1.2" IsReadOnly="True"/>
+                    <Button Grid.Column="1" Content="..." Width="34" Height="32" Margin="8,0,0,0" Click="SelectTargetFolder_Click"/>
+                </Grid>
+
+                <ComboBox ItemsSource="{Binding BackupTypes}" 
+                  SelectedItem="{Binding SelectedBackupType}"
+                  Height="32" FontSize="15" Padding="8,0" Background="#f8fafd" BorderBrush="#b0c4de" BorderThickness="1.2"
+                  Margin="0,0,0,16">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock>
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding}" Value="Complete">
+                                                <Setter Property="Text" Value="{Binding DataContext.LanguageViewModel[CompleteBackup], RelativeSource={RelativeSource AncestorType=Page}}" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding}" Value="Differential">
+                                                <Setter Property="Text" Value="{Binding DataContext.LanguageViewModel[DifferentialBackup], RelativeSource={RelativeSource AncestorType=Page}}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
+                    <Button Command="{Binding ValidateCommand}" Width="110" Height="34" Margin="0,0,10,0">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsEditMode}" Value="True">
+                                        <Setter Property="Content" Value="{Binding LanguageViewModel[Update]}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsEditMode}" Value="False">
+                                        <Setter Property="Content" Value="{Binding LanguageViewModel[Validate]}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                    <Button Content="{Binding LanguageViewModel[Cancel]}" Command="{Binding CancelCommand}" Width="110" Height="34" Margin="0"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </Grid>
 </Page>
