@@ -22,6 +22,10 @@ namespace EasySave
 
         public static object SharedLanguageViewModel { get; internal set; }
 
+        private RemoteConsoleServer _remoteServer;
+        private bool _isRemoteServerActive = false;
+        private const int RemoteServerPort = 9000;
+
         /// <summary>
         /// Constructor for MainWindow.
         /// Initializes the DataContext with the MainMenuViewModel.
@@ -307,6 +311,32 @@ namespace EasySave
                         MessageBoxButton.OK,
                         MessageBoxImage.Information);
                 }
+        /// Ouvre la console déportée (client distant)
+        /// </summary>
+        private void OpenRemoteConsole_Click(object sender, RoutedEventArgs e)
+        {
+            var remoteConsole = new EasySave.Views.RemoteConsoleView();
+            remoteConsole.Show();
+        }
+
+        private void RemoteServerButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (!_isRemoteServerActive)
+            {
+                _remoteServer = new RemoteConsoleServer(RemoteServerPort);
+                _remoteServer.Start();
+                _isRemoteServerActive = true;
+                RemoteServerButton.Content = "Désactiver Serveur Distant";
+                RemoteServerStatus.Text = $"Serveur: Actif (Port {RemoteServerPort})";
+                RemoteServerStatus.Foreground = System.Windows.Media.Brushes.Green;
+            }
+            else
+            {
+                _remoteServer?.Stop();
+                _isRemoteServerActive = false;
+                RemoteServerButton.Content = "Activer Serveur Distant";
+                RemoteServerStatus.Text = "Serveur: Inactif";
+                RemoteServerStatus.Foreground = System.Windows.Media.Brushes.Red;
             }
         }
     }

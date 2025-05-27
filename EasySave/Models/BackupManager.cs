@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
 using System.Xml.Linq;
+using System.ComponentModel;
 
 namespace EasySave.Models
 {
@@ -34,6 +35,9 @@ namespace EasySave.Models
 
         // Dictionnaire pour suivre les CancellationTokenSource des jobs en cours d'exécution
         private Dictionary<int, CancellationTokenSource> _jobCancellationTokens = new Dictionary<int, CancellationTokenSource>();
+
+        private List<IObserver> _globalObservers = new List<IObserver>();
+
 
         /// <summary>
         /// Private constructor to enforce singleton pattern.
@@ -309,6 +313,10 @@ namespace EasySave.Models
                 LogManager logManager = LogManager.GetInstance();
                 job.AttachObserver(logManager);
 
+                // Add global observers (ex: RemoteConsoleServer)
+                foreach (var obs in _globalObservers)
+                    job.AttachObserver(obs);
+
                 // Initialiser l'état de pause du nouveau job
                 InitializeJobPauseState(backupJobs.Count - 1);
 
@@ -358,6 +366,10 @@ namespace EasySave.Models
                 // Add log observer to the backup strategy
                 LogManager logManager = LogManager.GetInstance();
                 job.AttachObserver(logManager);
+
+                // Add global observers (ex: RemoteConsoleServer)
+                foreach (var obs in _globalObservers)
+                    job.AttachObserver(obs);
 
                 // Restaurer l'état de pause
                 _pausedJobIndices[index] = wasPaused;
@@ -662,6 +674,69 @@ namespace EasySave.Models
                         Console.WriteLine($"Job '{job.Name}' (indice {index}) réinitialisé.");
                     }
                     return false;
+        /// <summary>
+        /// Data Transfer Object for exposing job status remotely
+        /// </summary>
+        public class BackupJobStatusDto : INotifyPropertyChanged
+        {
+            private int _index;
+            private string _name;
+            private string _state;
+            private int _progress;
+
+            public int Index { get => _index; set { if (_index != value) { _index = value; OnPropertyChanged(nameof(Index)); } } }
+            public string Name { get => _name; set { if (_name != value) { _name = value; OnPropertyChanged(nameof(Name)); } } }
+            public string State { get => _state; set { if (_state != value) { _state = value; OnPropertyChanged(nameof(State)); } } }
+            public int Progress { get => _progress; set { if (_progress != value) { _progress = value; OnPropertyChanged(nameof(Progress)); } } }
+
+            public event PropertyChangedEventHandler PropertyChanged;
+            protected void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        /// <summary>
+        /// Returns a list of job status DTOs for remote monitoring
+        /// </summary>
+        public List<BackupJobStatusDto> GetJobStatuses()
+        {
+            lock (lockObject)
+            {
+                var result = new List<BackupJobStatusDto>();
+                for (int i = 0; i < backupJobs.Count; i++)
+                {
+                    var job = backupJobs[i];
+                    result.Add(new BackupJobStatusDto
+                    {
+                        Index = i,
+                        Name = job.Name,
+                        State = job.State.ToString(),
+                        Progress = job.Progress
+                    });
+                }
+                return result;
+            }
+        }
+
+        public void AttachObserver(IObserver observer)
+        {
+            lock (lockObject)
+            {
+                if (!_globalObservers.Contains(observer))
+                {
+                    _globalObservers.Add(observer);
+                    foreach (var job in backupJobs)
+                        job.AttachObserver(observer);
+                }
+            }
+        }
+
+        public void DetachObserver(IObserver observer)
+        {
+            lock (lockObject)
+            {
+                if (_globalObservers.Contains(observer))
+                {
+                    _globalObservers.Remove(observer);
+                    // Il n'y a pas de Detach dans BackupJob, donc il restera sur les jobs existants, mais ce n'est pas bloquant.
                 }
             }
         }
