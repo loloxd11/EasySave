@@ -1,7 +1,7 @@
 ﻿<Page x:Class="EasySave.Views.Jobs"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      Title="{Binding LanguageViewModel[JobsTitle]}" Height="318" Width="400">
+      Title="{Binding LanguageViewModel[JobsTitle]}" Background="#cfe6ff" Height="318" Width="400">
 
     <Page.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisConverter" />

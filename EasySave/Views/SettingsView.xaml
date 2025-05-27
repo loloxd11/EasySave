@@ -13,7 +13,7 @@
         <converters:NotNullConverter x:Key="NotNullConverter"/>
     </Page.Resources>
 
-    <Grid Background="#f4f4f4">
+    <Grid Background="#cfe6ff">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
