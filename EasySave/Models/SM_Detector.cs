@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace EasySave.Models
 {
@@ -42,11 +43,8 @@ namespace EasySave.Models
             // Vérification initiale
             CheckIfBusinessSoftwareIsRunning();
 
-            // Notification immédiate si le logiciel est déjà lancé
-            if (IsRunning)
-
-                // Démarrer la tâche de surveillance en arrière-plan
-                _monitoringTask = Task.Run(MonitorProcessAsync, _cancellationTokenSource.Token);
+            // Toujours démarrer la tâche de surveillance en arrière-plan
+            _monitoringTask = Task.Run(MonitorProcessAsync, _cancellationTokenSource.Token);
         }
 
         /// <summary>
@@ -94,11 +92,21 @@ namespace EasySave.Models
                             Console.WriteLine($"SM_Detector: Processus '{_businessSoftwareName}' démarré");
                             // Notifier le BackupManager que le processus est lancé
                             _backupManager.SM_Detected();
+                            System.Windows.MessageBox.Show(
+                            "Sauvegardes mises en pause : logiciel métier détecté",
+                            "Sauvegarde en pause",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Information);
                         }
                         else
                         {
                             Console.WriteLine($"SM_Detector: Processus '{_businessSoftwareName}' arrêté");
                             _backupManager.SM_Undetected();
+                            System.Windows.MessageBox.Show(
+                            "Sauvegardes reprises : logiciel métier terminé",
+                            "Sauvegarde reprise",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Information);
                         }
 
                         previousState = IsRunning;

@@ -1,8 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
@@ -24,6 +26,11 @@ namespace EasySave.Models
         private CancellationTokenSource _detectorTokenSource;
         private Thread _detectorThread;
 
+        // Structure pour le suivi de la pause des jobs
+        private Dictionary<int, bool> _pausedJobIndices;
+
+        // Événements de signalisation pour la reprise
+        private Dictionary<int, ManualResetEventSlim> _resumeEvents;
 
         /// <summary>
         /// Private constructor to enforce singleton pattern.
@@ -32,6 +39,8 @@ namespace EasySave.Models
         private BackupManager()
         {
             backupJobs = new List<BackupJob>();
+            _pausedJobIndices = new Dictionary<int, bool>();
+            _resumeEvents = new Dictionary<int, ManualResetEventSlim>();
 
             // Initialisation du détecteur de logiciel métier
             _detectorTokenSource = new CancellationTokenSource();
@@ -57,6 +66,209 @@ namespace EasySave.Models
                 _configManager.LoadConfiguration(); // Load configuration on instance creation
             }
             return _instance;
+        }
+
+        /// <summary>
+        /// Vérifie si un job spécifique est actuellement en pause
+        /// </summary>
+        /// <param name="index">Index du job dans la liste</param>
+        /// <returns>True si le job est en pause, sinon False</returns>
+        public bool IsJobPaused(int index)
+        {
+            lock (lockObject)
+            {
+                // Vérifier d'abord que l'index est valide
+                if (index < 0 || index >= backupJobs.Count)
+                    return false;
+
+                return _pausedJobIndices.TryGetValue(index, out bool isPaused) && isPaused;
+            }
+        }
+
+        /// <summary>
+        /// Vérifie si tous les jobs sont en pause
+        /// </summary>
+        /// <returns>True si tous les jobs sont en pause, sinon False</returns>
+        public bool AreAllJobsPaused()
+        {
+            lock (lockObject)
+            {
+                if (backupJobs.Count == 0 || _pausedJobIndices.Count == 0)
+                    return false;
+
+                // Vérifier que tous les jobs existants sont en pause
+                for (int i = 0; i < backupJobs.Count; i++)
+                {
+                    if (!_pausedJobIndices.TryGetValue(i, out bool isPaused) || !isPaused)
+                        return false;
+                }
+
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Met en pause des jobs de sauvegarde spécifiques par leurs indices
+        /// </summary>
+        /// <param name="indices">Collection d'indices des jobs à mettre en pause (null pour tous les jobs)</param>
+        /// <param name="reason">Raison de la mise en pause</param>
+        public void PauseBackupJobs(IEnumerable<int> indices = null, string reason = "")
+        {
+            lock (lockObject)
+            {
+                // Si indices est null, on met en pause tous les jobs
+                if (indices == null)
+                {
+                    indices = Enumerable.Range(0, backupJobs.Count);
+                }
+
+                foreach (var index in indices)
+                {
+                    // Vérifier que l'index est valide
+                    if (index < 0 || index >= backupJobs.Count)
+                        continue;
+
+                    // Créer l'événement s'il n'existe pas encore
+                    if (!_resumeEvents.ContainsKey(index))
+                    {
+                        _resumeEvents[index] = new ManualResetEventSlim(true);
+                    }
+
+                    // Mettre le job en pause
+                    _pausedJobIndices[index] = true;
+                    _resumeEvents[index].Reset(); // Met l'événement en état non-signalé
+
+                    Console.WriteLine($"Job '{backupJobs[index].Name}' (indice {index}) mis en pause. Raison : {reason}");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Reprend des jobs de sauvegarde spécifiques qui sont en pause
+        /// </summary>
+        /// <param name="indices">Collection d'indices des jobs à reprendre (null pour tous les jobs)</param>
+        public void ResumeBackupJobs(IEnumerable<int> indices = null)
+        {
+            lock (lockObject)
+            {
+                // Si indices est null, on reprend tous les jobs
+                if (indices == null)
+                {
+                    indices = _pausedJobIndices.Keys.ToList();
+                }
+
+                foreach (var index in indices)
+                {
+                    // Vérifier si le job est en pause
+                    if (!_pausedJobIndices.TryGetValue(index, out bool isPaused) || !isPaused)
+                        continue;
+
+                    // Vérifier que l'index est toujours valide
+                    if (index >= 0 && index < backupJobs.Count)
+                    {
+                        // Marquer le job comme non pausé
+                        _pausedJobIndices[index] = false;
+
+                        // Signaler l'événement pour débloquer le job s'il existe
+                        if (_resumeEvents.TryGetValue(index, out var resumeEvent))
+                        {
+                            resumeEvent.Set();
+                        }
+
+                        Console.WriteLine($"Job '{backupJobs[index].Name}' (indice {index}) repris");
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Attend la reprise d'un job spécifique s'il est en pause
+        /// </summary>
+        /// <param name="index">Index du job</param>
+        /// <param name="cancellationToken">Token d'annulation</param>
+        /// <returns>True si la reprise a lieu, False si l'opération est annulée</returns>
+        public bool WaitForJobResume(int index, CancellationToken cancellationToken)
+        {
+            try
+            {
+                // Si l'index est invalide ou le job n'est pas en pause, retourne immédiatement true
+                if (index < 0 || index >= backupJobs.Count || !IsJobPaused(index))
+                    return true;
+
+                // S'il n'y a pas d'événement pour ce job, on en crée un
+                lock (lockObject)
+                {
+                    if (!_resumeEvents.TryGetValue(index, out var _))
+                    {
+                        _resumeEvents[index] = new ManualResetEventSlim(true);
+                    }
+                }
+
+                // Attendre que l'événement soit signalé (reprise) ou que l'annulation soit demandée
+                return _resumeEvents[index].Wait(Timeout.Infinite, cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Ajoute un nouvel événement de pause/reprise pour un nouveau job
+        /// </summary>
+        /// <param name="index">Index du job</param>
+        private void InitializeJobPauseState(int index)
+        {
+            if (index >= 0)
+            {
+                _pausedJobIndices[index] = false;
+                _resumeEvents[index] = new ManualResetEventSlim(true);
+            }
+        }
+
+        /// <summary>
+        /// Met à jour les indices après une suppression de job
+        /// </summary>
+        /// <param name="removedIndex">Index du job supprimé</param>
+        private void UpdateIndicesAfterRemoval(int removedIndex)
+        {
+            lock (lockObject)
+            {
+                // Supprimer l'état et l'événement du job supprimé
+                _pausedJobIndices.Remove(removedIndex);
+                if (_resumeEvents.TryGetValue(removedIndex, out var eventToDispose))
+                {
+                    eventToDispose.Dispose();
+                    _resumeEvents.Remove(removedIndex);
+                }
+
+                // Créer de nouveaux dictionnaires avec les indices mis à jour
+                var newPausedJobIndices = new Dictionary<int, bool>();
+                var newResumeEvents = new Dictionary<int, ManualResetEventSlim>();
+
+                // Décaler tous les indices supérieurs à celui supprimé
+                foreach (var kvp in _pausedJobIndices)
+                {
+                    int oldIndex = kvp.Key;
+                    bool isPaused = kvp.Value;
+
+                    int newIndex = oldIndex > removedIndex ? oldIndex - 1 : oldIndex;
+                    newPausedJobIndices[newIndex] = isPaused;
+                }
+
+                foreach (var kvp in _resumeEvents)
+                {
+                    int oldIndex = kvp.Key;
+                    var resumeEvent = kvp.Value;
+
+                    int newIndex = oldIndex > removedIndex ? oldIndex - 1 : oldIndex;
+                    newResumeEvents[newIndex] = resumeEvent;
+                }
+
+                // Remplacer les dictionnaires
+                _pausedJobIndices = newPausedJobIndices;
+                _resumeEvents = newResumeEvents;
+            }
         }
 
         /// <summary>
@@ -94,6 +306,9 @@ namespace EasySave.Models
                 LogManager logManager = LogManager.GetInstance();
                 job.AttachObserver(logManager);
 
+                // Initialiser l'état de pause du nouveau job
+                InitializeJobPauseState(backupJobs.Count - 1);
+
                 // Save the backup job to configuration
                 SaveBackupJobsToConfig();
 
@@ -122,6 +337,9 @@ namespace EasySave.Models
                     return false;
                 }
 
+                // Sauvegarder l'état de pause
+                bool wasPaused = IsJobPaused(index);
+
                 // Remove the old job
                 backupJobs.RemoveAt(index);
 
@@ -137,6 +355,9 @@ namespace EasySave.Models
                 // Add log observer to the backup strategy
                 LogManager logManager = LogManager.GetInstance();
                 job.AttachObserver(logManager);
+
+                // Restaurer l'état de pause
+                _pausedJobIndices[index] = wasPaused;
 
                 // Save the backup job to configuration
                 SaveBackupJobsToConfig();
@@ -161,6 +382,10 @@ namespace EasySave.Models
                 }
 
                 backupJobs.RemoveAt(index);
+
+                // Mettre à jour les indices après la suppression
+                UpdateIndicesAfterRemoval(index);
+
                 SaveBackupJobsToConfig();
 
                 return true;
@@ -180,15 +405,19 @@ namespace EasySave.Models
         /// Executes the backup jobs specified by their indices.
         /// Checks if business software is running before executing backups.
         /// </summary>
-        /// <param name="backupIndices">List of indices of jobs to execute.</param>
-        /// <param name="order">Execution order (not used in current implementation).</param>
-        /// <returns>Tuple contenant le résultat de l'opération (succès/échec) et un message explicatif</returns>
-        /// Exécute les jobs de sauvegarde spécifiés par leurs indices, en suivant la logique détaillée.
-        /// </summary>
         /// <param name="jobIndexes">Liste des indices des jobs à exécuter.</param>
-        public async Task ExecuteJobsAsync(List<int> jobIndexes)
+        /// <returns>Tuple contenant le résultat de l'opération (succès/échec) et un message explicatif</returns>
+        public async Task<(bool Success, string Message)> ExecuteJobsAsync(List<int> jobIndexes)
         {
-            var tasks = new List<Task>();
+            // Vérifier si le logiciel métier est en cours d'exécution
+            if (_smDetector.IsRunning)
+            {
+                // Annuler l'exécution et retourner un message explicatif
+                return (false, "Impossible d'exécuter les jobs de sauvegarde : logiciel métier en cours d'exécution");
+            }
+
+            var tasks = new List<Task<bool>>();
+            var tokenSource = new CancellationTokenSource();
 
             foreach (var index in jobIndexes)
             {
@@ -196,12 +425,48 @@ namespace EasySave.Models
                 if (index >= 0 && index < backupJobs.Count)
                 {
                     var job = backupJobs[index];
+                    int jobIndex = index;  // Capture de la variable pour le lambda
+
+                    // Configure le job avec son index et une référence au BackupManager
+                    job.SetManagerInfo(jobIndex, this);
+
                     // Lance chaque job dans un thread séparé
-                    tasks.Add(Task.Run(() => job.ExecuteJob()));
+                    tasks.Add(Task.Run(() =>
+                    {
+                        try
+                        {
+                            // Le job va maintenant vérifier lui-même s'il doit être en pause
+                            return job.ExecuteJob();
+                        }
+                        catch (OperationCanceledException)
+                        {
+                            return false;
+                        }
+                    }, tokenSource.Token));
                 }
             }
 
-            await Task.WhenAll(tasks);
+            if (tasks.Count > 0)
+            {
+                try
+                {
+                    var results = await Task.WhenAll(tasks);
+                    bool allSucceeded = results.All(r => r);
+
+                    if (allSucceeded)
+                        return (true, "Jobs de sauvegarde exécutés avec succès");
+                    else
+                        return (false, "Certains jobs de sauvegarde ont échoué");
+                }
+                catch (OperationCanceledException)
+                {
+                    return (false, "Jobs de sauvegarde annulés");
+                }
+            }
+            else
+            {
+                return (false, "Aucun job valide à exécuter");
+            }
         }
 
         /// <summary>
@@ -267,11 +532,23 @@ namespace EasySave.Models
             File.WriteAllText(configFilePath, json);
         }
 
+        /// <summary>
+        /// Méthode appelée lorsque le logiciel métier est détecté
+        /// </summary>
         public void SM_Detected()
         {
+            // Mettre en pause tous les jobs
+            PauseBackupJobs(reason: "Logiciel métier détecté");
+
         }
+
+        /// <summary>
+        /// Méthode appelée lorsque le logiciel métier n'est plus détecté
+        /// </summary>
         public void SM_Undetected()
         {
+            // Reprendre tous les jobs qui étaient en pause à cause du logiciel métier
+            ResumeBackupJobs();
         }
     }
 }
