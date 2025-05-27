@@ -98,6 +98,21 @@ namespace EasySave.Models
                 NotifyObservers("start", Name, State, sourcePath, targetPath, totalFiles, totalSize, 0, 0, 0);
 
                 var encryptionService = EncryptionService.GetInstance();
+                var transferCoordinator = TransferCoordinator.Instance;
+
+                // 1. Enregistrer tous les fichiers prioritaires en attente
+                foreach (var file in filesToCopy)
+                {
+                    string ext = Path.GetExtension(file);
+                    if (transferCoordinator.IsPriorityExtension(ext))
+                    {
+                        transferCoordinator.RegisterPendingPriorityFile(file);
+                    }
+                }
+
+                filesToCopy = filesToCopy
+                    .OrderByDescending(f => transferCoordinator.IsPriorityExtension(Path.GetExtension(f)))
+                    .ToList();
 
                 foreach (var sourceFile in filesToCopy)
                 {
@@ -106,6 +121,13 @@ namespace EasySave.Models
                     string destDir = Path.GetDirectoryName(destFile);
                     if (!Directory.Exists(destDir))
                         Directory.CreateDirectory(destDir);
+
+                    long fileSize = new FileInfo(sourceFile).Length;
+                    string ext = Path.GetExtension(sourceFile);
+                    bool isPriority = transferCoordinator.IsPriorityExtension(ext);
+
+                    // 2. Demander l'autorisation de transfert
+                    transferCoordinator.RequestTransfer(sourceFile, fileSize);
 
                     // Mesurer le temps de transfert
                     var sw = System.Diagnostics.Stopwatch.StartNew();
@@ -118,6 +140,15 @@ namespace EasySave.Models
                     if (encryptionService.ShouldEncryptFile(destFile))
                     {
                         encryptionTime = encryptionService.EncryptFile(destFile);
+                    }
+
+                    // 3. Libérer la ressource après transfert
+                    transferCoordinator.ReleaseTransfer(sourceFile);
+
+                    // 4. Si prioritaire, désenregistrer
+                    if (isPriority)
+                    {
+                        transferCoordinator.UnregisterPendingPriorityFile(sourceFile);
                     }
 
                     currentProgress++;

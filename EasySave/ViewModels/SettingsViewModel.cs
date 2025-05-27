@@ -88,6 +88,16 @@ namespace EasySave.ViewModels
         public ICommand SetJsonFormatCommand { get; }
 
         /// <summary>
+        /// Command to add a priority file extension to the list.
+        /// </summary>
+        public ICommand AddPriorityExtensionCommand { get; }
+
+        /// <summary>
+        /// Command to remove a priority file extension from the list.
+        /// </summary>
+        public ICommand RemovePriorityExtensionCommand { get; }
+
+        /// <summary>
         /// Current application language.
         /// </summary>
         public string CurrentLanguage => LanguageViewModel.CurrentLanguage;
@@ -226,6 +236,62 @@ namespace EasySave.ViewModels
         /// </summary>
         public bool IsPriorityProcessSelected => !string.IsNullOrEmpty(_priorityProcess);
 
+        private ObservableCollection<string> _priorityExtensions;
+        /// <summary>
+        /// Collection of priority file extensions.
+        /// </summary>
+        public ObservableCollection<string> PriorityExtensions
+        {
+            get => _priorityExtensions;
+            set
+            {
+                _priorityExtensions = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private string _newPriorityExtension;
+        /// <summary>
+        /// New priority extension to add to the list.
+        /// </summary>
+        public string NewPriorityExtension
+        {
+            get => _newPriorityExtension;
+            set
+            {
+                _newPriorityExtension = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private string _selectedPriorityExtension;
+        /// <summary>
+        /// Selected priority extension in the list.
+        /// </summary>
+        public string SelectedPriorityExtension
+        {
+            get => _selectedPriorityExtension;
+            set
+            {
+                _selectedPriorityExtension = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private int _maxParallelSizeKB;
+        /// <summary>
+        /// Maximum parallel size in KB.
+        /// </summary>
+        public int MaxParallelSizeKB
+        {
+            get => _maxParallelSizeKB;
+            set
+            {
+                _maxParallelSizeKB = value;
+                OnPropertyChanged();
+            }
+        }
+
         /// <summary>
         /// Constructor for the settings ViewModel.
         /// Initializes commands and loads configuration values.
@@ -248,6 +314,12 @@ namespace EasySave.ViewModels
             // Load current log format from configuration
             LoadLogFormat();
 
+            // Load priority extensions from configuration
+            LoadPriorityExtensions();
+
+            // Load max parallel size from configuration
+            LoadMaxParallelSizeKB();
+
             // Initialize the list of running processes
             LoadRunningProcesses();
 
@@ -264,6 +336,12 @@ namespace EasySave.ViewModels
 
                 // Save log format
                 SaveLogFormat();
+
+                // Save priority extensions
+                SavePriorityExtensions();
+
+                // Save max parallel size
+                SaveMaxParallelSizeKB();
 
                 NavigateToMainMenu?.Invoke(this, EventArgs.Empty);
             });
@@ -332,6 +410,27 @@ namespace EasySave.ViewModels
             {
                 SelectedLogFormat = LogFormat.JSON;
             });
+
+            AddPriorityExtensionCommand = new RelayCommand(() =>
+            {
+                if (!string.IsNullOrWhiteSpace(NewPriorityExtension))
+                {
+                    string ext = NewPriorityExtension.Trim();
+                    if (!ext.StartsWith(".")) ext = "." + ext;
+                    if (!PriorityExtensions.Contains(ext))
+                        PriorityExtensions.Add(ext);
+                    NewPriorityExtension = string.Empty;
+                }
+            });
+
+            RemovePriorityExtensionCommand = new RelayCommand(() =>
+            {
+                if (!string.IsNullOrEmpty(SelectedPriorityExtension))
+                {
+                    PriorityExtensions.Remove(SelectedPriorityExtension);
+                    SelectedPriorityExtension = null;
+                }
+            }, () => SelectedPriorityExtension != null);
         }
 
         /// <summary>
@@ -492,6 +591,45 @@ namespace EasySave.ViewModels
             // Optionally reset the LogManager singleton if needed by architecture
             // LogManager.ResetInstance();
             _logManager.SetFormat(SelectedLogFormat);
+        }
+
+        /// <summary>
+        /// Loads priority file extensions from configuration.
+        /// </summary>
+        private void LoadPriorityExtensions()
+        {
+            string extStr = _configManager.GetSetting("PriorityExtensions") ?? string.Empty;
+            var list = extStr.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(e => e.Trim().ToLowerInvariant()).ToList();
+            PriorityExtensions = new ObservableCollection<string>(list);
+        }
+
+        /// <summary>
+        /// Saves priority file extensions to configuration.
+        /// </summary>
+        public void SavePriorityExtensions()
+        {
+            string extStr = string.Join(",", PriorityExtensions);
+            _configManager.SetSetting("PriorityExtensions", extStr);
+        }
+
+        /// <summary>
+        /// Loads the maximum parallel size in KB from configuration.
+        /// </summary>
+        private void LoadMaxParallelSizeKB()
+        {
+            if (int.TryParse(_configManager.GetSetting("MaxParallelSizeKB"), out int n))
+                MaxParallelSizeKB = n;
+            else
+                MaxParallelSizeKB = 1024;
+        }
+
+        /// <summary>
+        /// Saves the maximum parallel size in KB to configuration.
+        /// </summary>
+        public void SaveMaxParallelSizeKB()
+        {
+            _configManager.SetSetting("MaxParallelSizeKB", MaxParallelSizeKB.ToString());
         }
 
         /// <summary>
