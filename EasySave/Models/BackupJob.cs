@@ -43,7 +43,7 @@ namespace EasySave.Models
         public bool IsPaused => _backupManager != null && _jobIndex >= 0 && _backupManager.IsJobPaused(_jobIndex);
 
         // Méthode pour attendre si le job est en pause
-        public void WaitIfPaused()
+        public void WaitIfPaused(CancellationToken cancellationToken = default)
         {
             if (_backupManager == null || _jobIndex < 0)
                 return;
@@ -51,11 +51,25 @@ namespace EasySave.Models
             // Tant que le job est en pause, on attend
             while (_backupManager.IsJobPaused(_jobIndex))
             {
+                // Vérifier si l'annulation a été demandée
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                }
+
                 Console.WriteLine($"Job '{Name}' (indice {_jobIndex}) en attente de reprise...");
-                
-                // Utiliser CancellationToken.None car nous voulons juste attendre la reprise
-                _backupManager.WaitForJobResume(_jobIndex, CancellationToken.None);
-                
+
+                try
+                {
+                    // Utiliser le CancellationToken fourni pour permettre l'annulation pendant la pause
+                    _backupManager.WaitForJobResume(_jobIndex, cancellationToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    // Propager l'exception pour annuler l'opération
+                    throw;
+                }
+
                 // Courte pause pour éviter une consommation CPU excessive
                 Thread.Sleep(100);
             }
@@ -114,15 +128,23 @@ namespace EasySave.Models
             this.type = type;
             this.backupStrategy = strategy;
         }
-
-        public bool ExecuteJob()
+        public bool ExecuteJob(CancellationToken cancellationToken = default)
         {
-            var filesToCopy = backupStrategy.GetFilesToCopy(src, dst);
-            return CopyFiles(filesToCopy, src, dst);
+            try
+            {
+                var filesToCopy = backupStrategy.GetFilesToCopy(src, dst);
+                return CopyFiles(filesToCopy, src, dst, cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                State = JobState.inactive;
+                Progress = 0;
+                NotifyObservers("cancelled", Name, State, "", "", 0, 0, 0, 0, 0);
+                return false;
+            }
         }
 
-
-        public bool CopyFiles(List<string> filesToCopy, string sourcePath, string targetPath)
+        public bool CopyFiles(List<string> filesToCopy, string sourcePath, string targetPath, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -140,6 +162,9 @@ namespace EasySave.Models
                 // 1. Enregistrer tous les fichiers prioritaires en attente
                 foreach (var file in filesToCopy)
                 {
+                    // Vérifier si l'annulation a été demandée
+                    cancellationToken.ThrowIfCancellationRequested();
+
                     string ext = Path.GetExtension(file);
                     if (transferCoordinator.IsPriorityExtension(ext))
                     {
@@ -153,9 +178,12 @@ namespace EasySave.Models
 
                 foreach (var sourceFile in filesToCopy)
                 {
+                    // Vérifier si l'annulation a été demandée
+                    cancellationToken.ThrowIfCancellationRequested();
+
                     // Vérifier si le job doit être en pause et attendre si nécessaire
                     WaitIfPaused();
-                    
+
                     string relativePath = Path.GetRelativePath(sourcePath, sourceFile);
                     string destFile = Path.Combine(targetPath, relativePath);
                     string destDir = Path.GetDirectoryName(destFile);
@@ -169,42 +197,57 @@ namespace EasySave.Models
                     // 2. Demander l'autorisation de transfert
                     transferCoordinator.RequestTransfer(sourceFile, fileSize);
 
-                    // Mesurer le temps de transfert
-                    var sw = System.Diagnostics.Stopwatch.StartNew();
-                    File.Copy(sourceFile, destFile, true);
-                    sw.Stop();
-                    long transferTime = sw.ElapsedMilliseconds;
-
-                    long encryptionTime = 0;
-                    // Vérifier si le fichier doit être chiffré
-                    if (encryptionService.ShouldEncryptFile(destFile))
+                    try
                     {
-                        encryptionTime = encryptionService.EncryptFile(destFile);
+                        // Mesurer le temps de transfert
+                        var sw = System.Diagnostics.Stopwatch.StartNew();
+                        File.Copy(sourceFile, destFile, true);
+                        sw.Stop();
+                        long transferTime = sw.ElapsedMilliseconds;
+
+                        long encryptionTime = 0;
+                        // Vérifier si le fichier doit être chiffré
+                        if (encryptionService.ShouldEncryptFile(destFile))
+                        {
+                            encryptionTime = encryptionService.EncryptFile(destFile);
+                        }
+
+                        currentProgress++;
+
+                        // Notifier la progression avec le temps de transfert et de chiffrement
+                        NotifyObservers("processing", Name, State, sourceFile, destFile, totalFiles, totalSize, transferTime, encryptionTime, currentProgress);
                     }
-
-                    // 3. Libérer la ressource après transfert
-                    transferCoordinator.ReleaseTransfer(sourceFile);
-
-                    // 4. Si prioritaire, désenregistrer
-                    if (isPriority)
+                    finally
                     {
-                        transferCoordinator.UnregisterPendingPriorityFile(sourceFile);
-                    }
+                        // 3. Libérer la ressource après transfert
+                        transferCoordinator.ReleaseTransfer(sourceFile);
 
-                    currentProgress++;
-                    // Notifier la progression avec le temps de transfert et de chiffrement
-                    NotifyObservers("processing", Name, State, sourceFile, destFile, totalFiles, totalSize, transferTime, encryptionTime, currentProgress);
+                        // 4. Si prioritaire, désenregistrer
+                        if (isPriority)
+                        {
+                            transferCoordinator.UnregisterPendingPriorityFile(sourceFile);
+                        }
+                    }
                 }
 
                 // Notifier la fin
                 State = JobState.completed;
+                Progress = 100;
                 NotifyObservers("complete", Name, State, sourcePath, targetPath, totalFiles, totalSize, 0, 0, currentProgress);
                 return true;
+            }
+            catch (OperationCanceledException)
+            {
+                // Attraper l'exception d'annulation pour effectuer le nettoyage nécessaire
+                State = JobState.inactive;
+                NotifyObservers("cancelled", Name, State, sourcePath, targetPath, 0, 0, 0, 0, 0);
+                return false;
             }
             catch (Exception ex)
             {
                 State = JobState.error;
                 NotifyObservers("error", Name, State, sourcePath, targetPath, 0, 0, 0, 0, 0);
+                Console.WriteLine($"Erreur lors de la copie des fichiers pour '{Name}': {ex.Message}");
                 return false;
             }
         }

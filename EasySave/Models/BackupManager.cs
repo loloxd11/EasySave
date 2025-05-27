@@ -33,7 +33,11 @@ namespace EasySave.Models
         // Événements de signalisation pour la reprise
         private Dictionary<int, ManualResetEventSlim> _resumeEvents;
 
+        // Dictionnaire pour suivre les CancellationTokenSource des jobs en cours d'exécution
+        private Dictionary<int, CancellationTokenSource> _jobCancellationTokens = new Dictionary<int, CancellationTokenSource>();
+
         private List<IObserver> _globalObservers = new List<IObserver>();
+
 
         /// <summary>
         /// Private constructor to enforce singleton pattern.
@@ -428,7 +432,6 @@ namespace EasySave.Models
             }
 
             var tasks = new List<Task<bool>>();
-            var tokenSource = new CancellationTokenSource();
 
             foreach (var index in jobIndexes)
             {
@@ -438,20 +441,48 @@ namespace EasySave.Models
                     var job = backupJobs[index];
                     int jobIndex = index;  // Capture de la variable pour le lambda
 
+                    // Créer un nouveau CancellationTokenSource pour ce job
+                    var tokenSource = new CancellationTokenSource();
+
+                    // Stocker le tokenSource dans le dictionnaire (remplacer l'ancien s'il existe)
+                    lock (lockObject)
+                    {
+                        if (_jobCancellationTokens.ContainsKey(jobIndex))
+                        {
+                            // Si un tokenSource existe déjà pour ce job, le disposer d'abord
+                            _jobCancellationTokens[jobIndex].Dispose();
+                        }
+                        _jobCancellationTokens[jobIndex] = tokenSource;
+                    }
+
                     // Configure le job avec son index et une référence au BackupManager
                     job.SetManagerInfo(jobIndex, this);
 
-                    // Lance chaque job dans un thread séparé
+                    // Lance chaque job dans un thread séparé avec son propre token d'annulation
                     tasks.Add(Task.Run(() =>
                     {
                         try
                         {
                             // Le job va maintenant vérifier lui-même s'il doit être en pause
-                            return job.ExecuteJob();
+                            return job.ExecuteJob(tokenSource.Token);
                         }
                         catch (OperationCanceledException)
                         {
+                            Console.WriteLine($"Job '{job.Name}' (index {jobIndex}) annulé.");
+                            job.State = JobState.inactive; // Réinitialiser l'état du job
+                            job.Progress = 0; // Réinitialiser la progression
                             return false;
+                        }
+                        finally
+                        {
+                            // Nettoyer le tokenSource du dictionnaire quand le job est terminé
+                            lock (lockObject)
+                            {
+                                if (_jobCancellationTokens.ContainsKey(jobIndex))
+                                {
+                                    _jobCancellationTokens.Remove(jobIndex);
+                                }
+                            }
                         }
                     }, tokenSource.Token));
                 }
@@ -593,6 +624,56 @@ namespace EasySave.Models
             }
         }
 
+        /// <summary>
+        /// Arrête immédiatement un job de sauvegarde en annulant son thread d'exécution
+        /// </summary>
+        /// <param name="index">Index du job à arrêter</param>
+        /// <returns>True si le job a été arrêté, False si l'index est invalide ou si le job n'est pas en cours d'exécution</returns>
+        public bool KillBackupJob(int index)
+        {
+            lock (lockObject)
+            {
+                // Vérifier que l'index est valide
+                if (index < 0 || index >= backupJobs.Count)
+                    return false;
+
+                var job = backupJobs[index];
+
+                // Si un tokenSource existe pour ce job, l'annuler
+                if (_jobCancellationTokens.TryGetValue(index, out var tokenSource))
+                {
+                    try
+                    {
+                        // Annuler le token pour interrompre le thread
+                        tokenSource.Cancel();
+
+                        // Si le job était en pause, le reprendre pour qu'il puisse traiter l'annulation
+                        if (IsJobPaused(index))
+                        {
+                            ResumeBackupJobs(new[] { index });
+                        }
+
+                        Console.WriteLine($"Job '{job.Name}' (indice {index}) tué.");
+                        return true;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Erreur lors de l'arrêt du job '{job.Name}': {ex.Message}");
+                        return false;
+                    }
+                }
+                else
+                {
+                    // Si aucun tokenSource n'existe, le job n'est probablement pas en cours d'exécution
+                    // On peut quand même réinitialiser son état si nécessaire
+                    if (job.State != JobState.inactive)
+                    {
+                        job.State = JobState.inactive;
+                        job.Progress = 0;
+
+                        Console.WriteLine($"Job '{job.Name}' (indice {index}) réinitialisé.");
+                    }
+                    return false;
         /// <summary>
         /// Data Transfer Object for exposing job status remotely
         /// </summary>

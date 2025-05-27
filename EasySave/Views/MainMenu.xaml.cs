@@ -222,6 +222,95 @@ namespace EasySave
         }
 
         /// <summary>
+        /// Reprend l'exécution d'un job en pause
+        /// </summary>
+        private void ResumeButton_Click(object sender, RoutedEventArgs e)
+        {
+            var button = (Button)sender;
+            var job = (BackupJob)button.DataContext;
+            int index = _viewModel.BackupJobs.IndexOf(job);
+
+            if (index >= 0)
+            {
+                BackupManager manager = BackupManager.GetInstance();
+
+                // Vérifier si le job est en pause avant de reprendre
+                if (manager.IsJobPaused(index))
+                {
+                    // Reprendre uniquement ce job
+                    manager.ResumeBackupJobs(new[] { index });
+                }
+                // Si le job n'est pas en pause, le bouton n'a pas d'effet
+            }
+        }
+
+        /// <summary>
+        /// Met en pause ou reprend le job sélectionné dans la ligne
+        /// </summary>
+        private void PauseButton_Click(object sender, RoutedEventArgs e)
+        {
+            var button = (Button)sender;
+            var job = (BackupJob)button.DataContext;
+            int index = _viewModel.BackupJobs.IndexOf(job);
+
+            if (index >= 0)
+            {
+                BackupManager manager = BackupManager.GetInstance();
+
+                // Vérifier si le job est déjà en pause
+                if (manager.IsJobPaused(index))
+                {
+                    // Reprendre le job
+                    manager.ResumeBackupJobs(new[] { index });
+                }
+                else
+                {
+                    // Mettre le job en pause
+                    manager.PauseBackupJobs(new[] { index }, "Pause manuelle");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Met en pause tous les jobs actifs
+        /// </summary>
+        private void PauseAllJobs_Click(object sender, RoutedEventArgs e)
+        {
+            BackupManager manager = BackupManager.GetInstance();
+            manager.PauseBackupJobs(reason: "Pause manuelle globale");
+        }
+
+        /// <summary>
+        /// Reprend tous les jobs en pause
+        /// </summary>
+        private void ResumeAllJobs_Click(object sender, RoutedEventArgs e)
+        {
+            BackupManager manager = BackupManager.GetInstance();
+            manager.ResumeBackupJobs();
+        }
+
+        /// <summary>
+        /// Arrête immédiatement un job de sauvegarde en tuant son thread d'exécution
+        /// </summary>
+        private void StopButton_Click(object sender, RoutedEventArgs e)
+        {
+            var button = (Button)sender;
+            var job = (BackupJob)button.DataContext;
+            int index = _viewModel.BackupJobs.IndexOf(job);
+
+            if (index >= 0)
+            {
+                BackupManager manager = BackupManager.GetInstance();
+
+                // Tuer le thread d'exécution du job
+                if (manager.KillBackupJob(index))
+                {
+                    MessageBox.Show(
+                        $"Le job '{job.Name}' a été arrêté.",
+                        "Job arrêté",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                }
         /// Ouvre la console déportée (client distant)
         /// </summary>
         private void OpenRemoteConsole_Click(object sender, RoutedEventArgs e)
