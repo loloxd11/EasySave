@@ -184,15 +184,11 @@ namespace EasySave.Models
                 return 0;
             }
 
-            long startTime = DateTime.Now.Ticks;
-
             try
             {
-                // Affichage des informations pour le débogage
                 Console.WriteLine($"Chiffrement du fichier: {filePath}");
                 Console.WriteLine($"Avec l'exécutable: {_cryptoSoftPath}");
 
-                // Lancer CryptoSoft avec le fichier à chiffrer et la clé comme arguments
                 ProcessStartInfo startInfo = new ProcessStartInfo
                 {
                     FileName = _cryptoSoftPath,
@@ -205,7 +201,6 @@ namespace EasySave.Models
 
                 using (Process process = Process.Start(startInfo))
                 {
-                    // Lire la sortie standard
                     string output = process.StandardOutput.ReadToEnd();
                     if (!string.IsNullOrEmpty(output))
                     {
@@ -214,8 +209,7 @@ namespace EasySave.Models
 
                     process.WaitForExit();
 
-                    // Vérifier si le processus s'est terminé correctement
-                    if (process.ExitCode != 0)
+                    if (process.ExitCode < 0)
                     {
                         string error = process.StandardError.ReadToEnd();
                         Console.WriteLine($"Erreur lors du chiffrement: {error}");
@@ -224,6 +218,8 @@ namespace EasySave.Models
                     else
                     {
                         Console.WriteLine("Chiffrement réussi!");
+                        // L'exit code contient la durée du chiffrement en millisecondes
+                        return process.ExitCode;
                     }
                 }
             }
@@ -232,9 +228,6 @@ namespace EasySave.Models
                 Console.WriteLine($"Exception lors du chiffrement: {ex.Message}");
                 return 0;
             }
-
-            long endTime = DateTime.Now.Ticks;
-            return (endTime - startTime) / TimeSpan.TicksPerMillisecond;
         }
     }
 }
