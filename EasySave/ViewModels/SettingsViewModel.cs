@@ -562,7 +562,16 @@ namespace EasySave.ViewModels
         /// </summary>
         public void SavePriorityProcess()
         {
-            _configManager.SetSetting("PriorityProcess", PriorityProcess ?? string.Empty);
+            string oldValue = _configManager.GetSetting("PriorityProcess") ?? string.Empty;
+            string newValue = PriorityProcess ?? string.Empty;
+
+            _configManager.SetSetting("PriorityProcess", newValue);
+
+            // Si la valeur a changé, mettre à jour le détecteur
+            if (oldValue != newValue)
+            {
+                BackupManager.GetInstance().UpdatePriorityProcess(newValue);
+            }
         }
 
         /// <summary>

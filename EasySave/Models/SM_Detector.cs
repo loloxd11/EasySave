@@ -24,20 +24,77 @@ namespace EasySave.Models
 
             // Récupération du nom du processus depuis les paramètres
             _businessSoftwareName = ConfigManager.GetInstance().GetSetting("PriorityProcess");
-            if (string.IsNullOrEmpty(_businessSoftwareName))
-                _businessSoftwareName = "businessApp.exe"; // Valeur par défaut
 
-            // Ajoute l'extension .exe si absente
-            if (!_businessSoftwareName.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
+            // Si le nom est renseigné, ajouter l'extension .exe si nécessaire
+            if (!string.IsNullOrEmpty(_businessSoftwareName) &&
+                !_businessSoftwareName.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
+            {
                 _businessSoftwareName += ".exe";
+            }
         }
 
+        /// <summary>
+        /// Met à jour le nom du logiciel métier à surveiller et redémarre la surveillance si nécessaire
+        /// </summary>
+        /// <param name="newName">Nouveau nom du logiciel métier</param>
+        public void UpdateBusinessSoftwareName(string newName)
+        {
+            bool wasEmpty = string.IsNullOrEmpty(_businessSoftwareName);
+            bool willBeEmpty = string.IsNullOrEmpty(newName);
+
+            // Si le nouveau nom est vide, désactive la surveillance
+            if (willBeEmpty)
+            {
+                _businessSoftwareName = string.Empty;
+                IsRunning = false; // Force l'état à "non en cours d'exécution"
+                Console.WriteLine("SM_Detector: Surveillance désactivée (aucun logiciel métier spécifié)");
+                return;
+            }
+
+            // Sinon, mettre à jour le nom avec l'extension .exe si nécessaire
+            _businessSoftwareName = newName;
+            if (!_businessSoftwareName.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
+                _businessSoftwareName += ".exe";
+
+            Console.WriteLine($"SM_Detector: Mise à jour du nom du logiciel métier surveillé '{_businessSoftwareName}'");
+
+            // Si on passe d'un état vide à un état non-vide et que la tâche n'est pas active,
+            // il faut redémarrer la surveillance
+            if (wasEmpty && !willBeEmpty && (_monitoringTask == null || _monitoringTask.IsCompleted))
+            {
+                Console.WriteLine("SM_Detector: Redémarrage de la surveillance après mise à jour du nom");
+                // Vérification initiale
+                CheckIfBusinessSoftwareIsRunning();
+
+                // Créer un nouveau token si nécessaire
+                if (_cancellationTokenSource == null || _cancellationTokenSource.IsCancellationRequested)
+                {
+                    _cancellationTokenSource = new CancellationTokenSource();
+                }
+
+                // Démarrer la tâche de surveillance
+                _monitoringTask = Task.Run(MonitorProcessAsync, _cancellationTokenSource.Token);
+            }
+            else
+            {
+                // Sinon, simplement mettre à jour la vérification
+                CheckIfBusinessSoftwareIsRunning();
+            }
+        }
         /// <summary>
         /// Démarre la surveillance du logiciel métier
         /// </summary>
         public void StartMonitoring(CancellationToken token)
         {
             _cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(token);
+
+            // Si aucun logiciel métier n'est spécifié, ne pas démarrer la surveillance active
+            if (string.IsNullOrEmpty(_businessSoftwareName))
+            {
+                Console.WriteLine("SM_Detector: Surveillance non démarrée (aucun logiciel métier spécifié)");
+                return;
+            }
+
             Console.WriteLine($"SM_Detector: Démarrage de la surveillance du logiciel métier '{_businessSoftwareName}'");
 
             // Vérification initiale
@@ -81,6 +138,13 @@ namespace EasySave.Models
             {
                 try
                 {
+                    // Si aucun logiciel métier n'est spécifié, ne rien faire
+                    if (string.IsNullOrEmpty(_businessSoftwareName))
+                    {
+                        await Task.Delay(CheckInterval, _cancellationTokenSource.Token);
+                        continue;
+                    }
+
                     // Vérifier si le processus est en cours d'exécution
                     CheckIfBusinessSoftwareIsRunning();
 
@@ -93,8 +157,8 @@ namespace EasySave.Models
                             // Notifier le BackupManager que le processus est lancé
                             _backupManager.SM_Detected();
                             System.Windows.MessageBox.Show(
-                            "Sauvegardes mises en pause : logiciel métier détecté",
-                            "Sauvegarde en pause",
+                            "logiciel métier détecté",
+                            "Logiciel metier start",
                             MessageBoxButton.OK,
                             MessageBoxImage.Information);
                         }
@@ -103,8 +167,8 @@ namespace EasySave.Models
                             Console.WriteLine($"SM_Detector: Processus '{_businessSoftwareName}' arrêté");
                             _backupManager.SM_Undetected();
                             System.Windows.MessageBox.Show(
-                            "Sauvegardes reprises : logiciel métier terminé",
-                            "Sauvegarde reprise",
+                            "logiciel métier terminé",
+                            "Logiciel metier stop",
                             MessageBoxButton.OK,
                             MessageBoxImage.Information);
                         }
@@ -137,6 +201,13 @@ namespace EasySave.Models
         {
             try
             {
+                // Si aucun logiciel métier n'est spécifié, considérer qu'il n'est pas en cours d'exécution
+                if (string.IsNullOrEmpty(_businessSoftwareName))
+                {
+                    IsRunning = false;
+                    return;
+                }
+
                 // Extraire le nom du processus sans l'extension .exe
                 string processName = _businessSoftwareName;
                 if (processName.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))

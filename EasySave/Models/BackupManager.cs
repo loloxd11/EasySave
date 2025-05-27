@@ -537,9 +537,18 @@ namespace EasySave.Models
         /// </summary>
         public void SM_Detected()
         {
-            // Mettre en pause tous les jobs
-            PauseBackupJobs(reason: "Logiciel métier détecté");
-
+            // Vérifier si au moins un job est actif (en cours d'exécution)
+            if (backupJobs.Any(job => job.State == JobState.active))
+            {
+                System.Windows.MessageBox.Show(
+                "Sauvegardes mises en pause",
+                "Sauvegarde en pause",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
+                // Mettre en pause tous les jobs si au moins un est actif
+                PauseBackupJobs(reason: "Logiciel métier détecté");
+                Console.WriteLine("Jobs mis en pause : logiciel métier détecté");
+            }
         }
 
         /// <summary>
@@ -547,8 +556,30 @@ namespace EasySave.Models
         /// </summary>
         public void SM_Undetected()
         {
-            // Reprendre tous les jobs qui étaient en pause à cause du logiciel métier
-            ResumeBackupJobs();
+            // Ne reprendre les jobs que si au moins un job est en pause
+            if (_pausedJobIndices.Any(kvp => kvp.Value))
+            {
+                System.Windows.MessageBox.Show(
+                "Sauvegardes reprises",
+                "Sauvegarde reprise",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
+                // Reprendre tous les jobs qui étaient en pause
+                ResumeBackupJobs();
+                Console.WriteLine("Jobs repris : logiciel métier terminé");
+            }
+        }
+
+        /// <summary>
+        /// Met à jour le nom du logiciel métier surveillé
+        /// </summary>
+        /// <param name="newName">Nouveau nom du logiciel métier</param>
+        public void UpdatePriorityProcess(string newName)
+        {
+            if (_smDetector != null)
+            {
+                _smDetector.UpdateBusinessSoftwareName(newName);
+            }
         }
     }
 }
