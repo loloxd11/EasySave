@@ -129,6 +129,7 @@ namespace EasySave.Models
                 int totalFiles = filesToCopy.Count;
                 long totalSize = filesToCopy.Sum(f => new FileInfo(f).Length);
                 int currentProgress = 0;
+                State = JobState.active;
 
                 // Notifier le début
                 NotifyObservers("start", Name, State, sourcePath, targetPath, totalFiles, totalSize, 0, 0, 0);
@@ -196,11 +197,13 @@ namespace EasySave.Models
                 }
 
                 // Notifier la fin
+                State = JobState.completed;
                 NotifyObservers("complete", Name, State, sourcePath, targetPath, totalFiles, totalSize, 0, 0, currentProgress);
                 return true;
             }
             catch (Exception ex)
             {
+                State = JobState.error;
                 NotifyObservers("error", Name, State, sourcePath, targetPath, 0, 0, 0, 0, 0);
                 return false;
             }
