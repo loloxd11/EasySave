@@ -53,9 +53,15 @@ L’interface console est maintenue et continue d’être supportée.
 
 ---
 ## Version 2.O
-La version 2.0 d’EasySave introduit une interface graphique WPF  afin de faciliter l’utilisation du logiciel. Contrairement à la version précédente, il n’y a plus de limite sur le nombre de travaux de sauvegarde pouvant être créés. Le chiffrement des fichiers est désormais possible.
+La version 2.0 de **EasySave** introduit une interface graphique WPF  afin de faciliter l’utilisation du logiciel. Contrairement à la version précédente, il n’y a plus de limite sur le nombre de travaux de sauvegarde pouvant être créés. Le chiffrement des fichiers est désormais possible.
 Le journal (log) a été enrichi pour inclure le temps de cryptage de chaque fichier, avec des valeurs indiquant s’il y a eu cryptage, le temps que cela a pris ou un éventuel code d’erreur. Le logiciel est désormais capable de détecter l’exécution d’un logiciel métier (comme la calculatrice), ce qui bloque les sauvegardes, termine proprement le fichier en cours de traitement et consigne l’événement dans le log.
 Le support du multilingue (français/anglais) est maintenu. Le fichier d’état, utile pour suivre en temps réel l’avancement d’une sauvegarde, est toujours présent. Le logiciel peut être exécuté en mode mono ou séquentiel selon les préférences de l’utilisateur.
+
+---
+## Version 3.0
+La version 3.0 de **EasySave** introduit l’exécution parallèle des sauvegardes grâce aux threads, ce qui réduit le temps global d’exécution. Elle gère également les fichiers prioritaires et ajuste la vitesse des transferts en cas de saturation du réseau. Le module de détection des logiciels métiers est toujours présent.
+Le journal (log) inclut désormais le tri des fichiers et les problèmes liés à la bande passante. Une console déportée via socket TCP a été ajoutée, et la contrainte de mono-instance pour CryptoSoft est maintenue. Le fichier d’état reste toujours présent, tout comme le support multilingue (français/anglais).
+
 
 ---
 ## Une tâche de sauvegarde est définie par :
