@@ -21,7 +21,7 @@
         /// Logs a specific event by its name.
         /// </summary>
         /// <param name="eventName">The name of the event to log.</param>
-        void LogEvent(string eventName);
+        void LogEvent(string name, string eventName);
 
         /// <summary>
         /// Gets the current log format (e.g., JSON or XML).

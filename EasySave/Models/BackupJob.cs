@@ -56,10 +56,6 @@ namespace EasySave.Models
                 Console.WriteLine($"Job '{Name}' (indice {_jobIndex}) en attente de reprise...");
                 _state = JobState.paused;
 
-                // Mise à jour de Progress avec la valeur courante
-                if (totalFiles > 0)
-                    Progress = (int)((float)currentProgress / totalFiles * 100);
-
                 NotifyObservers("pause", Name, State, sourcePath, targetPath, totalFiles, totalSize, 0, 0, currentProgress);
 
                 try
