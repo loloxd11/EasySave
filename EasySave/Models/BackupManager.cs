@@ -580,7 +580,6 @@ namespace EasySave.Models
                 MessageBoxImage.Information);
                 // Mettre en pause tous les jobs si au moins un est actif
                 PauseBackupJobs(reason: "Logiciel métier détecté");
-                Console.WriteLine("Jobs mis en pause : logiciel métier détecté");
             }
         }
 
@@ -599,7 +598,6 @@ namespace EasySave.Models
                 MessageBoxImage.Information);
                 // Reprendre tous les jobs qui étaient en pause
                 ResumeBackupJobs();
-                Console.WriteLine("Jobs repris : logiciel métier terminé");
             }
         }
 

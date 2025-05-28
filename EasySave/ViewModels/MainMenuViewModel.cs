@@ -299,5 +299,22 @@ namespace EasySave.ViewModels
                 }
             }
         }
+
+        /// <summary>
+        /// Rafraîchit la liste des jobs de sauvegarde
+        /// </summary>
+        public void RefreshBackupJobs()
+        {
+            // Récupérer la liste des jobs depuis le BackupManager
+            var manager = BackupManager.GetInstance();
+            var updatedJobs = manager.ListBackups();
+
+            // Mettre à jour la liste observable
+            BackupJobs.Clear();
+            foreach (var job in updatedJobs)
+            {
+                BackupJobs.Add(job);
+            }
+        }
     }
 }
