@@ -674,6 +674,9 @@ namespace EasySave.Models
                         Console.WriteLine($"Job '{job.Name}' (indice {index}) réinitialisé.");
                     }
                     return false;
+                }
+            }
+        }
         /// <summary>
         /// Data Transfer Object for exposing job status remotely
         /// </summary>

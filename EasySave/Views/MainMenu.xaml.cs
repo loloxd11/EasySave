@@ -311,6 +311,9 @@ namespace EasySave
                         MessageBoxButton.OK,
                         MessageBoxImage.Information);
                 }
+            }
+        }
+
         /// Ouvre la console déportée (client distant)
         /// </summary>
         private void OpenRemoteConsole_Click(object sender, RoutedEventArgs e)
