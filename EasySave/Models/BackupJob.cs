@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EasySave.Models
 {
@@ -43,7 +37,9 @@ namespace EasySave.Models
         public bool IsPaused => _backupManager != null && _jobIndex >= 0 && _backupManager.IsJobPaused(_jobIndex);
 
         // Méthode pour attendre si le job est en pause
-        public void WaitIfPaused(CancellationToken cancellationToken = default)
+        // Méthode pour attendre si le job est en pause
+        public void WaitIfPaused(CancellationToken cancellationToken = default, string sourcePath = "", string targetPath = "", int totalFiles = 0,
+                                  long totalSize = 0, int currentProgress = 0)
         {
             if (_backupManager == null || _jobIndex < 0)
                 return;
@@ -58,6 +54,9 @@ namespace EasySave.Models
                 }
 
                 Console.WriteLine($"Job '{Name}' (indice {_jobIndex}) en attente de reprise...");
+                _state = JobState.paused;
+
+                NotifyObservers("pause", Name, State, sourcePath, targetPath, totalFiles, totalSize, 0, 0, currentProgress);
 
                 try
                 {
@@ -69,7 +68,11 @@ namespace EasySave.Models
                     // Propager l'exception pour annuler l'opération
                     throw;
                 }
-
+                if (State == JobState.paused)
+                {
+                    _state = JobState.active;
+                    NotifyObservers("resume", Name, State, sourcePath, targetPath, totalFiles, totalSize, 0, 0, currentProgress);
+                }
                 // Courte pause pour éviter une consommation CPU excessive
                 Thread.Sleep(100);
             }
@@ -176,13 +179,11 @@ namespace EasySave.Models
                     .OrderByDescending(f => transferCoordinator.IsPriorityExtension(Path.GetExtension(f)))
                     .ToList();
 
+
                 foreach (var sourceFile in filesToCopy)
                 {
                     // Vérifier si l'annulation a été demandée
                     cancellationToken.ThrowIfCancellationRequested();
-
-                    // Vérifier si le job doit être en pause et attendre si nécessaire
-                    WaitIfPaused();
 
                     string relativePath = Path.GetRelativePath(sourcePath, sourceFile);
                     string destFile = Path.Combine(targetPath, relativePath);
@@ -193,6 +194,9 @@ namespace EasySave.Models
                     long fileSize = new FileInfo(sourceFile).Length;
                     string ext = Path.GetExtension(sourceFile);
                     bool isPriority = transferCoordinator.IsPriorityExtension(ext);
+
+                    // Vérifier si le job doit être en pause avant chaque fichier
+                    WaitIfPaused(cancellationToken, sourcePath, targetPath, totalFiles, totalSize, currentProgress);
 
                     // 2. Demander l'autorisation de transfert
                     transferCoordinator.RequestTransfer(sourceFile, fileSize);

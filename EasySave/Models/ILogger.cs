@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace EasySave.Models
+﻿namespace EasySave.Models
 {
     /// <summary>
     /// Interface for logging file transfers and events in the application.
@@ -27,7 +21,7 @@ namespace EasySave.Models
         /// Logs a specific event by its name.
         /// </summary>
         /// <param name="eventName">The name of the event to log.</param>
-        void LogEvent(string eventName);
+        void LogEvent(string name, string eventName);
 
         /// <summary>
         /// Gets the current log format (e.g., JSON or XML).

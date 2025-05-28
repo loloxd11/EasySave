@@ -1,13 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using LogLibrary.Factories;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using EasySave.Models;
-using LogLibrary.Factories;
-using LogLibrary.Enums;
-using LogLibrary.Interfaces;
 
 namespace EasySave.Models
 {
@@ -84,11 +76,12 @@ namespace EasySave.Models
         /// <summary>
         /// Journalise un événement spécifique lié au processus de sauvegarde.
         /// </summary>
-        public void LogEvent(string eventName)
+        public void LogEvent(string jobName, string eventName)
         {
             lock (_logWriteLock)
             {
-                _logger.LogEvent(eventName);
+                string formattedEvent = $"{jobName} - {eventName}";
+                _logger.LogEvent(formattedEvent);
             }
         }
 
@@ -118,13 +111,13 @@ namespace EasySave.Models
             switch (action)
             {
                 case "start":
-                    LogEvent("JobStarted");
+                    LogEvent(name, "JobStarted");
                     break;
                 case "finish":
-                    LogEvent("JobCompleted");
+                    LogEvent(name, "JobCompleted");
                     break;
                 case "error":
-                    LogEvent("JobError");
+                    LogEvent(name, "JobError");
                     break;
                 case "processing":
                     if (sourcePath != null && targetPath != null)
@@ -151,10 +144,16 @@ namespace EasySave.Models
                     );
                     break;
                 case "delete_dir":
-                    LogEvent("DirectoryDeleted");
+                    LogEvent(name, "DirectoryDeleted");
                     break;
                 case "clean_complete":
-                    LogEvent("TargetDirectoryCleaned");
+                    LogEvent(name, "TargetDirectoryCleaned");
+                    break;
+                case "pause":
+                    LogEvent(name, "JobPaused");
+                    break;
+                case "cancelled":
+                    LogEvent(name, "JobCancelled");
                     break;
             }
         }

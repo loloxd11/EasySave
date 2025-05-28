@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.Eventing.Reader;
-using System.IO;
-using System.Linq;
-using System.Text;
+﻿using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
-using EasySave.Views;
 
 namespace EasySave.Models
 {
@@ -159,10 +152,10 @@ namespace EasySave.Models
                     UpdateJobState(name, type, state, sourcePath, targetPath, totalFiles, totalSize, progression);
                 }
 
-                 NotifyObservers();
+                NotifyObservers();
             }
         }
-        
+
         /// <summary>
         /// Updates the state of an existing job.
         /// </summary>

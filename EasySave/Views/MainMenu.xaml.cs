@@ -1,13 +1,8 @@
 using EasySave.Models;
 using EasySave.ViewModels;
 using EasySave.Views;
-using System;
-using System.Collections.ObjectModel;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Forms;
-using System.Windows.Input;
 using Button = System.Windows.Controls.Button;
 using CheckBox = System.Windows.Controls.CheckBox;
 using MessageBox = System.Windows.MessageBox;
@@ -311,6 +306,9 @@ namespace EasySave
                         MessageBoxButton.OK,
                         MessageBoxImage.Information);
                 }
+            }
+        }
+
         /// Ouvre la console déportée (client distant)
         /// </summary>
         private void OpenRemoteConsole_Click(object sender, RoutedEventArgs e)

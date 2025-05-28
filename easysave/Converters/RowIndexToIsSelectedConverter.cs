@@ -1,9 +1,7 @@
-﻿using System;
+﻿using EasySave.ViewModels;
 using System.Globalization;
-using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using EasySave.ViewModels;
 using Application = System.Windows.Application;
 
 namespace EasySave.Converters

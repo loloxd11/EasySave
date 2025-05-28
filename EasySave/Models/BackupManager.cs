@@ -1,15 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Forms;
-using System.Xml.Linq;
 using System.ComponentModel;
+using System.IO;
+using System.Windows;
 
 namespace EasySave.Models
 {
@@ -674,6 +665,9 @@ namespace EasySave.Models
                         Console.WriteLine($"Job '{job.Name}' (indice {index}) réinitialisé.");
                     }
                     return false;
+                }
+            }
+        }
         /// <summary>
         /// Data Transfer Object for exposing job status remotely
         /// </summary>

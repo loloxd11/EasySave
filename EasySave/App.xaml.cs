@@ -1,12 +1,9 @@
-﻿using EasySave.Models;
-using EasySave.Views;
-using System.Configuration;
-using System.Data;
-using EasySave.Converters;
+﻿using EasySave.Converters;
+using EasySave.Models;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using Application = System.Windows.Application;
-using System.Runtime.InteropServices;
 
 namespace EasySave
 {
