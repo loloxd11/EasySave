@@ -1,11 +1,9 @@
 using EasySave.Commands;
 using EasySave.Models;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
-using MessageBox = System.Windows.MessageBox;
 
 namespace EasySave.ViewModels
 {

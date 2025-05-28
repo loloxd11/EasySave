@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace EasySave.Models
+﻿namespace EasySave.Models
 {
     /// <summary>
     /// Interface for observing state changes in backup jobs.

@@ -1,13 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using LogLibrary.Factories;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using EasySave.Models;
-using LogLibrary.Factories;
-using LogLibrary.Enums;
-using LogLibrary.Interfaces;
 
 namespace EasySave.Models
 {

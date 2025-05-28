@@ -1,12 +1,9 @@
+using EasySave.Commands;
 using EasySave.Models;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Input;
-using EasySave.Commands;
-using System.Threading;
 
 namespace EasySave.ViewModels
 {

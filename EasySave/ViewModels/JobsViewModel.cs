@@ -1,12 +1,9 @@
 ﻿using EasySave.Commands;
 using EasySave.Models;
-using System;
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
-using System.Linq;
-using System.Collections.Generic;
 
 namespace EasySave.ViewModels
 {

@@ -1,8 +1,7 @@
-﻿using System;
+﻿using EasySave.Models;
+using EasySave.ViewModels;
 using System.Windows;
 using System.Windows.Controls;
-using EasySave.ViewModels;
-using EasySave.Models;
 using WinForm = System.Windows.Forms;
 
 namespace EasySave.Views

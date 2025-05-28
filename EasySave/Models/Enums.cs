@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace EasySave.Models
+﻿namespace EasySave.Models
 {
     /// <summary>
     /// Represents the type of backup operation.
@@ -41,7 +35,15 @@ namespace EasySave.Models
         /// <summary>
         /// The job has encountered an error.
         /// </summary>
-        error
+        error,
+        /// <summary>
+        /// The job is currently paused.
+        /// 
+        paused,
+        /// <summary>
+        /// The job is stopped
+        /// 
+        stopped
     }
 
     /// <summary>

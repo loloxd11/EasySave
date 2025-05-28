@@ -1,8 +1,7 @@
-﻿using System;
+﻿using EasySave.ViewModels;
 using System.Globalization;
 using System.Windows.Controls;
 using System.Windows.Data;
-using EasySave.ViewModels;
 
 namespace EasySave.Converters
 {
