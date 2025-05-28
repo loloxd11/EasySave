@@ -289,6 +289,12 @@ namespace EasySave.Models
         public string Destination => dst;
 
         /// <summary>
+        /// Gets the index of the job in the BackupManager's list.
+        /// </summary>
+        
+        public int JobIndex => _jobIndex;
+
+        /// <summary>
         /// Gets the type of backup.
         /// </summary>
         public BackupType Type => type;

@@ -4,6 +4,7 @@
         xmlns:viewmodels="clr-namespace:EasySave.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:EasySave.Views"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=viewmodels:JobsViewModel}"
         Title="EasySave" Height="600" Width="900" Background="#f4f4f4" WindowStartupLocation="CenterScreen">

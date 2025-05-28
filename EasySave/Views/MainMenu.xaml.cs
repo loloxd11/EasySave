@@ -188,9 +188,8 @@ namespace EasySave
                 {
                     int index = row.GetIndex();
                     var job = _viewModel.BackupJobs[index];
-                    if (!job.IsSelected)
+                    if (job.IsSelected)
                     {
-                        job.IsSelected = true;
                         _viewModel.ToggleJobSelection(index);
                     }
                 }
@@ -212,9 +211,8 @@ namespace EasySave
                 {
                     int index = row.GetIndex();
                     var job = _viewModel.BackupJobs[index];
-                    if (job.IsSelected)
+                    if (!job.IsSelected)
                     {
-                        job.IsSelected = false;
                         _viewModel.ToggleJobSelection(index);
                     }
                 }
