@@ -10,6 +10,7 @@ using System;
 using System.Net.Sockets;
 using System.IO;
 using MessageBox = System.Windows.MessageBox;
+using System.Windows;
 
 namespace EasySave.ViewModels
 {
@@ -57,7 +58,7 @@ namespace EasySave.ViewModels
 
         public RemoteConsoleViewModel()
         {
-            ConnectCommand = new RelayCommand(async () => await ConnectAsync());
+            ConnectCommand = new Commands.AsyncRelayCommand(async () => await ConnectAsync());
             RefreshCommand = new RelayCommand(async () => await RefreshJobsAsync(), () => _isConnected);
             ExecuteJobsCommand = new RelayCommand(async () => await ExecuteSelectedJobsAsync(), () => _isConnected && SelectedJobIndices.Count > 0);
             PauseAllJobsCommand = new RelayCommand(async () => await PauseAllJobsAsync(), () => _isConnected);
