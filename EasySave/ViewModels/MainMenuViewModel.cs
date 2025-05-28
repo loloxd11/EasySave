@@ -1,5 +1,7 @@
 using EasySave.Commands;
 using EasySave.Models;
+using EasySave.Views;
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows;
@@ -153,27 +155,36 @@ namespace EasySave.ViewModels
         /// <param name="select">True to select all, false to deselect all.</param>
         public void SelectAllJobs(bool select)
         {
-            _selectedJobIndices.Clear();
-
-            if (select)
+            // Empêcher les notifications temporairement
+            _isTogglingJobSelection = true;
+            try
             {
+                _selectedJobIndices.Clear();
+
+                // Définir l'état IsSelected pour chaque job (sélectionné ou non)
                 for (int i = 0; i < BackupJobs.Count; i++)
                 {
-                    _selectedJobIndices.Add(i);
+                    BackupJobs[i].IsSelected = select;
+                    if (select)
+                    {
+                        _selectedJobIndices.Add(i);
+                    }
+                }
+
+                // Forcer l'actualisation de l'UI
+                OnPropertyChanged(nameof(SelectedJobIndices));
+                OnPropertyChanged(nameof(BackupJobs));
+
+                // Forcer le rafraîchissement des lignes individuelles
+                foreach (var job in BackupJobs)
+                {
+                    OnPropertyChanged("Item[]");
                 }
             }
-
-            // Synchroniser la propriÃ©tÃ© IsSelected de tous les jobs
-            for (int i = 0; i < BackupJobs.Count; i++)
+            finally
             {
-                BackupJobs[i].IsSelected = _selectedJobIndices.Contains(i);
+                _isTogglingJobSelection = false;
             }
-
-            OnPropertyChanged(nameof(SelectedJobIndices));
-            // Hack: reassigns the collection to force the DataGrid to rebind
-            var temp = BackupJobs;
-            BackupJobs = null;
-            BackupJobs = temp;
         }
 
         /// <summary>
@@ -181,7 +192,7 @@ namespace EasySave.ViewModels
         /// </summary>
         private void UpdateAllJobsSelectedState()
         {
-            bool allSelected = BackupJobs.Count > 0 && _selectedJobIndices.Count == BackupJobs.Count;
+            bool allSelected = BackupJobs.Count > 0 && BackupJobs.All(job => job.IsSelected);
             if (_areAllJobsSelected != allSelected)
             {
                 _areAllJobsSelected = allSelected;
@@ -193,27 +204,41 @@ namespace EasySave.ViewModels
         /// Toggles the selection state of a job and updates the "Select All" state.
         /// </summary>
         /// <param name="index">Index of the job to toggle.</param>
+        private bool _isTogglingJobSelection = false;
         public void ToggleJobSelection(int index)
         {
-            if (_selectedJobIndices.Contains(index))
-                _selectedJobIndices.Remove(index);
-            else
-                _selectedJobIndices.Add(index);
+            // Éviter la récursion infinie
+            if (_isTogglingJobSelection)
+                return;
 
-            // Mettre Ã  jour la propriÃ©tÃ© IsSelected du job concernÃ©
-            if (index >= 0 && index < BackupJobs.Count)
-                BackupJobs[index].IsSelected = _selectedJobIndices.Contains(index);
-
-            OnPropertyChanged(nameof(SelectedJobIndices));
-            OnPropertyChanged(nameof(BackupJobs));
-
-            // Forces refresh of each DataGrid row
-            foreach (var job in BackupJobs)
+            try
             {
-                OnPropertyChanged("Item[]");
-            }
+                _isTogglingJobSelection = true;
 
-            UpdateAllJobsSelectedState();
+                if (_selectedJobIndices.Contains(index))
+                    _selectedJobIndices.Remove(index);
+                else
+                    _selectedJobIndices.Add(index);
+
+                // Mettre à jour la propriété IsSelected du job concerné
+                if (index >= 0 && index < BackupJobs.Count)
+                    BackupJobs[index].IsSelected = _selectedJobIndices.Contains(index);
+
+                OnPropertyChanged(nameof(SelectedJobIndices));
+                OnPropertyChanged(nameof(BackupJobs));
+
+                // Forces refresh of each DataGrid row
+                foreach (var job in BackupJobs)
+                {
+                    OnPropertyChanged("Item[]");
+                }
+
+                UpdateAllJobsSelectedState();
+            }
+            finally
+            {
+                _isTogglingJobSelection = false;
+            }
         }
 
         /// <summary>
