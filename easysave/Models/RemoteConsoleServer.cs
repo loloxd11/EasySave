@@ -6,7 +6,7 @@ using System.Text.Json;
 namespace EasySave.Models
 {
     /// <summary>
-    /// Serveur pour la console distante permettant de monitorer et lancer les jobs à distance.
+    /// Serveur pour la console distante permettant de monitorer et lancer les jobs ï¿½ distance.
     /// </summary>
     public class RemoteConsoleServer : IObserver
     {
@@ -16,6 +16,8 @@ namespace EasySave.Models
         private readonly BackupManager _backupManager;
         private readonly List<StreamWriter> _clients = new();
         private readonly object _clientsLock = new();
+
+        public event Action<bool> ServerStatusChanged;
 
         public RemoteConsoleServer(int port)
         {
@@ -30,6 +32,7 @@ namespace EasySave.Models
             _listener.Start();
             _backupManager.AttachObserver(this);
             Task.Run(() => AcceptLoop(_cts.Token));
+            ServerStatusChanged?.Invoke(true);
         }
 
         public void Stop()
@@ -45,6 +48,7 @@ namespace EasySave.Models
                 _clients.Clear();
             }
             _backupManager.DetachObserver(this);
+            ServerStatusChanged?.Invoke(false);
         }
 
         private async Task AcceptLoop(CancellationToken token)
@@ -74,7 +78,7 @@ namespace EasySave.Models
                 {
                     _clients.Add(writer);
                 }
-                // Envoi immédiat de l'état courant au nouveau client
+                // Envoi immÃ©diat de l'Ã©tat courant au nouveau client
                 var statuses = _backupManager.GetJobStatuses();
                 string json = JsonSerializer.Serialize(statuses);
                 await writer.WriteLineAsync(json);
@@ -94,10 +98,56 @@ namespace EasySave.Models
                         {
                             if (int.TryParse(line.Substring(6), out int idx))
                             {
-                                // Répondre immédiatement avant d'attendre la fin de la sauvegarde
-                                await writer.WriteLineAsync(JsonSerializer.Serialize(new { Success = true, Message = "Job lancé" }));
-                                // Lancer la sauvegarde en tâche de fond
+                                // RÃ©pondre immÃ©diatement avant d'attendre la fin de la sauvegarde
+                                await writer.WriteLineAsync(JsonSerializer.Serialize(new { Success = true, Message = "Job lancÃ©" }));
+                                // Lancer la sauvegarde en tache de fond
                                 _ = _backupManager.ExecuteJobsAsync(new List<int> { idx });
+                            }
+                            else
+                            {
+                                await writer.WriteLineAsync(JsonSerializer.Serialize(new { Success = false, Message = "Index invalide" }));
+                            }
+                        }
+                        else if (line.StartsWith("PAUSEALL", StringComparison.OrdinalIgnoreCase))
+                        {
+                            _backupManager.PauseBackupJobs(reason: "Remote pause all");
+                            await writer.WriteLineAsync(JsonSerializer.Serialize(new { Success = true, Message = "Tous les jobs mis en pause" }));
+                        }
+                        else if (line.StartsWith("RESUMEALL", StringComparison.OrdinalIgnoreCase))
+                        {
+                            _backupManager.ResumeBackupJobs();
+                            await writer.WriteLineAsync(JsonSerializer.Serialize(new { Success = true, Message = "Tous les jobs repris" }));
+                        }
+                        else if (line.StartsWith("PAUSE ", StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (int.TryParse(line.Substring(6), out int idx))
+                            {
+                                _backupManager.PauseBackupJobs(new[] { idx }, "Remote pause");
+                                await writer.WriteLineAsync(JsonSerializer.Serialize(new { Success = true, Message = $"Job {idx} mis en pause" }));
+                            }
+                            else
+                            {
+                                await writer.WriteLineAsync(JsonSerializer.Serialize(new { Success = false, Message = "Index invalide" }));
+                            }
+                        }
+                        else if (line.StartsWith("RESUME ", StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (int.TryParse(line.Substring(7), out int idx))
+                            {
+                                _backupManager.ResumeBackupJobs(new[] { idx });
+                                await writer.WriteLineAsync(JsonSerializer.Serialize(new { Success = true, Message = $"Job {idx} repris" }));
+                            }
+                            else
+                            {
+                                await writer.WriteLineAsync(JsonSerializer.Serialize(new { Success = false, Message = "Index invalide" }));
+                            }
+                        }
+                        else if (line.StartsWith("STOP ", StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (int.TryParse(line.Substring(5), out int idx))
+                            {
+                                bool killed = _backupManager.KillBackupJob(idx);
+                                await writer.WriteLineAsync(JsonSerializer.Serialize(new { Success = killed, Message = killed ? $"Job {idx} arrÃªtÃ©" : "Impossible d'arrÃªter le job" }));
                             }
                             else
                             {
@@ -120,7 +170,7 @@ namespace EasySave.Models
             }
         }
 
-        // Méthode appelée par l'observer à chaque changement d'état/progression
+        // MÃ©thode appelÃ©e par l'observer Ã  chaque changement d'Ã©tat/progression
         public void Update(string action, string name, BackupType type, JobState state, string sourcePath, string targetPath, int totalFiles, long totalSize, long transferTime, long encryptionTime, int progression)
         {
             BroadcastJobStatuses();

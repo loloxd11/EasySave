@@ -222,4 +222,31 @@
   <data name="MaxParallelSizePhrase" xml:space="preserve">
     <value>Limite de taille pour transfert simultané (en Ko)</value>
   </data>
+  <data name="Connect" xml:space="preserve">
+    <value>Connection</value>
+  </data>
+  <data name="Refresh" xml:space="preserve">
+    <value>Rafraichir</value>
+  </data>
+  <data name="Back" xml:space="preserve">
+    <value>Retour</value>
+  </data>
+  <data name="RemoteConsole" xml:space="preserve">
+    <value>Console Déportée</value>
+  </data>
+  <data name="RemoteServer" xml:space="preserve">
+    <value>Activer Serveur Distant</value>
+  </data>
+  <data name="ServerStatusActive" xml:space="preserve">
+    <value>Serveur : Actif</value>
+  </data>
+  <data name="ServerStatusInactive" xml:space="preserve">
+    <value>Serveur : Inactif</value>
+  </data>
+  <data name="PauseAll" xml:space="preserve">
+    <value>Pause All</value>
+  </data>
+  <data name="ResumeAll" xml:space="preserve">
+    <value>Resume All</value>
+  </data>
 </root>

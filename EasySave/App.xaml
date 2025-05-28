@@ -5,5 +5,7 @@
              StartupUri="Views/MainMenu.xaml">
     <Application.Resources>
         <converters:RowIndexToIsSelectedConverter x:Key="RowIndexToIsSelectedConverter"/>
+        <converters:SingleSelectionToEnabledConverter x:Key="SingleSelectionToEnabledConverter"/>
+        <converters:AtLeastOneSelectionToEnabledConverter x:Key="AtLeastOneSelectionToEnabledConverter"/>
     </Application.Resources>
 </Application>

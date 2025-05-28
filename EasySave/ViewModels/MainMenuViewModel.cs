@@ -98,6 +98,11 @@ namespace EasySave.ViewModels
         {
             var jobs = _backupManager.ListBackups();
             BackupJobs = new ObservableCollection<BackupJob>(jobs);
+            // Synchroniser la sélection visuelle après chargement
+            foreach (var job in BackupJobs)
+            {
+                job.IsSelected = SelectedJobIndices.Contains(BackupJobs.IndexOf(job));
+            }
         }
 
         /// <summary>
@@ -158,6 +163,12 @@ namespace EasySave.ViewModels
                 }
             }
 
+            // Synchroniser la propriété IsSelected de tous les jobs
+            for (int i = 0; i < BackupJobs.Count; i++)
+            {
+                BackupJobs[i].IsSelected = _selectedJobIndices.Contains(i);
+            }
+
             OnPropertyChanged(nameof(SelectedJobIndices));
             // Hack: reassigns the collection to force the DataGrid to rebind
             var temp = BackupJobs;
@@ -189,13 +200,16 @@ namespace EasySave.ViewModels
             else
                 _selectedJobIndices.Add(index);
 
+            // Mettre à jour la propriété IsSelected du job concerné
+            if (index >= 0 && index < BackupJobs.Count)
+                BackupJobs[index].IsSelected = _selectedJobIndices.Contains(index);
+
             OnPropertyChanged(nameof(SelectedJobIndices));
             OnPropertyChanged(nameof(BackupJobs));
 
             // Forces refresh of each DataGrid row
             foreach (var job in BackupJobs)
             {
-                // Notifies that the fictitious "IsSelected" property has changed for each job
                 OnPropertyChanged("Item[]");
             }
 
@@ -218,7 +232,7 @@ namespace EasySave.ViewModels
         public async Task<(bool Success, string Message)> ExecuteSelectedJobsAsync()
         {
             if (SelectedJobIndices.Count == 0)
-                return (false, "Aucun job s�lectionn�");
+                return (false, "Aucun job sélectionné");
 
             var result = await _backupManager.ExecuteJobsAsync(SelectedJobIndices.ToList());
             return result;

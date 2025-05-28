@@ -668,6 +668,7 @@ namespace EasySave.Models
                 }
             }
         }
+
         /// <summary>
         /// Data Transfer Object for exposing job status remotely
         /// </summary>
@@ -677,11 +678,13 @@ namespace EasySave.Models
             private string _name;
             private string _state;
             private int _progress;
+            private bool _isSelected;
 
             public int Index { get => _index; set { if (_index != value) { _index = value; OnPropertyChanged(nameof(Index)); } } }
             public string Name { get => _name; set { if (_name != value) { _name = value; OnPropertyChanged(nameof(Name)); } } }
             public string State { get => _state; set { if (_state != value) { _state = value; OnPropertyChanged(nameof(State)); } } }
             public int Progress { get => _progress; set { if (_progress != value) { _progress = value; OnPropertyChanged(nameof(Progress)); } } }
+            public bool IsSelected { get => _isSelected; set { if (_isSelected != value) { _isSelected = value; OnPropertyChanged(nameof(IsSelected)); } } }
 
             public event PropertyChangedEventHandler PropertyChanged;
             protected void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

@@ -23,6 +23,20 @@ namespace EasySave.Models
         // Index du job dans la liste du BackupManager
         private int _jobIndex = -1;
 
+        private bool _isSelected;
+        public bool IsSelected
+        {
+            get => _isSelected;
+            set
+            {
+                if (_isSelected != value)
+                {
+                    _isSelected = value;
+                    OnPropertyChanged(nameof(IsSelected));
+                }
+            }
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
 
