@@ -40,6 +40,9 @@ namespace EasySave
         /// <summary>
         /// Met à jour l'état et la progression des jobs dans l'interface utilisateur
         /// </summary>
+        /// <summary>
+        /// Met à jour l'état et la progression des jobs dans l'interface utilisateur
+        /// </summary>
         public void Update(string action, string name, BackupType type, JobState state,
             string sourcePath, string targetPath, int totalFiles, long totalSize, int progression)
         {
@@ -51,27 +54,50 @@ namespace EasySave
                 {
                     if (action == "start")
                     {
-                        job.State = JobState.active;
-                        job.Progress = 0;
+                        UpdateJobState(name, JobState.active, 0);
                     }
                     else if (action == "complete")
                     {
-                        job.State = JobState.completed;
-                        job.Progress = 100;
+                        UpdateJobState(name, JobState.completed, 100);
                     }
                     else if (action == "error")
                     {
-                        job.State = JobState.error;
+                        UpdateJobState(name, JobState.error);
                     }
-                    else if (action == "update" || action == "transfer" || action == "processing")
+                    if (action == "pause" || action == "resume")
                     {
-                        job.State = state;
-                        job.Progress = progression;
+                        RefreshJobsView();
+                    }
+                    else
+                    {
+                        UpdateJobState(name, state, progression);
                     }
                 }
             });
         }
+        /// <summary>
+        /// Met à jour l'état d'un job dans l'interface utilisateur
+        /// </summary>
+        /// <param name="name">Nom du job</param>
+        /// <param name="newState">Nouvel état du job</param>
+        /// <param name="progressValue">Valeur de progression (optionnelle, conserve la valeur actuelle si non spécifiée)</param>
+        public void UpdateJobState(string name, JobState newState, int? progressValue = null)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                var job = _viewModel.BackupJobs.FirstOrDefault(j => j.Name == name);
+                if (job != null)
+                {
+                    job.State = newState;
 
+                    // Ne mettre à jour la progression que si une valeur est spécifiée
+                    if (progressValue.HasValue)
+                    {
+                        job.Progress = progressValue.Value;
+                    }
+                }
+            });
+        }
         /// <summary>
         /// Resets the current view to the MainMenu.
         /// Clears the current content, reinitializes the ViewModel, and reloads the MainMenu XAML.
@@ -128,6 +154,24 @@ namespace EasySave
             Content = jobsFrame;
         }
 
+        /// <summary>
+        /// Rafraîchit l'affichage des jobs dans l'interface
+        /// </summary>
+        public void RefreshJobsView()
+        {
+            Dispatcher.Invoke(() =>
+            {
+                // Demander au ViewModel de rafraîchir sa liste de jobs
+                _viewModel.RefreshBackupJobs();
+
+                // Si vous avez un contrôle spécifique pour afficher les jobs (comme un DataGrid)
+                // vous pouvez forcer son actualisation
+                if (BackupJobsGrid != null) // Remplacer par le nom de votre DataGrid
+                {
+                    BackupJobsGrid.Items.Refresh();
+                }
+            });
+        }
 
         /// <summary>
         /// Handles the event when a job checkbox is checked.
@@ -258,12 +302,7 @@ namespace EasySave
                 BackupManager manager = BackupManager.GetInstance();
 
                 // Vérifier si le job est déjà en pause
-                if (manager.IsJobPaused(index))
-                {
-                    // Reprendre le job
-                    manager.ResumeBackupJobs(new[] { index });
-                }
-                else
+                if (!manager.IsJobPaused(index))
                 {
                     // Mettre le job en pause
                     manager.PauseBackupJobs(new[] { index }, "Pause manuelle");

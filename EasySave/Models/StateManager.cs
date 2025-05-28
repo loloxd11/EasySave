@@ -1,6 +1,9 @@
-﻿using System.IO;
+﻿using EasySave.Views;
+using Microsoft.VisualBasic.Logging;
+using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Windows;
 
 namespace EasySave.Models
 {
@@ -133,8 +136,6 @@ namespace EasySave.Models
         {
             lock (lockObject)
             {
-                Console.WriteLine($"Received update: action={action}, name={name}, progression={progression}");
-
                 if (action == "start")
                 {
                     InitializeJobState(name, type, state, sourcePath, targetPath, totalFiles, totalSize, progression);
@@ -143,9 +144,28 @@ namespace EasySave.Models
                 {
                     FinalizeJobState(name, type, state, sourcePath, targetPath, totalFiles, totalSize, progression);
                 }
-                else if (action == "transfer" || action == "processing")  // Assurez-vous que "transfer" est bien traité
+                else if (action == "transfer" || action == "processing")
                 {
                     UpdateJobState(name, type, state, sourcePath, targetPath, totalFiles, totalSize, progression);
+                }
+                else if (action == "pause" || action == "resume")
+                {
+                    // Pour la pause et la reprise, préserver l'action d'origine
+                    JobStateInfo jobState = GetOrCreateJobState(name);
+                    jobState.Type = type;
+                    jobState.State = state;
+                    jobState.SourcePath = sourcePath;
+                    jobState.TargetPath = targetPath;
+
+                    // Notifier avec l'action originale préservée
+                    foreach (var observer in stateObservers)
+                    {
+                        observer.Update(action, name, type, state, sourcePath, targetPath,
+                            totalFiles, totalSize, progression);
+                    }
+
+                    SaveStateFile();
+                    return; // On retourne directement pour éviter l'appel à NotifyObservers à la fin
                 }
                 else
                 {

@@ -79,7 +79,7 @@
                         <DataGridTextColumn Header="{Binding LanguageViewModel[SourcePath]}" Binding="{Binding Source}" Width="2*" />
                         <DataGridTextColumn Header="{Binding LanguageViewModel[TargetPath]}" Binding="{Binding Destination}" Width="2*" />
                         <DataGridTextColumn Header="{Binding LanguageViewModel[BackupType]}" Binding="{Binding Type}" Width="*" />
-                        <DataGridTextColumn Header="{Binding LanguageViewModel[Status]}" Binding="{Binding State}" Width="*" />
+                        <DataGridTextColumn Header="{Binding LanguageViewModel[Status]}" Binding="{Binding State, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Width="*" />
                         <DataGridTemplateColumn Header="{Binding LanguageViewModel[Progress]}" Width="120">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
