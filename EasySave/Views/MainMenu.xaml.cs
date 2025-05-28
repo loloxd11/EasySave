@@ -25,6 +25,7 @@ namespace EasySave
         private RemoteConsoleServer _remoteServer;
         private bool _isRemoteServerActive = false;
         private const int RemoteServerPort = 9000;
+        private RemoteConsoleViewControl _remoteConsoleViewControl; // Ajout d'une référence pour éviter l'ouverture multiple
 
         /// <summary>
         /// Constructor for MainWindow.
@@ -147,8 +148,10 @@ namespace EasySave
                 if (row != null)
                 {
                     int index = row.GetIndex();
-                    if (!_viewModel.IsJobSelected(index))
+                    var job = _viewModel.BackupJobs[index];
+                    if (!job.IsSelected)
                     {
+                        job.IsSelected = true;
                         _viewModel.ToggleJobSelection(index);
                     }
                 }
@@ -169,8 +172,10 @@ namespace EasySave
                 if (row != null)
                 {
                     int index = row.GetIndex();
-                    if (_viewModel.IsJobSelected(index))
+                    var job = _viewModel.BackupJobs[index];
+                    if (job.IsSelected)
                     {
+                        job.IsSelected = false;
                         _viewModel.ToggleJobSelection(index);
                     }
                 }
@@ -311,12 +316,37 @@ namespace EasySave
                         MessageBoxButton.OK,
                         MessageBoxImage.Information);
                 }
-        /// Ouvre la console déportée (client distant)
+            }
+        }
+
+        /// <summary>
+        /// Ouvre la console déportée (client distant) dans la fenêtre principale
         /// </summary>
         private void OpenRemoteConsole_Click(object sender, RoutedEventArgs e)
         {
-            var remoteConsole = new EasySave.Views.RemoteConsoleView();
-            remoteConsole.Show();
+            if (_remoteConsoleViewControl == null)
+            {
+                _remoteConsoleViewControl = new EasySave.Views.RemoteConsoleViewControl();
+            }
+            this.Content = _remoteConsoleViewControl;
+        }
+
+        private void UpdateRemoteServerStatus(bool isActive)
+        {
+            var lang = ViewModels.LanguageViewModel.Instance;
+            if (RemoteServerStatus != null)
+            {
+                if (isActive)
+                {
+                    RemoteServerStatus.Text = lang["ServerStatusActive"] + $" (Port {RemoteServerPort})";
+                    RemoteServerStatus.Foreground = System.Windows.Media.Brushes.Green;
+                }
+                else
+                {
+                    RemoteServerStatus.Text = lang["ServerStatusInactive"];
+                    RemoteServerStatus.Foreground = System.Windows.Media.Brushes.Red;
+                }
+            }
         }
 
         private void RemoteServerButton_Click(object sender, RoutedEventArgs e)
@@ -324,19 +354,22 @@ namespace EasySave
             if (!_isRemoteServerActive)
             {
                 _remoteServer = new RemoteConsoleServer(RemoteServerPort);
+                _remoteServer.ServerStatusChanged += UpdateRemoteServerStatus;
                 _remoteServer.Start();
                 _isRemoteServerActive = true;
                 RemoteServerButton.Content = "Désactiver Serveur Distant";
-                RemoteServerStatus.Text = $"Serveur: Actif (Port {RemoteServerPort})";
-                RemoteServerStatus.Foreground = System.Windows.Media.Brushes.Green;
+                UpdateRemoteServerStatus(true);
             }
             else
             {
-                _remoteServer?.Stop();
+                if (_remoteServer != null)
+                {
+                    _remoteServer.ServerStatusChanged -= UpdateRemoteServerStatus;
+                    _remoteServer.Stop();
+                }
                 _isRemoteServerActive = false;
                 RemoteServerButton.Content = "Activer Serveur Distant";
-                RemoteServerStatus.Text = "Serveur: Inactif";
-                RemoteServerStatus.Foreground = System.Windows.Media.Brushes.Red;
+                UpdateRemoteServerStatus(false);
             }
         }
     }

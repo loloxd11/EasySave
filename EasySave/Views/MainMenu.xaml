@@ -31,11 +31,11 @@
                     Background="#ededed" BorderBrush="#aaa" Padding="5"
                     FontSize="16"
                     Click="SettingsButton_Click"/>
-            <Button x:Name="RemoteConsoleButton" Content="🖧 Console Deportee" Width="160" Margin="0,0,10,0"
+            <Button x:Name="RemoteConsoleButton" Content="{Binding LanguageViewModel[RemoteConsole]}" Width="160" Margin="0,0,10,0"
                      Background="#ddd" BorderBrush="#aaa" Padding="5" Click="OpenRemoteConsole_Click" />
-            <Button x:Name="RemoteServerButton" Content="Activer Serveur Distant" Width="170" Margin="0,0,10,0"
+            <Button x:Name="RemoteServerButton" Content="{Binding LanguageViewModel[RemoteServer]}" Width="170" Margin="0,0,10,0"
                      Background="#ddd" BorderBrush="#aaa" Padding="5" Click="RemoteServerButton_Click" />
-            <TextBlock x:Name="RemoteServerStatus" Text="Serveur: Inactif" VerticalAlignment="Center" Margin="10,0,0,0" Foreground="Red" FontWeight="Bold"/>
+            <TextBlock x:Name="RemoteServerStatus" Text="{Binding LanguageViewModel[ServerStatusInactive]}" VerticalAlignment="Center" Margin="10,0,0,0" Foreground="Red" FontWeight="Bold"/>
         </StackPanel>
 
         <!-- DataGrid -->
@@ -129,13 +129,43 @@
             <Button Content="{Binding LanguageViewModel[Add]}" Click="AddBackupJob_Click"
                     Width="80" Height="40" Background="#5cb85c" Foreground="White" FontSize="16" Margin="5"/>
             <Button Content="{Binding LanguageViewModel[Edit]}" Command="{Binding EditJobCommand}"
-                    Width="80" Height="40" Background="#ededed" Foreground="#888" FontSize="16" Margin="5"/>
+                    Width="80" Height="40" Margin="5"
+                    IsEnabled="{Binding SelectedJobIndices.Count, Converter={StaticResource SingleSelectionToEnabledConverter}}">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="Background" Value="#ededed"/>
+                        <Setter Property="Foreground" Value="#888"/>
+                        <Setter Property="FontSize" Value="16"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsEnabled" Value="True">
+                                <Setter Property="Background" Value="#007bff"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
             <Button Content="{Binding LanguageViewModel[Delete]}" Command="{Binding DeleteJobCommand}"
-                    Width="80" Height="40" Background="#ededed" Foreground="#888" FontSize="16" Margin="5"/>
+                    Width="80" Height="40" Margin="5"
+                    IsEnabled="{Binding SelectedJobIndices.Count, Converter={StaticResource AtLeastOneSelectionToEnabledConverter}}">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="Background" Value="#ededed"/>
+                        <Setter Property="Foreground" Value="#888"/>
+                        <Setter Property="FontSize" Value="16"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsEnabled" Value="True">
+                                <Setter Property="Background" Value="#d9534f"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
             <Button Content="{Binding LanguageViewModel[Execute]}" Click="ExecuteBackupJob_Click"
                     Width="100" Height="40" Background="#f0ad4e" Foreground="#222" FontSize="16" Margin="5"/>
-            <Button Content="Pause All" Click="PauseAllJobs_Click" Width="100" Height="40" Background="Black" Foreground="White" FontSize="16" Margin="5"/>
-            <Button Content="Resume All" Click="ResumeAllJobs_Click" Width="100" Height="40" Background="#d9534f" Foreground="White" FontSize="16" Margin="5"/>
+            <Button Content="{Binding LanguageViewModel[PauseAll]}" Click="PauseAllJobs_Click" Width="100" Height="40" Background="Black" Foreground="White" FontSize="16" Margin="5"/>
+            <Button Content="{Binding LanguageViewModel[ResumeAll]}" Click="ResumeAllJobs_Click" Width="100" Height="40" Background="#d9534f" Foreground="White" FontSize="16" Margin="5"/>
         </StackPanel>
     </Grid>
 </Window>
