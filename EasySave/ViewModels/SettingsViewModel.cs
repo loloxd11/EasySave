@@ -520,10 +520,8 @@ namespace EasySave.ViewModels
         /// </summary>
         public void SaveEncryptionPassphrase()
         {
-            if (!string.IsNullOrWhiteSpace(EncryptionPassphrase))
-            {
-                EncryptionService.GetInstance().SetEncryptionPassword(EncryptionPassphrase);
-            }
+            // Always save, even if empty (to allow clearing the password)
+            EncryptionService.GetInstance().SetEncryptionPassword(EncryptionPassphrase ?? string.Empty);
         }
 
         /// <summary>

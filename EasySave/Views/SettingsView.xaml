@@ -334,10 +334,10 @@
                     Orientation="Horizontal" 
                     HorizontalAlignment="Center" 
                     Margin="0,30,0,30">
-            <Button Command="{Binding SaveCommand}" 
-                    Content="{Binding LanguageViewModel[Save]}" 
-                    Width="120"
-                    Style="{StaticResource GreenButton}"/>
+            <Button Content="{Binding LanguageViewModel[Save]}"
+                Width="120"
+                Style="{StaticResource GreenButton}"
+                Click="SaveSettings_Click"/>
             <Button Command="{Binding CancelCommand}" 
                     Content="{Binding LanguageViewModel[Cancel]}" 
                     Width="120"
