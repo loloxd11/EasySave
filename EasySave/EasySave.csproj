@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+	<UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="CryptoSoft\**" />
+    <Compile Remove="easysave\**" />
+    <EmbeddedResource Remove="CryptoSoft\**" />
+    <EmbeddedResource Remove="easysave\**" />
+    <None Remove="CryptoSoft\**" />
+    <None Remove="easysave\**" />
+    <Page Remove="CryptoSoft\**" />
+    <Page Remove="easysave\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Commands\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="LogLibrary">
+      <HintPath>..\ClassLibraryProjects\LogLibrary\obj\Release\net8.0\LogLibrary.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
