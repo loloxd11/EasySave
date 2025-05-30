@@ -325,8 +325,7 @@ namespace EasySave.ViewModels
                 // Save encrypted extensions
                 SaveEncryptedExtensions();
 
-                // Save passphrase
-                SaveEncryptionPassphrase();
+                // Do NOT save the passphrase here. It is handled explicitly in the code-behind only if a new password is provided.
 
                 // Save priority process
                 SavePriorityProcess();
@@ -513,15 +512,6 @@ namespace EasySave.ViewModels
         {
             EncryptionService encryptionService = EncryptionService.GetInstance();
             encryptionService.SetEncryptedExtensions(EncryptedExtensions);
-        }
-
-        /// <summary>
-        /// Saves the encryption passphrase to configuration.
-        /// </summary>
-        public void SaveEncryptionPassphrase()
-        {
-            // Always save, even if empty (to allow clearing the password)
-            EncryptionService.GetInstance().SetEncryptionPassword(EncryptionPassphrase ?? string.Empty);
         }
 
         /// <summary>

@@ -89,15 +89,18 @@ namespace EasySave.Views
         {
             var viewModel = (SettingsViewModel)DataContext;
 
-            // Retrieve the passphrase from the PasswordBox (not bindable)
+            // Get the value from the PasswordBox
             string passphrase = PassphraseBox.Password;
+
+            // Only update the password if the user entered a non-empty value
             if (!string.IsNullOrEmpty(passphrase))
             {
-                // Temporarily store in the ViewModel for saving
                 viewModel.EncryptionPassphrase = passphrase;
+                // Save the password directly using the EncryptionService
+                EasySave.Models.EncryptionService.GetInstance().SetEncryptionPassword(passphrase);
             }
 
-            // Execute the SaveCommand from the ViewModel
+            // Execute the SaveCommand for all other settings
             viewModel.SaveCommand.Execute(null);
         }
 
