@@ -3,6 +3,10 @@ using System.Windows;
 
 namespace EasySave.Models
 {
+    /// <summary>
+    /// Detector class responsible for monitoring the execution state of a specified business software process.
+    /// Notifies the BackupManager when the process starts or stops.
+    /// </summary>
     internal class SM_Detector
     {
         private CancellationTokenSource _cancellationTokenSource;
@@ -10,19 +14,27 @@ namespace EasySave.Models
         private BackupManager _backupManager;
         private Task _monitoringTask;
 
-        // Période entre chaque vérification en millisecondes
+        // Interval between each process check in milliseconds
         private const int CheckInterval = 500;
 
+        /// <summary>
+        /// Indicates whether the business software is currently running.
+        /// </summary>
         public bool IsRunning { get; private set; }
 
+        /// <summary>
+        /// Initializes a new instance of the SM_Detector class.
+        /// Loads the business software name from configuration and appends ".exe" if necessary.
+        /// </summary>
+        /// <param name="backupManager">Reference to the BackupManager for notification.</param>
         public SM_Detector(BackupManager backupManager)
         {
             _backupManager = backupManager;
 
-            // Récupération du nom du processus depuis les paramètres
+            // Retrieve the process name from settings
             _businessSoftwareName = ConfigManager.GetInstance().GetSetting("PriorityProcess");
 
-            // Si le nom est renseigné, ajouter l'extension .exe si nécessaire
+            // Append ".exe" if not present
             if (!string.IsNullOrEmpty(_businessSoftwareName) &&
                 !_businessSoftwareName.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
             {
@@ -31,78 +43,79 @@ namespace EasySave.Models
         }
 
         /// <summary>
-        /// Met à jour le nom du logiciel métier à surveiller et redémarre la surveillance si nécessaire
+        /// Updates the name of the business software to monitor and restarts monitoring if necessary.
         /// </summary>
-        /// <param name="newName">Nouveau nom du logiciel métier</param>
+        /// <param name="newName">New name of the business software process.</param>
         public void UpdateBusinessSoftwareName(string newName)
         {
             bool wasEmpty = string.IsNullOrEmpty(_businessSoftwareName);
             bool willBeEmpty = string.IsNullOrEmpty(newName);
 
-            // Si le nouveau nom est vide, désactive la surveillance
+            // If the new name is empty, disable monitoring
             if (willBeEmpty)
             {
                 _businessSoftwareName = string.Empty;
-                IsRunning = false; // Force l'état à "non en cours d'exécution"
-                Console.WriteLine("SM_Detector: Surveillance désactivée (aucun logiciel métier spécifié)");
+                IsRunning = false; // Force state to "not running"
+                Console.WriteLine("SM_Detector: Monitoring disabled (no business software specified)");
                 return;
             }
 
-            // Sinon, mettre à jour le nom avec l'extension .exe si nécessaire
+            // Update the name and append ".exe" if necessary
             _businessSoftwareName = newName;
             if (!_businessSoftwareName.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
                 _businessSoftwareName += ".exe";
 
-            Console.WriteLine($"SM_Detector: Mise à jour du nom du logiciel métier surveillé '{_businessSoftwareName}'");
+            Console.WriteLine($"SM_Detector: Updated monitored business software name to '{_businessSoftwareName}'");
 
-            // Si on passe d'un état vide à un état non-vide et que la tâche n'est pas active,
-            // il faut redémarrer la surveillance
+            // If transitioning from empty to non-empty and the task is not active, restart monitoring
             if (wasEmpty && !willBeEmpty && (_monitoringTask == null || _monitoringTask.IsCompleted))
             {
-                Console.WriteLine("SM_Detector: Redémarrage de la surveillance après mise à jour du nom");
-                // Vérification initiale
+                Console.WriteLine("SM_Detector: Restarting monitoring after name update");
+                // Initial check
                 CheckIfBusinessSoftwareIsRunning();
 
-                // Créer un nouveau token si nécessaire
+                // Create a new token if necessary
                 if (_cancellationTokenSource == null || _cancellationTokenSource.IsCancellationRequested)
                 {
                     _cancellationTokenSource = new CancellationTokenSource();
                 }
 
-                // Démarrer la tâche de surveillance
+                // Start the monitoring task
                 _monitoringTask = Task.Run(MonitorProcessAsync, _cancellationTokenSource.Token);
             }
             else
             {
-                // Sinon, simplement mettre à jour la vérification
+                // Otherwise, just update the check
                 CheckIfBusinessSoftwareIsRunning();
             }
         }
+
         /// <summary>
-        /// Démarre la surveillance du logiciel métier
+        /// Starts monitoring the business software process.
         /// </summary>
+        /// <param name="token">Cancellation token to support cooperative cancellation.</param>
         public void StartMonitoring(CancellationToken token)
         {
             _cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(token);
 
-            // Si aucun logiciel métier n'est spécifié, ne pas démarrer la surveillance active
+            // Do not start monitoring if no business software is specified
             if (string.IsNullOrEmpty(_businessSoftwareName))
             {
-                Console.WriteLine("SM_Detector: Surveillance non démarrée (aucun logiciel métier spécifié)");
+                Console.WriteLine("SM_Detector: Monitoring not started (no business software specified)");
                 return;
             }
 
-            Console.WriteLine($"SM_Detector: Démarrage de la surveillance du logiciel métier '{_businessSoftwareName}'");
+            Console.WriteLine($"SM_Detector: Starting monitoring for business software '{_businessSoftwareName}'");
 
-            // Vérification initiale
+            // Initial check
             CheckIfBusinessSoftwareIsRunning();
 
-            // Toujours démarrer la tâche de surveillance en arrière-plan
+            // Always start the background monitoring task
             _monitoringTask = Task.Run(MonitorProcessAsync, _cancellationTokenSource.Token);
         }
 
         /// <summary>
-        /// Arrête proprement la surveillance
+        /// Stops monitoring the business software process gracefully.
         /// </summary>
         public void StopMonitoring()
         {
@@ -110,22 +123,23 @@ namespace EasySave.Models
             {
                 _cancellationTokenSource?.Cancel();
 
-                // Attendre que la tâche de surveillance se termine (avec un délai raisonnable)
+                // Wait for the monitoring task to complete (with a reasonable timeout)
                 if (_monitoringTask != null && !_monitoringTask.IsCompleted)
                 {
                     _monitoringTask.Wait(TimeSpan.FromSeconds(2));
                 }
 
-                Console.WriteLine("SM_Detector: Surveillance arrêtée.");
+                Console.WriteLine("SM_Detector: Monitoring stopped.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"SM_Detector: Erreur lors de l'arrêt de la surveillance - {ex.Message}");
+                Console.WriteLine($"SM_Detector: Error while stopping monitoring - {ex.Message}");
             }
         }
 
         /// <summary>
-        /// Boucle de surveillance asynchrone du processus métier
+        /// Asynchronous monitoring loop for the business software process.
+        /// Notifies the BackupManager when the process starts or stops.
         /// </summary>
         private async Task MonitorProcessAsync()
         {
@@ -135,37 +149,37 @@ namespace EasySave.Models
             {
                 try
                 {
-                    // Si aucun logiciel métier n'est spécifié, ne rien faire
+                    // If no business software is specified, do nothing
                     if (string.IsNullOrEmpty(_businessSoftwareName))
                     {
                         await Task.Delay(CheckInterval, _cancellationTokenSource.Token);
                         continue;
                     }
 
-                    // Vérifier si le processus est en cours d'exécution
+                    // Check if the process is running
                     CheckIfBusinessSoftwareIsRunning();
 
-                    // Si l'état a changé, notifier le BackupManager
+                    // If the state has changed, notify the BackupManager
                     if (IsRunning != previousState)
                     {
                         if (IsRunning)
                         {
-                            Console.WriteLine($"SM_Detector: Processus '{_businessSoftwareName}' démarré");
-                            // Notifier le BackupManager que le processus est lancé
+                            Console.WriteLine($"SM_Detector: Process '{_businessSoftwareName}' started");
+                            // Notify BackupManager that the process has started
                             _backupManager.SM_Detected();
                             System.Windows.MessageBox.Show(
-                            "logiciel métier détecté",
-                            "Logiciel metier start",
+                            "Business software detected",
+                            "Business software start",
                             MessageBoxButton.OK,
                             MessageBoxImage.Information);
                         }
                         else
                         {
-                            Console.WriteLine($"SM_Detector: Processus '{_businessSoftwareName}' arrêté");
+                            Console.WriteLine($"SM_Detector: Process '{_businessSoftwareName}' stopped");
                             _backupManager.SM_Undetected();
                             System.Windows.MessageBox.Show(
-                            "logiciel métier terminé",
-                            "Logiciel metier stop",
+                            "Business software stopped",
+                            "Business software stop",
                             MessageBoxButton.OK,
                             MessageBoxImage.Information);
                         }
@@ -173,48 +187,48 @@ namespace EasySave.Models
                         previousState = IsRunning;
                     }
 
-                    // Attendre avant la prochaine vérification
-                    // Utilisation de Task.Delay pour une attente asynchrone qui respecte l'annulation
+                    // Wait before the next check (supports cancellation)
                     await Task.Delay(CheckInterval, _cancellationTokenSource.Token);
                 }
                 catch (OperationCanceledException)
                 {
-                    // Surveillance annulée, sortir de la boucle
+                    // Monitoring cancelled, exit the loop
                     break;
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"SM_Detector: Erreur pendant la surveillance - {ex.Message}");
-                    // Attendre un peu avant de réessayer
+                    Console.WriteLine($"SM_Detector: Error during monitoring - {ex.Message}");
+                    // Wait a bit before retrying
                     await Task.Delay(1000, _cancellationTokenSource.Token);
                 }
             }
         }
 
         /// <summary>
-        /// Vérifie si le processus métier est en cours d'exécution
+        /// Checks if the business software process is currently running.
+        /// Updates the IsRunning property accordingly.
         /// </summary>
         private void CheckIfBusinessSoftwareIsRunning()
         {
             try
             {
-                // Si aucun logiciel métier n'est spécifié, considérer qu'il n'est pas en cours d'exécution
+                // If no business software is specified, consider it not running
                 if (string.IsNullOrEmpty(_businessSoftwareName))
                 {
                     IsRunning = false;
                     return;
                 }
 
-                // Extraire le nom du processus sans l'extension .exe
+                // Extract the process name without the ".exe" extension
                 string processName = _businessSoftwareName;
                 if (processName.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
                     processName = processName.Substring(0, processName.Length - 4);
 
-                // Vérifier si le processus est en cours d'exécution
+                // Check if the process is running
                 Process[] processes = Process.GetProcessesByName(processName);
                 IsRunning = processes.Length > 0;
 
-                // Libérer les ressources
+                // Release resources
                 foreach (var process in processes)
                 {
                     process.Dispose();
@@ -222,7 +236,7 @@ namespace EasySave.Models
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"SM_Detector: Erreur lors de la vérification du processus - {ex.Message}");
+                Console.WriteLine($"SM_Detector: Error while checking process - {ex.Message}");
             }
         }
     }

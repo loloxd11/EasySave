@@ -20,6 +20,7 @@
         /// <summary>
         /// Logs a specific event by its name.
         /// </summary>
+        /// <param name="name">The name of the logger or context.</param>
         /// <param name="eventName">The name of the event to log.</param>
         void LogEvent(string name, string eventName);
 

@@ -19,8 +19,20 @@
         /// <param name="transferTime">The time taken for file transfer, if applicable.</param>
         /// <param name="encryptionTime">The time taken for encryption, if applicable.</param>
         /// <param name="progression">The progression percentage of the backup job.</param>
-        void Update(string action, string name, BackupType type, JobState state,
-            string sourcePath, string targetPath, int totalFiles, long totalSize, long transferTime, long encryptionTime, int progression);
-
+        void Update(
+            string action,
+            string name,
+            BackupType type,
+            JobState state,
+            string sourcePath,
+            string targetPath,
+            int totalFiles,
+            long totalSize,
+            long transferTime,
+            long encryptionTime,
+            int progression
+        );
+        // This method is called whenever a backup job changes state or is updated.
+        // Implementing classes should use this method to react to backup job events.
     }
 }

@@ -14,6 +14,10 @@ using System.Windows;
 
 namespace EasySave.ViewModels
 {
+    /// <summary>
+    /// ViewModel for the remote console, allowing monitoring and control of backup jobs on a remote server.
+    /// Handles connection, job status updates, and job commands (start, pause, resume, stop).
+    /// </summary>
     public class RemoteConsoleViewModel : INotifyPropertyChanged
     {
         private string _host = "127.0.0.1";
@@ -27,20 +31,41 @@ namespace EasySave.ViewModels
         private bool _areAllJobsSelected;
         private bool _manualDisconnect = false;
 
+        /// <summary>
+        /// Singleton instance for language management.
+        /// </summary>
         public LanguageViewModel LanguageViewModel { get; } = LanguageViewModel.Instance;
 
+        /// <summary>
+        /// Host address of the remote server.
+        /// </summary>
         public string Host { get => _host; set { _host = value; OnPropertyChanged(); } }
+        /// <summary>
+        /// Port number of the remote server.
+        /// </summary>
         public int Port { get => _port; set { _port = value; OnPropertyChanged(); } }
+        /// <summary>
+        /// List of backup jobs retrieved from the remote server.
+        /// </summary>
         public ObservableCollection<BackupManager.BackupJobStatusDto> Jobs { get => _jobs; set { _jobs = value; OnPropertyChanged(); } }
+        /// <summary>
+        /// Currently selected backup job.
+        /// </summary>
         public BackupManager.BackupJobStatusDto SelectedJob { get => _selectedJob; set { _selectedJob = value; OnPropertyChanged(); } }
+        /// <summary>
+        /// Indices of selected jobs (for multi-selection).
+        /// </summary>
         public ObservableCollection<int> SelectedJobIndices { get => _selectedJobIndices; set { _selectedJobIndices = value; OnPropertyChanged(); } }
+        /// <summary>
+        /// Indicates if all jobs are selected.
+        /// </summary>
         public bool AreAllJobsSelected
         {
             get => _areAllJobsSelected;
             set { _areAllJobsSelected = value; SelectAllJobs(value); OnPropertyChanged(); }
         }
 
-        // Commands
+        // Commands for UI binding
         public ICommand ConnectCommand { get; }
         public ICommand RefreshCommand { get; }
         public ICommand ExecuteJobsCommand { get; }
@@ -52,10 +77,13 @@ namespace EasySave.ViewModels
         public ICommand BackCommand { get; }
         public ICommand ToggleJobSelectionCommand { get; }
 
-        // Event pour navigation retour
+        // Events for navigation
         public event Action BackRequested;
         public event Action RequestBackToMainView;
 
+        /// <summary>
+        /// Constructor. Initializes commands and sets up the ViewModel.
+        /// </summary>
         public RemoteConsoleViewModel()
         {
             ConnectCommand = new Commands.AsyncRelayCommand(async () => await ConnectAsync());
@@ -71,8 +99,15 @@ namespace EasySave.ViewModels
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
+        /// <summary>
+        /// Notifies listeners that a property value has changed.
+        /// </summary>
+        /// <param name="prop">Name of the property.</param>
         private void OnPropertyChanged([CallerMemberName] string prop = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
 
+        /// <summary>
+        /// Handles the back navigation, disconnecting from the server and returning to the main view.
+        /// </summary>
         private void Back()
         {
             _manualDisconnect = true;
@@ -80,6 +115,9 @@ namespace EasySave.ViewModels
             RequestBackToMainView?.Invoke();
         }
 
+        /// <summary>
+        /// Subscribes to client events (e.g., disconnection).
+        /// </summary>
         private void SubscribeClientEvents()
         {
             if (_client != null)
@@ -88,6 +126,9 @@ namespace EasySave.ViewModels
             }
         }
 
+        /// <summary>
+        /// Handles unexpected client disconnection.
+        /// </summary>
         private void OnClientDisconnected()
         {
             if (!_manualDisconnect)
@@ -97,11 +138,14 @@ namespace EasySave.ViewModels
             RequestBackToMainView?.Invoke();
         }
 
+        /// <summary>
+        /// Connects to the remote server asynchronously.
+        /// </summary>
         private async Task ConnectAsync()
         {
             try
             {
-                // Vérification du port
+                // Check port validity
                 if (Port < 1 || Port > 65535)
                 {
                     ShowError("Port invalide. Veuillez entrer un port entre 1 et 65535.");
@@ -132,12 +176,19 @@ namespace EasySave.ViewModels
             }
         }
 
+        /// <summary>
+        /// Displays an error message to the user.
+        /// </summary>
+        /// <param name="message">Error message to display.</param>
         private void ShowError(string message)
         {
-            // Ici, tu peux remplacer par un event, un binding, ou une MessageBox selon l'UI
+            // You can replace this with an event, binding, or MessageBox depending on the UI
             MessageBox.Show(message, "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
+        /// <summary>
+        /// Refreshes the list of jobs from the remote server asynchronously.
+        /// </summary>
         private async Task RefreshJobsAsync()
         {
             if (_client == null) return;
@@ -152,51 +203,75 @@ namespace EasySave.ViewModels
             }
         }
 
+        /// <summary>
+        /// Executes all selected jobs asynchronously.
+        /// </summary>
         private async Task ExecuteSelectedJobsAsync()
         {
             if (_client == null || SelectedJobIndices.Count == 0) return;
             foreach (var idx in SelectedJobIndices)
             {
-                await _client.StartJobAsync(idx); // TODO: améliorer pour batch
+                await _client.StartJobAsync(idx); // TODO: improve for batch execution
             }
             await RefreshJobsAsync();
         }
 
+        /// <summary>
+        /// Pauses all jobs asynchronously.
+        /// </summary>
         private async Task PauseAllJobsAsync()
         {
             if (_client == null) return;
-            await _client.PauseAllJobsAsync(); // À implémenter côté client/serveur
+            await _client.PauseAllJobsAsync(); // To be implemented on client/server side
             await RefreshJobsAsync();
         }
 
+        /// <summary>
+        /// Resumes all jobs asynchronously.
+        /// </summary>
         private async Task ResumeAllJobsAsync()
         {
             if (_client == null) return;
-            await _client.ResumeAllJobsAsync(); // À implémenter côté client/serveur
+            await _client.ResumeAllJobsAsync(); // To be implemented on client/server side
             await RefreshJobsAsync();
         }
 
+        /// <summary>
+        /// Pauses a specific job asynchronously.
+        /// </summary>
+        /// <param name="idx">Index of the job to pause.</param>
         private async Task PauseJobAsync(int idx)
         {
             if (_client == null) return;
-            await _client.PauseJobAsync(idx); // À implémenter côté client/serveur
+            await _client.PauseJobAsync(idx); // To be implemented on client/server side
             await RefreshJobsAsync();
         }
 
+        /// <summary>
+        /// Resumes a specific job asynchronously.
+        /// </summary>
+        /// <param name="idx">Index of the job to resume.</param>
         private async Task ResumeJobAsync(int idx)
         {
             if (_client == null) return;
-            await _client.ResumeJobAsync(idx); // À implémenter côté client/serveur
+            await _client.ResumeJobAsync(idx); // To be implemented on client/server side
             await RefreshJobsAsync();
         }
 
+        /// <summary>
+        /// Stops a specific job asynchronously.
+        /// </summary>
+        /// <param name="idx">Index of the job to stop.</param>
         private async Task StopJobAsync(int idx)
         {
             if (_client == null) return;
-            await _client.StopJobAsync(idx); // À implémenter côté client/serveur
+            await _client.StopJobAsync(idx); // To be implemented on client/server side
             await RefreshJobsAsync();
         }
 
+        /// <summary>
+        /// Starts listening for real-time job updates from the server.
+        /// </summary>
         private void StartListeningPush()
         {
             _listenCts?.Cancel();
@@ -208,6 +283,10 @@ namespace EasySave.ViewModels
             _client.StartListening(_listenCts.Token);
         }
 
+        /// <summary>
+        /// Updates the Jobs collection in place, preserving selection and UI state.
+        /// </summary>
+        /// <param name="newJobs">New list of job statuses.</param>
         private void UpdateJobsInPlace(System.Collections.Generic.List<BackupManager.BackupJobStatusDto> newJobs)
         {
             bool mustReplace = newJobs.Count != _jobs.Count || !_jobs.Select(j => j.Index).SequenceEqual(newJobs.Select(j => j.Index));
@@ -229,21 +308,24 @@ namespace EasySave.ViewModels
                     }
                 }
             }
-            // Synchroniser la sélection visuelle après chaque update
+            // Synchronize visual selection after each update
             foreach (var job in Jobs)
             {
                 job.IsSelected = SelectedJobIndices.Contains(job.Index);
             }
         }
 
-        // Sélection multiple (checkboxes)
+        /// <summary>
+        /// Toggles the selection state of a job (for multi-selection with checkboxes).
+        /// </summary>
+        /// <param name="index">Index of the job to toggle.</param>
         public void ToggleJobSelection(int index)
         {
             if (_selectedJobIndices.Contains(index))
                 _selectedJobIndices.Remove(index);
             else
                 _selectedJobIndices.Add(index);
-            // Mettre à jour la propriété IsSelected du job concerné
+            // Update the IsSelected property of the affected job
             var job = Jobs.FirstOrDefault(j => j.Index == index);
             if (job != null)
                 job.IsSelected = _selectedJobIndices.Contains(index);
@@ -252,6 +334,10 @@ namespace EasySave.ViewModels
             UpdateAllJobsSelectedState();
         }
 
+        /// <summary>
+        /// Selects or deselects all jobs.
+        /// </summary>
+        /// <param name="select">True to select all, false to deselect all.</param>
         public void SelectAllJobs(bool select)
         {
             _selectedJobIndices.Clear();
@@ -260,7 +346,7 @@ namespace EasySave.ViewModels
                 foreach (var job in Jobs)
                     _selectedJobIndices.Add(job.Index);
             }
-            // Synchroniser la propriété IsSelected de tous les jobs
+            // Synchronize the IsSelected property of all jobs
             foreach (var job in Jobs)
             {
                 job.IsSelected = _selectedJobIndices.Contains(job.Index);
@@ -271,6 +357,9 @@ namespace EasySave.ViewModels
             Jobs = temp;
         }
 
+        /// <summary>
+        /// Updates the AreAllJobsSelected property based on the current selection.
+        /// </summary>
         private void UpdateAllJobsSelectedState()
         {
             bool allSelected = Jobs.Count > 0 && _selectedJobIndices.Count == Jobs.Count;

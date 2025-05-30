@@ -5,7 +5,8 @@ using System.Windows.Controls;
 namespace EasySave.Views
 {
     /// <summary>
-    /// Interaction logic for SettingsView.xaml
+    /// Interaction logic for SettingsView.xaml.
+    /// This page allows the user to configure application settings such as encryption, logging, and process priority.
     /// </summary>
     public partial class SettingsView : Page
     {
@@ -31,10 +32,13 @@ namespace EasySave.Views
 
         /// <summary>
         /// Event handler for the Loaded event.
-        /// Initializes the PasswordBox with the saved passphrase.
+        /// Initializes the PasswordBox with the saved passphrase from the ViewModel.
         /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">Event arguments.</param>
         private void SettingsView_Loaded(object sender, RoutedEventArgs e)
         {
+            // Set the PasswordBox value to the passphrase from the ViewModel
             PassphraseBox.Password = _viewModel.EncryptionPassphrase;
         }
 
@@ -42,6 +46,8 @@ namespace EasySave.Views
         /// Event handler for setting the priority process.
         /// Calls the ViewModel method to set the selected process as priority.
         /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">Event arguments.</param>
         private void SetPriorityButton_Click(object sender, RoutedEventArgs e)
         {
             _viewModel.SetPriorityProcess();
@@ -51,6 +57,8 @@ namespace EasySave.Views
         /// Event handler for clearing the priority process.
         /// Calls the ViewModel method to clear the priority process.
         /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">Event arguments.</param>
         private void ClearPriorityButton_Click(object sender, RoutedEventArgs e)
         {
             _viewModel.ClearPriorityProcess();
@@ -60,8 +68,8 @@ namespace EasySave.Views
         /// Event handler for navigation to the main menu.
         /// If the page is hosted in a window, resets the content to the main menu.
         /// </summary>
-        /// <param name="sender">The event sender</param>
-        /// <param name="e">Event arguments</param>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">Event arguments.</param>
         private void OnNavigateToMainMenu(object sender, EventArgs e)
         {
             // Check if the page is hosted in a window and reset its content to the main menu
@@ -75,6 +83,8 @@ namespace EasySave.Views
         /// Event handler for saving settings.
         /// Retrieves the passphrase from the PasswordBox and triggers the ViewModel's SaveCommand.
         /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">Event arguments.</param>
         private void SaveSettings_Click(object sender, RoutedEventArgs e)
         {
             var viewModel = (SettingsViewModel)DataContext;

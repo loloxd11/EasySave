@@ -437,6 +437,7 @@ namespace EasySave.ViewModels
         {
             try
             {
+                // Get all processes, filter by those with a main window or common process names
                 var processes = Process.GetProcesses()
                     .Where(p => !string.IsNullOrEmpty(p.MainWindowTitle) || IsCommonProcess(p.ProcessName))
                     .OrderBy(p => p.ProcessName)
@@ -564,7 +565,7 @@ namespace EasySave.ViewModels
 
             _configManager.SetSetting("PriorityProcess", newValue);
 
-            // Si la valeur a changé, mettre à jour le détecteur
+            // If the value has changed, update the detector
             if (oldValue != newValue)
             {
                 BackupManager.GetInstance().UpdatePriorityProcess(newValue);

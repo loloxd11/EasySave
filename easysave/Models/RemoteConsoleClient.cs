@@ -5,14 +5,23 @@ using System.Text.Json;
 namespace EasySave.Models
 {
     /// <summary>
-    /// Client pour la console distante permettant de monitorer et lancer les jobs � distance.
+    /// Client for the remote console, allowing monitoring and launching jobs remotely.
     /// </summary>
     public class RemoteConsoleClient
     {
         private readonly string _host;
         private readonly int _port;
+
+        /// <summary>
+        /// Event triggered when the list of jobs is updated.
+        /// </summary>
         public event Action<List<BackupManager.BackupJobStatusDto>>? JobsUpdated;
+
+        /// <summary>
+        /// Event triggered when the connection is lost.
+        /// </summary>
         public event Action OnDisconnected;
+
         private TcpClient _client;
         private NetworkStream _stream;
         private StreamReader _reader;
@@ -20,13 +29,20 @@ namespace EasySave.Models
         private CancellationTokenSource _listenCts;
         private bool _isManualDisconnect = false;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RemoteConsoleClient"/> class.
+        /// </summary>
+        /// <param name="host">The remote host address.</param>
+        /// <param name="port">The remote port number.</param>
         public RemoteConsoleClient(string host, int port)
         {
             _host = host;
             _port = port;
         }
 
-        // Connexion d�di�e pour le push temps r�el
+        /// <summary>
+        /// Connects to the remote server for real-time push updates.
+        /// </summary>
         public async Task ConnectAsync()
         {
             _client = new TcpClient();
@@ -37,6 +53,9 @@ namespace EasySave.Models
             _listenCts = new CancellationTokenSource();
         }
 
+        /// <summary>
+        /// Disconnects from the remote server and releases resources.
+        /// </summary>
         public void Disconnect()
         {
             try
@@ -51,13 +70,19 @@ namespace EasySave.Models
             catch { }
         }
 
+        /// <summary>
+        /// Handles the event when the connection is lost unexpectedly.
+        /// </summary>
         private void HandleConnectionLost()
         {
             if (!_isManualDisconnect)
                 OnDisconnected?.Invoke();
         }
 
-        // Connexion ponctuelle pour les commandes (LIST, START)
+        /// <summary>
+        /// Gets the list of job statuses from the server (one-time connection).
+        /// </summary>
+        /// <returns>List of <see cref="BackupManager.BackupJobStatusDto"/>.</returns>
         public async Task<List<BackupManager.BackupJobStatusDto>> GetJobStatusesAsync()
         {
             using var client = new TcpClient();
@@ -70,6 +95,11 @@ namespace EasySave.Models
             return JsonSerializer.Deserialize<List<BackupManager.BackupJobStatusDto>>(json);
         }
 
+        /// <summary>
+        /// Sends a command to start a job by index.
+        /// </summary>
+        /// <param name="index">Index of the job to start.</param>
+        /// <returns>Tuple indicating success and a message.</returns>
         public async Task<(bool Success, string Message)> StartJobAsync(int index)
         {
             using var client = new TcpClient();
@@ -90,11 +120,14 @@ namespace EasySave.Models
                 }
                 catch
                 {
-                    // Ignore les messages qui ne sont pas la r�ponse attendue
                 }
             }
         }
 
+        /// <summary>
+        /// Starts listening for real-time job updates from the server.
+        /// </summary>
+        /// <param name="token">Cancellation token to stop listening.</param>
         public void StartListening(CancellationToken token)
         {
             _listenCts = CancellationTokenSource.CreateLinkedTokenSource(token);
@@ -116,11 +149,19 @@ namespace EasySave.Models
             }, _listenCts.Token);
         }
 
+        /// <summary>
+        /// Stops listening for real-time updates.
+        /// </summary>
         public void StopListening()
         {
             _listenCts?.Cancel();
         }
 
+        /// <summary>
+        /// Sends a command to pause a job by index.
+        /// </summary>
+        /// <param name="index">Index of the job to pause.</param>
+        /// <returns>Tuple indicating success and a message.</returns>
         public async Task<(bool Success, string Message)> PauseJobAsync(int index)
         {
             using var client = new TcpClient();
@@ -133,6 +174,11 @@ namespace EasySave.Models
             return ParseResult(json);
         }
 
+        /// <summary>
+        /// Sends a command to resume a job by index.
+        /// </summary>
+        /// <param name="index">Index of the job to resume.</param>
+        /// <returns>Tuple indicating success and a message.</returns>
         public async Task<(bool Success, string Message)> ResumeJobAsync(int index)
         {
             using var client = new TcpClient();
@@ -145,6 +191,11 @@ namespace EasySave.Models
             return ParseResult(json);
         }
 
+        /// <summary>
+        /// Sends a command to stop a job by index.
+        /// </summary>
+        /// <param name="index">Index of the job to stop.</param>
+        /// <returns>Tuple indicating success and a message.</returns>
         public async Task<(bool Success, string Message)> StopJobAsync(int index)
         {
             using var client = new TcpClient();
@@ -157,6 +208,10 @@ namespace EasySave.Models
             return ParseResult(json);
         }
 
+        /// <summary>
+        /// Sends a command to pause all jobs.
+        /// </summary>
+        /// <returns>Tuple indicating success and a message.</returns>
         public async Task<(bool Success, string Message)> PauseAllJobsAsync()
         {
             using var client = new TcpClient();
@@ -169,6 +224,10 @@ namespace EasySave.Models
             return ParseResult(json);
         }
 
+        /// <summary>
+        /// Sends a command to resume all jobs.
+        /// </summary>
+        /// <returns>Tuple indicating success and a message.</returns>
         public async Task<(bool Success, string Message)> ResumeAllJobsAsync()
         {
             using var client = new TcpClient();
@@ -181,6 +240,11 @@ namespace EasySave.Models
             return ParseResult(json);
         }
 
+        /// <summary>
+        /// Parses the result JSON string into a tuple.
+        /// </summary>
+        /// <param name="json">JSON string to parse.</param>
+        /// <returns>Tuple indicating success and a message.</returns>
         private (bool Success, string Message) ParseResult(string json)
         {
             try
@@ -193,9 +257,18 @@ namespace EasySave.Models
             return (false, "Erreur de communication");
         }
 
+        /// <summary>
+        /// DTO for job start/stop/pause/resume command results.
+        /// </summary>
         private class StartJobResult
         {
+            /// <summary>
+            /// Indicates if the command was successful.
+            /// </summary>
             public bool Success { get; set; }
+            /// <summary>
+            /// Message returned by the server.
+            /// </summary>
             public string Message { get; set; }
         }
     }

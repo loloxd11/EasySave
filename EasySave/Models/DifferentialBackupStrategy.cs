@@ -3,6 +3,10 @@ using System.Security.Cryptography;
 
 namespace EasySave.Models
 {
+    /// <summary>
+    /// Implements the differential backup strategy.
+    /// Only files that have changed since the last complete backup are copied.
+    /// </summary>
     public class DifferentialBackupStrategy : AbstractBackupStrategy
     {
         private string currentFile;
@@ -11,55 +15,63 @@ namespace EasySave.Models
         private int remainFiles;
         private BackupType backupType = BackupType.Differential;
 
+        /// <summary>
+        /// Determines which files need to be copied for a differential backup.
+        /// Only files that are new or have changed since the last backup are included.
+        /// Also deletes files in the destination that no longer exist in the source.
+        /// </summary>
+        /// <param name="sourcePath">The source directory path.</param>
+        /// <param name="targetPath">The target directory path.</param>
+        /// <returns>List of file paths to copy from source to target.</returns>
         public override List<string> GetFilesToCopy(string sourcePath, string targetPath)
         {
-            // Créer le répertoire de destination s'il n'existe pas
+            // Create the destination directory if it does not exist
             if (!Directory.Exists(targetPath))
             {
                 Directory.CreateDirectory(targetPath);
             }
 
-            // Obtenir la liste des fichiers source et destination
+            // Get the list of source and destination files
             var sourceFiles = ScanDirectory(sourcePath);
             var destinationFiles = Directory.Exists(targetPath) ? ScanDirectory(targetPath) : new List<string>();
 
             var filesToCopy = new List<string>();
             var sourceRelativePaths = new HashSet<string>();
 
-            // Parcourir tous les fichiers sources
+            // Iterate through all source files
             foreach (var sourceFile in sourceFiles)
             {
-                // Obtenir le chemin relatif par rapport au répertoire source
+                // Get the relative path with respect to the source directory
                 string relativePath = sourceFile.Substring(sourcePath.Length).TrimStart(Path.DirectorySeparatorChar);
                 sourceRelativePaths.Add(relativePath);
 
-                // Calculer le chemin destination correspondant
+                // Compute the corresponding destination file path
                 string destinationFile = Path.Combine(targetPath, relativePath);
 
                 bool shouldCopy = false;
 
-                // Vérifier si le fichier existe dans la destination
+                // Check if the file exists in the destination
                 if (File.Exists(destinationFile))
                 {
-                    // Comparer les hash des fichiers pour déterminer s'il y a eu des changements
+                    // Compare file hashes to determine if there are changes
                     string sourceHash = CalculateFileHash(sourceFile);
                     string destinationHash = CalculateFileHash(destinationFile);
 
                     if (sourceHash != destinationHash)
                     {
-                        // Les fichiers sont différents, on doit copier
+                        // Files are different, need to copy
                         shouldCopy = true;
 
-                        // Supprimer l'ancien fichier
+                        // Delete the old file
                         File.Delete(destinationFile);
                     }
                 }
                 else
                 {
-                    // Le fichier n'existe pas dans la destination, on doit le copier
+                    // File does not exist in the destination, need to copy
                     shouldCopy = true;
 
-                    // Créer le répertoire de destination si nécessaire
+                    // Create the destination directory if necessary
                     Directory.CreateDirectory(Path.GetDirectoryName(destinationFile));
                 }
 
@@ -69,14 +81,14 @@ namespace EasySave.Models
                 }
             }
 
-            // Supprimer les fichiers qui existent dans la destination mais pas dans la source
+            // Delete files that exist in the destination but not in the source
             foreach (var destinationFile in destinationFiles)
             {
                 string relativePath = destinationFile.Substring(targetPath.Length).TrimStart(Path.DirectorySeparatorChar);
 
                 if (!sourceRelativePaths.Contains(relativePath))
                 {
-                    // Ce fichier existe dans la destination mais pas dans la source, le supprimer
+                    // This file exists in the destination but not in the source, delete it
                     File.Delete(destinationFile);
                 }
             }
@@ -85,10 +97,10 @@ namespace EasySave.Models
         }
 
         /// <summary>
-        /// Calcule le hash MD5 d'un fichier
+        /// Calculates the MD5 hash of a file.
         /// </summary>
-        /// <param name="filePath">Chemin du fichier</param>
-        /// <returns>Le hash MD5 sous forme de chaîne hexadécimale</returns>
+        /// <param name="filePath">Path to the file.</param>
+        /// <returns>The MD5 hash as a hexadecimal string.</returns>
         private string CalculateFileHash(string filePath)
         {
             using (var md5 = MD5.Create())

@@ -9,6 +9,11 @@ using MessageBox = System.Windows.MessageBox;
 
 namespace EasySave
 {
+    /// <summary>
+    /// Main window for the EasySave application.
+    /// Handles UI logic for backup job management, state updates, and navigation.
+    /// Implements the IStateObserver interface to receive job state notifications.
+    /// </summary>
     public partial class MainWindow : Window, IStateObserver
     {
         // Main ViewModel instance for the main menu
@@ -20,11 +25,12 @@ namespace EasySave
         private RemoteConsoleServer _remoteServer;
         private bool _isRemoteServerActive = false;
         private const int RemoteServerPort = 9000;
-        private RemoteConsoleViewControl _remoteConsoleViewControl; // Ajout d'une référence pour éviter l'ouverture multiple
+        private RemoteConsoleViewControl _remoteConsoleViewControl; // Reference to avoid multiple openings
 
         /// <summary>
         /// Constructor for MainWindow.
         /// Initializes the DataContext with the MainMenuViewModel.
+        /// Subscribes to state updates.
         /// </summary>
         public MainWindow()
         {
@@ -32,17 +38,24 @@ namespace EasySave
             _viewModel = new MainMenuViewModel();
             DataContext = _viewModel;
 
-            // S'abonner aux mises à jour d'état
+            // Subscribe to state updates
             _stateManager = StateManager.GetInstance();
             _stateManager.AttachObserver(this);
         }
 
         /// <summary>
-        /// Met à jour l'état et la progression des jobs dans l'interface utilisateur
+        /// Updates the state and progress of backup jobs in the UI.
+        /// Called by the state manager when a job changes state.
         /// </summary>
-        /// <summary>
-        /// Met à jour l'état et la progression des jobs dans l'interface utilisateur
-        /// </summary>
+        /// <param name="action">Action performed on the job (start, complete, error, pause, resume, etc.)</param>
+        /// <param name="name">Name of the backup job</param>
+        /// <param name="type">Type of backup</param>
+        /// <param name="state">Current state of the job</param>
+        /// <param name="sourcePath">Source directory path</param>
+        /// <param name="targetPath">Target directory path</param>
+        /// <param name="totalFiles">Total number of files</param>
+        /// <param name="totalSize">Total size in bytes</param>
+        /// <param name="progression">Progress percentage</param>
         public void Update(string action, string name, BackupType type, JobState state,
             string sourcePath, string targetPath, int totalFiles, long totalSize, int progression)
         {
@@ -75,12 +88,14 @@ namespace EasySave
                 }
             });
         }
+
         /// <summary>
-        /// Met à jour l'état d'un job dans l'interface utilisateur
+        /// Updates the state of a job in the UI.
+        /// Optionally updates the progress value.
         /// </summary>
-        /// <param name="name">Nom du job</param>
-        /// <param name="newState">Nouvel état du job</param>
-        /// <param name="progressValue">Valeur de progression (optionnelle, conserve la valeur actuelle si non spécifiée)</param>
+        /// <param name="name">Job name</param>
+        /// <param name="newState">New state of the job</param>
+        /// <param name="progressValue">Optional progress value (keeps current if not specified)</param>
         public void UpdateJobState(string name, JobState newState, int? progressValue = null)
         {
             Dispatcher.Invoke(() =>
@@ -90,7 +105,7 @@ namespace EasySave
                 {
                     job.State = newState;
 
-                    // Ne mettre à jour la progression que si une valeur est spécifiée
+                    // Only update progress if a value is specified
                     if (progressValue.HasValue)
                     {
                         job.Progress = progressValue.Value;
@@ -98,6 +113,7 @@ namespace EasySave
                 }
             });
         }
+
         /// <summary>
         /// Resets the current view to the MainMenu.
         /// Clears the current content, reinitializes the ViewModel, and reloads the MainMenu XAML.
@@ -120,7 +136,7 @@ namespace EasySave
                 new Uri("/EasySave;component/Views/MainMenu.xaml", UriKind.Relative)
             );
 
-            // Réattacher l'observateur après avoir rechargé la vue
+            // Reattach the observer after reloading the view
             _stateManager.AttachObserver(this);
         }
 
@@ -155,18 +171,18 @@ namespace EasySave
         }
 
         /// <summary>
-        /// Rafraîchit l'affichage des jobs dans l'interface
+        /// Refreshes the display of jobs in the UI.
+        /// Calls the ViewModel to refresh its job list and updates the DataGrid if present.
         /// </summary>
         public void RefreshJobsView()
         {
             Dispatcher.Invoke(() =>
             {
-                // Demander au ViewModel de rafraîchir sa liste de jobs
+                // Ask the ViewModel to refresh its job list
                 _viewModel.RefreshBackupJobs();
 
-                // Si vous avez un contrôle spécifique pour afficher les jobs (comme un DataGrid)
-                // vous pouvez forcer son actualisation
-                if (BackupJobsGrid != null) // Remplacer par le nom de votre DataGrid
+                // If you have a specific control to display jobs (like a DataGrid), force its refresh
+                if (BackupJobsGrid != null) // Replace with your DataGrid's name
                 {
                     BackupJobsGrid.Items.Refresh();
                 }
@@ -229,9 +245,9 @@ namespace EasySave
         {
             try
             {
-                // Exécuter les jobs sélectionnés et récupérer le résultat
+                // Execute the selected jobs and get the result
                 var result = await _viewModel.ExecuteSelectedJobsAsync();
-                // Afficher le message approprié en fonction du résultat
+                // Show the appropriate message based on the result
                 MessageBoxImage icon = result.Success ? MessageBoxImage.Information : MessageBoxImage.Warning;
                 MessageBox.Show(
                     result.Message,
@@ -264,8 +280,11 @@ namespace EasySave
         }
 
         /// <summary>
-        /// Reprend l'exécution d'un job en pause
+        /// Resumes the execution of a paused job.
+        /// Only resumes if the job is currently paused.
         /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">Event arguments.</param>
         private void ResumeButton_Click(object sender, RoutedEventArgs e)
         {
             var button = (Button)sender;
@@ -276,19 +295,22 @@ namespace EasySave
             {
                 BackupManager manager = BackupManager.GetInstance();
 
-                // Vérifier si le job est en pause avant de reprendre
+                // Check if the job is paused before resuming
                 if (manager.IsJobPaused(index))
                 {
-                    // Reprendre uniquement ce job
+                    // Resume only this job
                     manager.ResumeBackupJobs(new[] { index });
                 }
-                // Si le job n'est pas en pause, le bouton n'a pas d'effet
+                // If the job is not paused, the button has no effect
             }
         }
 
         /// <summary>
-        /// Met en pause ou reprend le job sélectionné dans la ligne
+        /// Pauses or resumes the selected job in the row.
+        /// Only pauses if the job is not already paused.
         /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">Event arguments.</param>
         private void PauseButton_Click(object sender, RoutedEventArgs e)
         {
             var button = (Button)sender;
@@ -299,18 +321,20 @@ namespace EasySave
             {
                 BackupManager manager = BackupManager.GetInstance();
 
-                // Vérifier si le job est déjà en pause
+                // Check if the job is already paused
                 if (!manager.IsJobPaused(index))
                 {
-                    // Mettre le job en pause
+                    // Pause the job
                     manager.PauseBackupJobs(new[] { index }, "Pause manuelle");
                 }
             }
         }
 
         /// <summary>
-        /// Met en pause tous les jobs actifs
+        /// Pauses all active jobs.
         /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">Event arguments.</param>
         private void PauseAllJobs_Click(object sender, RoutedEventArgs e)
         {
             BackupManager manager = BackupManager.GetInstance();
@@ -318,8 +342,10 @@ namespace EasySave
         }
 
         /// <summary>
-        /// Reprend tous les jobs en pause
+        /// Resumes all paused jobs.
         /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">Event arguments.</param>
         private void ResumeAllJobs_Click(object sender, RoutedEventArgs e)
         {
             BackupManager manager = BackupManager.GetInstance();
@@ -327,8 +353,10 @@ namespace EasySave
         }
 
         /// <summary>
-        /// Arrête immédiatement un job de sauvegarde en tuant son thread d'exécution
+        /// Immediately stops a backup job by killing its execution thread.
         /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">Event arguments.</param>
         private void StopButton_Click(object sender, RoutedEventArgs e)
         {
             var button = (Button)sender;
@@ -339,7 +367,7 @@ namespace EasySave
             {
                 BackupManager manager = BackupManager.GetInstance();
 
-                // Tuer le thread d'exécution du job
+                // Kill the job's execution thread
                 if (manager.KillBackupJob(index))
                 {
                     MessageBox.Show(
@@ -352,8 +380,10 @@ namespace EasySave
         }
 
         /// <summary>
-        /// Ouvre la console déportée (client distant) dans la fenêtre principale
+        /// Opens the remote console (remote client) in the main window.
         /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">Event arguments.</param>
         private void OpenRemoteConsole_Click(object sender, RoutedEventArgs e)
         {
             if (_remoteConsoleViewControl == null)
@@ -363,6 +393,11 @@ namespace EasySave
             this.Content = _remoteConsoleViewControl;
         }
 
+        /// <summary>
+        /// Updates the remote server status display in the UI.
+        /// Changes the text and color based on the server's active state.
+        /// </summary>
+        /// <param name="isActive">True if the server is active, false otherwise.</param>
         private void UpdateRemoteServerStatus(bool isActive)
         {
             var lang = ViewModels.LanguageViewModel.Instance;
@@ -381,6 +416,12 @@ namespace EasySave
             }
         }
 
+        /// <summary>
+        /// Handles the click event for the remote server button.
+        /// Starts or stops the remote server and updates the UI accordingly.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">Event arguments.</param>
         private void RemoteServerButton_Click(object sender, RoutedEventArgs e)
         {
             if (!_isRemoteServerActive)

@@ -34,6 +34,9 @@ namespace EasySave.ViewModels
         /// </summary>
         public LanguageViewModel LanguageViewModel { get; }
 
+        /// <summary>
+        /// Reference to the BackupManager singleton for managing backup jobs.
+        /// </summary>
         public readonly BackupManager _backupManager;
 
         /// <summary>
@@ -95,12 +98,13 @@ namespace EasySave.ViewModels
 
         /// <summary>
         /// Loads the list of backup jobs from the BackupManager.
+        /// Synchronizes the visual selection after loading.
         /// </summary>
         public void LoadBackupJobs()
         {
             var jobs = _backupManager.ListBackups();
             BackupJobs = new ObservableCollection<BackupJob>(jobs);
-            // Synchroniser la sÃ©lection visuelle aprÃ¨s chargement
+            // Synchronize visual selection after loading
             foreach (var job in BackupJobs)
             {
                 job.IsSelected = SelectedJobIndices.Contains(BackupJobs.IndexOf(job));
@@ -155,13 +159,13 @@ namespace EasySave.ViewModels
         /// <param name="select">True to select all, false to deselect all.</param>
         public void SelectAllJobs(bool select)
         {
-            // Empêcher les notifications temporairement
+            // Prevent notifications temporarily
             _isTogglingJobSelection = true;
             try
             {
                 _selectedJobIndices.Clear();
 
-                // Définir l'état IsSelected pour chaque job (sélectionné ou non)
+                // Set IsSelected state for each job (selected or not)
                 for (int i = 0; i < BackupJobs.Count; i++)
                 {
                     BackupJobs[i].IsSelected = select;
@@ -171,11 +175,11 @@ namespace EasySave.ViewModels
                     }
                 }
 
-                // Forcer l'actualisation de l'UI
+                // Force UI refresh
                 OnPropertyChanged(nameof(SelectedJobIndices));
                 OnPropertyChanged(nameof(BackupJobs));
 
-                // Forcer le rafraîchissement des lignes individuelles
+                // Force refresh of individual rows
                 foreach (var job in BackupJobs)
                 {
                     OnPropertyChanged("Item[]");
@@ -207,7 +211,7 @@ namespace EasySave.ViewModels
         private bool _isTogglingJobSelection = false;
         public void ToggleJobSelection(int index)
         {
-            // Éviter la récursion infinie
+            // Avoid infinite recursion
             if (_isTogglingJobSelection)
                 return;
 
@@ -220,7 +224,7 @@ namespace EasySave.ViewModels
                 else
                     _selectedJobIndices.Add(index);
 
-                // Mettre à jour la propriété IsSelected du job concerné
+                // Update the IsSelected property of the concerned job
                 if (index >= 0 && index < BackupJobs.Count)
                     BackupJobs[index].IsSelected = _selectedJobIndices.Contains(index);
 
@@ -254,15 +258,15 @@ namespace EasySave.ViewModels
         /// <summary>
         /// Executes the selected backup jobs.
         /// </summary>
+        /// <returns>Tuple indicating success and a message.</returns>
         public async Task<(bool Success, string Message)> ExecuteSelectedJobsAsync()
         {
             if (SelectedJobIndices.Count == 0)
-                return (false, "Aucun job sÃ©lectionnÃ©");
+                return (false, "No job selected");
 
             var result = await _backupManager.ExecuteJobsAsync(SelectedJobIndices.ToList());
             return result;
         }
-
 
         /// <summary>
         /// Determines if jobs can be deleted (at least one selected).
@@ -340,15 +344,15 @@ namespace EasySave.ViewModels
         }
 
         /// <summary>
-        /// Rafraîchit la liste des jobs de sauvegarde
+        /// Refreshes the list of backup jobs.
         /// </summary>
         public void RefreshBackupJobs()
         {
-            // Récupérer la liste des jobs depuis le BackupManager
+            // Retrieve the list of jobs from the BackupManager
             var manager = BackupManager.GetInstance();
             var updatedJobs = manager.ListBackups();
 
-            // Mettre à jour la liste observable
+            // Update the observable list
             BackupJobs.Clear();
             foreach (var job in updatedJobs)
             {

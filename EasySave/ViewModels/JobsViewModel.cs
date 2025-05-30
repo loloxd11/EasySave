@@ -113,6 +113,7 @@ namespace EasySave.ViewModels
             LanguageViewModel = LanguageViewModel.Instance;
             isEditMode = false;
 
+            // Initialize commands for validation and cancellation
             ValidateCommand = new RelayCommand(ValidateJob);
             CancelCommand = new RelayCommand(() =>
             {
@@ -138,6 +139,7 @@ namespace EasySave.ViewModels
             TargetPath = jobToEdit.Destination;
             SelectedBackupType = jobToEdit.Type;
 
+            // Initialize commands for validation and cancellation
             ValidateCommand = new RelayCommand(ValidateJob);
             CancelCommand = new RelayCommand(() =>
             {
@@ -252,10 +254,12 @@ namespace EasySave.ViewModels
 
             if (success)
             {
+                // If the operation is successful, navigate back to the main menu
                 NavigateToMainMenu?.Invoke(this, EventArgs.Empty);
             }
             else
             {
+                // Show error message if saving the job failed
                 System.Windows.MessageBox.Show(
                     LanguageViewModel["JobSaveError"] ?? "Error saving the job.",
                     LanguageViewModel["Error"] ?? "Error",

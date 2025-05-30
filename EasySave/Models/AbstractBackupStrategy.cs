@@ -27,7 +27,15 @@ namespace EasySave.Models
         /// Total size of all files to process in the backup (in bytes).
         /// </summary>
         protected long totalSize;
+
+        /// <summary>
+        /// Current progress value of the backup job.
+        /// </summary>
         protected int currentProgress;
+
+        /// <summary>
+        /// Timestamp of the last file processed (in ticks).
+        /// </summary>
         protected long LastFileTime;
 
         /// <summary>
@@ -36,9 +44,8 @@ namespace EasySave.Models
         protected string name;
 
         /// <summary>
-        /// Attach an observer to receive updates about the backup job.
+        /// Static class containing standardized action names for backup notifications.
         /// </summary>
-        /// <param name="observer">The observer to attach.</param>
         public static class BackupActions
         {
             public const string Start = "start";
@@ -48,6 +55,11 @@ namespace EasySave.Models
             public const string Error = "error";
             public const string Progress = "progress";
         }
+
+        /// <summary>
+        /// Attach an observer to receive updates about the backup job.
+        /// </summary>
+        /// <param name="observer">The observer to attach.</param>
         public void AttachObserver(IObserver observer)
         {
             if (!observers.Contains(observer))
@@ -56,19 +68,27 @@ namespace EasySave.Models
             }
         }
 
+        /// <summary>
+        /// Abstract method to get the list of files to copy for the backup.
+        /// </summary>
+        /// <param name="sourcePath">Source directory path.</param>
+        /// <param name="targetPath">Target directory path.</param>
+        /// <returns>List of file paths to copy.</returns>
         public abstract List<string> GetFilesToCopy(string sourcePath, string targetPath);
 
         /// <summary>
-        /// Méthode unifiée pour notifier tous les observateurs avec différents types de mises à jour
+        /// Unified method to notify all observers with different types of backup job updates.
         /// </summary>
-        /// <param name="action">Type d'action (start, processing, transfer, complete, error, progress)</param>
-        /// <param name="name">Nom du travail de sauvegarde</param>
-        /// <param name="sourcePath">Chemin source (peut être vide pour les mises à jour de progression)</param>
-        /// <param name="targetPath">Chemin cible (peut être vide pour les mises à jour de progression)</param>
-        /// <param name="fileSize">Taille du fichier (pour les transferts)</param>
-        /// <param name="transferTime">Temps de transfert (pour les transferts)</param>
-        /// <param name="encryptionTime">Temps de chiffrement (pour les transferts)</param>
-        /// <param name="currentProgress">Valeur de progression actuelle (optionnel, utilisé pour les mises à jour de progression)</param>
+        /// <param name="action">Type of action (start, processing, transfer, complete, error, progress).</param>
+        /// <param name="name">Name of the backup job.</param>
+        /// <param name="state">Current state of the backup job.</param>
+        /// <param name="sourcePath">Source path (can be empty for progress updates).</param>
+        /// <param name="targetPath">Target path (can be empty for progress updates).</param>
+        /// <param name="totalFiles">Total number of files involved in the backup.</param>
+        /// <param name="totalSize">Total size of files in bytes.</param>
+        /// <param name="transferTime">Time taken for file transfer (for transfers).</param>
+        /// <param name="encryptionTime">Time taken for encryption (for transfers).</param>
+        /// <param name="currentProgress">Current progress value (optional, used for progress updates).</param>
         public void NotifyObserver(
             string action,
             string name,
@@ -81,12 +101,10 @@ namespace EasySave.Models
             long encryptionTime = 0,
             int currentProgress = 0)
         {
-
-            // Déterminer le type de sauvegarde en cours
+            // Determine the type of backup currently running
             BackupType backupType = this is CompleteBackupStrategy ? BackupType.Complete : BackupType.Differential;
 
-            // Les paramètres fileSize, transferTime et encryptionTime pourraient être ajoutés à l'interface IObserver
-            // si nécessaire, mais pour l'instant ils ne sont pas utilisés dans l'appel à Update
+            // Notify all observers with the update
             foreach (var observer in observers)
             {
                 observer.Update(action, name, backupType, state, sourcePath, targetPath,
@@ -101,9 +119,9 @@ namespace EasySave.Models
         /// <param name="target">Target path of the current file.</param>
         public void UpdateCurrentFile(string source, string target)
         {
-            // Update current file being processed
+            // Update the timestamp for the last file processed
             LastFileTime = DateTime.Now.Ticks;
-            // Utiliser les constantes standardisées et passer l'état correctement
+            // Notify observers about the file being processed
             NotifyObserver(BackupActions.Processing, name, state, source, target);
         }
 
@@ -140,7 +158,7 @@ namespace EasySave.Models
             }
             catch (Exception ex)
             {
-                // Log exception
+                // Log exception if directory cannot be accessed
                 Console.WriteLine($"Error scanning directory {path}: {ex.Message}");
             }
 
@@ -161,6 +179,7 @@ namespace EasySave.Models
             }
             catch (Exception)
             {
+                // Return 0 if file cannot be accessed
                 return 0;
             }
         }

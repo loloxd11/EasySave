@@ -12,6 +12,9 @@ namespace EasySave.Views
     /// </summary>
     public partial class Jobs : Page
     {
+        /// <summary>
+        /// ViewModel instance for managing backup jobs.
+        /// </summary>
         private JobsViewModel _viewModel;
 
         /// <summary>
@@ -43,8 +46,11 @@ namespace EasySave.Views
         /// <summary>
         /// Handles navigation back to the main menu when requested by the view model.
         /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">Event arguments.</param>
         private void OnNavigateToMainMenu(object sender, EventArgs e)
         {
+            // Get the parent window and reset to the main menu
             if (Window.GetWindow(this) is MainWindow mainWindow)
             {
                 mainWindow.ResetToMainMenu();
@@ -55,8 +61,11 @@ namespace EasySave.Views
         /// Opens a folder browser dialog for selecting the source folder.
         /// Updates the view model with the selected path.
         /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">Event arguments.</param>
         private void SelectSourceFolder_Click(object sender, RoutedEventArgs e)
         {
+            // Show folder browser dialog for source path selection
             WinForm.FolderBrowserDialog folderDialog = new WinForm.FolderBrowserDialog { };
             if (folderDialog.ShowDialog() == WinForm.DialogResult.OK)
             {
@@ -68,8 +77,11 @@ namespace EasySave.Views
         /// Opens a folder browser dialog for selecting the target folder.
         /// Updates the view model with the selected path.
         /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">Event arguments.</param>
         private void SelectTargetFolder_Click(object sender, RoutedEventArgs e)
         {
+            // Show folder browser dialog for target path selection
             WinForm.FolderBrowserDialog folderDialog = new WinForm.FolderBrowserDialog { };
             if (folderDialog.ShowDialog() == WinForm.DialogResult.OK)
             {

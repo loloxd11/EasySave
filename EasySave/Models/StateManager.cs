@@ -79,8 +79,14 @@ namespace EasySave.Models
             /// </summary>
             public long TotalSize { get; set; }
 
+            /// <summary>
+            /// Time taken to transfer files (in ms).
+            /// </summary>
             public long TransfertTime { get; set; }
 
+            /// <summary>
+            /// Time taken to encrypt files (in ms).
+            /// </summary>
             public long EncryptionTime { get; set; }
 
             /// <summary>
@@ -128,14 +134,15 @@ namespace EasySave.Models
         /// <param name="targetPath">Target path.</param>
         /// <param name="totalFiles">Total files.</param>
         /// <param name="totalSize">Total size.</param>
-        /// <param name="transfertTime">The time to tranfert file</param>
-        /// <param name="encryptionTime">The time to encrypt the file if needed</param>
+        /// <param name="transfertTime">The time to transfer file.</param>
+        /// <param name="encryptionTime">The time to encrypt the file if needed.</param>
         /// <param name="progression">Progression value.</param>
         public void Update(string action, string name, BackupType type, JobState state,
             string sourcePath, string targetPath, int totalFiles, long totalSize, long transfertTime, long encryptionTime, int progression)
         {
             lock (lockObject)
             {
+                // Handle job state update based on action
                 if (action == "start")
                 {
                     InitializeJobState(name, type, state, sourcePath, targetPath, totalFiles, totalSize, progression);
@@ -150,14 +157,14 @@ namespace EasySave.Models
                 }
                 else if (action == "pause" || action == "resume")
                 {
-                    // Pour la pause et la reprise, préserver l'action d'origine
+                    // For pause and resume, preserve the original action
                     JobStateInfo jobState = GetOrCreateJobState(name);
                     jobState.Type = type;
                     jobState.State = state;
                     jobState.SourcePath = sourcePath;
                     jobState.TargetPath = targetPath;
 
-                    // Notifier avec l'action originale préservée
+                    // Notify with the original action preserved
                     foreach (var observer in stateObservers)
                     {
                         observer.Update(action, name, type, state, sourcePath, targetPath,
@@ -165,7 +172,7 @@ namespace EasySave.Models
                     }
 
                     SaveStateFile();
-                    return; // On retourne directement pour éviter l'appel à NotifyObservers à la fin
+                    return; // Return directly to avoid calling NotifyObservers at the end
                 }
                 else
                 {
@@ -197,15 +204,14 @@ namespace EasySave.Models
             jobState.SourcePath = sourcePath;
             jobState.TargetPath = targetPath;
 
-            // Assurez-vous que TotalFiles soit toujours initialisé avec la valeur correcte
-            // et ne change pas pendant l'exécution
+            // Ensure TotalFiles is always initialized with the correct value and does not change during execution
             if (jobState.TotalFiles == 0 && totalFiles > 0)
             {
                 jobState.TotalFiles = totalFiles;
             }
 
             jobState.TotalSize = totalSize;
-            // Calculer la progression en pourcentage
+            // Calculate progression as a percentage
             jobState.Progression = (int)Math.Min(100, Math.Round((double)progression / jobState.TotalFiles * 100));
 
             SaveStateFile();
@@ -250,7 +256,7 @@ namespace EasySave.Models
         /// <param name="totalSize">Total size.</param>
         /// <param name="progression">Progression value.</param>
         public void FinalizeJobState(string name, BackupType type, JobState state,
-    string sourcePath, string targetPath, int totalFiles, long totalSize, int progression)
+            string sourcePath, string targetPath, int totalFiles, long totalSize, int progression)
         {
             JobStateInfo jobState = GetOrCreateJobState(name);
 
@@ -259,7 +265,7 @@ namespace EasySave.Models
             jobState.SourcePath = sourcePath;
             jobState.TargetPath = targetPath;
 
-            // Ne pas modifier TotalFiles lors de la finalisation
+            // Do not modify TotalFiles during finalization
             if (jobState.TotalFiles == 0 && totalFiles > 0)
             {
                 jobState.TotalFiles = totalFiles;
@@ -267,15 +273,14 @@ namespace EasySave.Models
 
             jobState.TotalSize = totalSize;
 
-            // Pour un job complété, aucun fichier ne reste à traiter
+            // For a completed job, no files remain to be processed
             if (state == JobState.completed)
             {
                 jobState.Progression = 100;
             }
             else
             {
-
-                // Calculer la progression en pourcentage
+                // Calculate progression as a percentage
                 jobState.Progression = jobState.TotalFiles > 0
                     ? (int)Math.Min(100, Math.Round((double)progression / jobState.TotalFiles * 100))
                     : 0;

@@ -3,6 +3,9 @@ using System.IO;
 
 namespace EasySave.Models
 {
+    /// <summary>
+    /// Represents a backup job, including its configuration, execution logic, and observer notification.
+    /// </summary>
     public class BackupJob : INotifyPropertyChanged
     {
         // Name of the backup job
@@ -15,15 +18,21 @@ namespace EasySave.Models
         private BackupType type;
         // Strategy used to execute the backup
         private AbstractBackupStrategy backupStrategy;
+        // Current state of the job
         private JobState _state = JobState.inactive;
+        // Progress percentage of the job
         private int _progress = 0;
 
-        // Référence au BackupManager pour vérifier l'état de pause
+        // Reference to the BackupManager to check pause state
         private BackupManager _backupManager;
-        // Index du job dans la liste du BackupManager
+        // Index of the job in the BackupManager's list
         private int _jobIndex = -1;
 
+        // Indicates if the job is selected in the UI
         private bool _isSelected;
+        /// <summary>
+        /// Gets or sets whether the job is selected in the UI.
+        /// </summary>
         public bool IsSelected
         {
             get => _isSelected;
@@ -37,49 +46,64 @@ namespace EasySave.Models
             }
         }
 
+        /// <summary>
+        /// Event triggered when a property value changes.
+        /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
-
-        // Méthode pour configurer la connexion avec le BackupManager
+        /// <summary>
+        /// Configures the connection with the BackupManager.
+        /// </summary>
+        /// <param name="jobIndex">Index of the job in the manager's list.</param>
+        /// <param name="backupManager">Reference to the BackupManager.</param>
         public void SetManagerInfo(int jobIndex, BackupManager backupManager)
         {
             _jobIndex = jobIndex;
             _backupManager = backupManager;
         }
 
-        // Méthode pour vérifier si le job devrait être en pause
+        /// <summary>
+        /// Indicates if the job is currently paused.
+        /// </summary>
         public bool IsPaused => _backupManager != null && _jobIndex >= 0 && _backupManager.IsJobPaused(_jobIndex);
 
-        // Méthode pour attendre si le job est en pause
-        // Méthode pour attendre si le job est en pause
+        /// <summary>
+        /// Waits if the job is paused, supporting cancellation and observer notification.
+        /// </summary>
+        /// <param name="cancellationToken">Token to support cancellation.</param>
+        /// <param name="sourcePath">Source path for observer notification.</param>
+        /// <param name="targetPath">Target path for observer notification.</param>
+        /// <param name="totalFiles">Total files for observer notification.</param>
+        /// <param name="totalSize">Total size for observer notification.</param>
+        /// <param name="currentProgress">Current progress for observer notification.</param>
         public void WaitIfPaused(CancellationToken cancellationToken = default, string sourcePath = "", string targetPath = "", int totalFiles = 0,
                                   long totalSize = 0, int currentProgress = 0)
         {
             if (_backupManager == null || _jobIndex < 0)
                 return;
 
-            // Tant que le job est en pause, on attend
+            // Wait while the job is paused
             while (_backupManager.IsJobPaused(_jobIndex))
             {
-                // Vérifier si l'annulation a été demandée
+                // Check for cancellation
                 if (cancellationToken.IsCancellationRequested)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
                 }
 
-                Console.WriteLine($"Job '{Name}' (indice {_jobIndex}) en attente de reprise...");
+                Console.WriteLine($"Job '{Name}' (index {_jobIndex}) waiting for resume...");
                 _state = JobState.paused;
 
                 NotifyObservers("pause", Name, State, sourcePath, targetPath, totalFiles, totalSize, 0, 0, currentProgress);
 
                 try
                 {
-                    // Utiliser le CancellationToken fourni pour permettre l'annulation pendant la pause
+                    // Use the provided CancellationToken to allow cancellation during pause
                     _backupManager.WaitForJobResume(_jobIndex, cancellationToken);
                 }
                 catch (OperationCanceledException)
                 {
-                    // Propager l'exception pour annuler l'opération
+                    // Propagate the exception to cancel the operation
                     throw;
                 }
                 if (State == JobState.paused)
@@ -87,24 +111,46 @@ namespace EasySave.Models
                     _state = JobState.active;
                     NotifyObservers("resume", Name, State, sourcePath, targetPath, totalFiles, totalSize, 0, 0, currentProgress);
                 }
-                // Courte pause pour éviter une consommation CPU excessive
+                // Short sleep to avoid high CPU usage
                 Thread.Sleep(100);
             }
         }
 
+        /// <summary>
+        /// Notifies listeners that a property value has changed.
+        /// </summary>
+        /// <param name="propertyName">The name of the property that changed.</param>
         protected virtual void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
+        // List of observers to notify about job updates
         private List<IObserver> observers = new List<IObserver>();
 
+        /// <summary>
+        /// Attaches an observer to receive job updates.
+        /// </summary>
+        /// <param name="observer">The observer to attach.</param>
         public void AttachObserver(IObserver observer)
         {
             if (!observers.Contains(observer))
                 observers.Add(observer);
         }
 
+        /// <summary>
+        /// Notifies all attached observers of a job update.
+        /// </summary>
+        /// <param name="action">Action type (start, processing, pause, resume, complete, error, cancelled).</param>
+        /// <param name="name">Job name.</param>
+        /// <param name="state">Current job state.</param>
+        /// <param name="sourcePath">Source path.</param>
+        /// <param name="targetPath">Target path.</param>
+        /// <param name="totalFiles">Total number of files.</param>
+        /// <param name="totalSize">Total size in bytes.</param>
+        /// <param name="transferTime">Transfer time in ms.</param>
+        /// <param name="encryptionTime">Encryption time in ms.</param>
+        /// <param name="currentProgress">Current progress value.</param>
         private void NotifyObservers(string action, string name, JobState state,
                                         string sourcePath = "", string targetPath = "", int totalFiles = 0,
                                         long totalSize = 0, long transferTime = 0, long encryptionTime = 0,
@@ -128,7 +174,6 @@ namespace EasySave.Models
             }
         }
 
-
         /// <summary>
         /// Initializes a new instance of the <see cref="BackupJob"/> class.
         /// </summary>
@@ -145,6 +190,12 @@ namespace EasySave.Models
             this.type = type;
             this.backupStrategy = strategy;
         }
+
+        /// <summary>
+        /// Executes the backup job using the configured strategy.
+        /// </summary>
+        /// <param name="cancellationToken">Token to support cancellation.</param>
+        /// <returns>True if the job completed successfully, false otherwise.</returns>
         public bool ExecuteJob(CancellationToken cancellationToken = default)
         {
             try
@@ -161,6 +212,14 @@ namespace EasySave.Models
             }
         }
 
+        /// <summary>
+        /// Copies the specified files from the source to the target directory, handling encryption, progress, and observer notification.
+        /// </summary>
+        /// <param name="filesToCopy">List of files to copy.</param>
+        /// <param name="sourcePath">Source directory path.</param>
+        /// <param name="targetPath">Target directory path.</param>
+        /// <param name="cancellationToken">Token to support cancellation.</param>
+        /// <returns>True if all files were copied successfully, false otherwise.</returns>
         public bool CopyFiles(List<string> filesToCopy, string sourcePath, string targetPath, CancellationToken cancellationToken = default)
         {
             try
@@ -170,16 +229,16 @@ namespace EasySave.Models
                 int currentProgress = 0;
                 State = JobState.active;
 
-                // Notifier le début
+                // Notify observers of the start
                 NotifyObservers("start", Name, State, sourcePath, targetPath, totalFiles, totalSize, 0, 0, 0);
 
                 var encryptionService = EncryptionService.GetInstance();
                 var transferCoordinator = TransferCoordinator.Instance;
 
-                // 1. Enregistrer tous les fichiers prioritaires en attente
+                // 1. Register all pending priority files
                 foreach (var file in filesToCopy)
                 {
-                    // Vérifier si l'annulation a été demandée
+                    // Check for cancellation
                     cancellationToken.ThrowIfCancellationRequested();
 
                     string ext = Path.GetExtension(file);
@@ -189,14 +248,14 @@ namespace EasySave.Models
                     }
                 }
 
+                // Sort files so priority files are processed first
                 filesToCopy = filesToCopy
                     .OrderByDescending(f => transferCoordinator.IsPriorityExtension(Path.GetExtension(f)))
                     .ToList();
 
-
                 foreach (var sourceFile in filesToCopy)
                 {
-                    // Vérifier si l'annulation a été demandée
+                    // Check for cancellation
                     cancellationToken.ThrowIfCancellationRequested();
 
                     string relativePath = Path.GetRelativePath(sourcePath, sourceFile);
@@ -209,22 +268,22 @@ namespace EasySave.Models
                     string ext = Path.GetExtension(sourceFile);
                     bool isPriority = transferCoordinator.IsPriorityExtension(ext);
 
-                    // Vérifier si le job doit être en pause avant chaque fichier
+                    // Wait if the job is paused before each file
                     WaitIfPaused(cancellationToken, sourcePath, targetPath, totalFiles, totalSize, currentProgress);
 
-                    // 2. Demander l'autorisation de transfert
+                    // 2. Request transfer authorization
                     transferCoordinator.RequestTransfer(sourceFile, fileSize);
 
                     try
                     {
-                        // Mesurer le temps de transfert
+                        // Measure transfer time
                         var sw = System.Diagnostics.Stopwatch.StartNew();
                         File.Copy(sourceFile, destFile, true);
                         sw.Stop();
                         long transferTime = sw.ElapsedMilliseconds;
 
                         long encryptionTime = 0;
-                        // Vérifier si le fichier doit être chiffré
+                        // Encrypt the file if required
                         if (encryptionService.ShouldEncryptFile(destFile))
                         {
                             encryptionTime = encryptionService.EncryptFile(destFile);
@@ -232,15 +291,15 @@ namespace EasySave.Models
 
                         currentProgress++;
 
-                        // Notifier la progression avec le temps de transfert et de chiffrement
+                        // Notify observers of progress, including transfer and encryption times
                         NotifyObservers("processing", Name, State, sourceFile, destFile, totalFiles, totalSize, transferTime, encryptionTime, currentProgress);
                     }
                     finally
                     {
-                        // 3. Libérer la ressource après transfert
+                        // 3. Release the resource after transfer
                         transferCoordinator.ReleaseTransfer(sourceFile);
 
-                        // 4. Si prioritaire, désenregistrer
+                        // 4. Unregister if priority
                         if (isPriority)
                         {
                             transferCoordinator.UnregisterPendingPriorityFile(sourceFile);
@@ -248,7 +307,7 @@ namespace EasySave.Models
                     }
                 }
 
-                // Notifier la fin
+                // Notify observers of completion
                 State = JobState.completed;
                 Progress = 100;
                 NotifyObservers("complete", Name, State, sourcePath, targetPath, totalFiles, totalSize, 0, 0, currentProgress);
@@ -256,7 +315,7 @@ namespace EasySave.Models
             }
             catch (OperationCanceledException)
             {
-                // Attraper l'exception d'annulation pour effectuer le nettoyage nécessaire
+                // Handle cancellation and notify observers
                 State = JobState.inactive;
                 NotifyObservers("cancelled", Name, State, sourcePath, targetPath, 0, 0, 0, 0, 0);
                 return false;
@@ -265,11 +324,10 @@ namespace EasySave.Models
             {
                 State = JobState.error;
                 NotifyObservers("error", Name, State, sourcePath, targetPath, 0, 0, 0, 0, 0);
-                Console.WriteLine($"Erreur lors de la copie des fichiers pour '{Name}': {ex.Message}");
+                Console.WriteLine($"Error while copying files for '{Name}': {ex.Message}");
                 return false;
             }
         }
-
 
         // Properties to access private fields
 
@@ -291,7 +349,6 @@ namespace EasySave.Models
         /// <summary>
         /// Gets the index of the job in the BackupManager's list.
         /// </summary>
-        
         public int JobIndex => _jobIndex;
 
         /// <summary>
@@ -299,6 +356,10 @@ namespace EasySave.Models
         /// </summary>
         public BackupType Type => type;
 
+        /// <summary>
+        /// Gets or sets the current state of the backup job.
+        /// Notifies property change listeners when the value changes.
+        /// </summary>
         public JobState State
         {
             get => _state;

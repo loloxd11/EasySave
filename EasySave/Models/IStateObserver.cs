@@ -18,7 +18,16 @@
         /// <param name="totalFiles">The total number of files involved in the backup.</param>
         /// <param name="totalSize">The total size of the files in bytes.</param>
         /// <param name="progression">The progression percentage of the backup job.</param>
-        void Update(string action, string name, BackupType type, JobState state,
-            string sourcePath, string targetPath, int totalFiles, long totalSize, int progression);
+        void Update(
+            string action, // Action performed on the backup job (e.g., start, stop, complete)
+            string name, // Name of the backup job
+            BackupType type, // Type of backup (Complete or Differential)
+            JobState state, // Current state of the backup job
+            string sourcePath, // Source directory path for the backup
+            string targetPath, // Target directory path for the backup
+            int totalFiles, // Total number of files involved in the backup
+            long totalSize, // Total size of the files in bytes
+            int progression // Progression percentage of the backup job
+        );
     }
 }

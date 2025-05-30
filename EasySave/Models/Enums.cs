@@ -38,11 +38,11 @@
         error,
         /// <summary>
         /// The job is currently paused.
-        /// 
+        /// </summary>
         paused,
         /// <summary>
-        /// The job is stopped
-        /// 
+        /// The job is stopped.
+        /// </summary>
         stopped
     }
 

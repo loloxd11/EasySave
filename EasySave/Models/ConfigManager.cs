@@ -4,6 +4,11 @@ using System.Text.Json.Serialization;
 
 namespace EasySave.Models
 {
+    /// <summary>
+    /// Singleton class responsible for managing application configuration,
+    /// including settings and backup jobs. Handles loading and saving configuration
+    /// from/to a JSON file in the user's AppData directory.
+    /// </summary>
     public class ConfigManager
     {
         private static ConfigManager _instance;
@@ -11,20 +16,49 @@ namespace EasySave.Models
         private Dictionary<string, string> settings;
         private ConfigDataWithJobs configData;
 
+        /// <summary>
+        /// Internal class representing the structure of the configuration file,
+        /// including application settings and backup jobs.
+        /// </summary>
         private class ConfigDataWithJobs
         {
+            /// <summary>
+            /// Dictionary of application settings (key-value pairs).
+            /// </summary>
             public Dictionary<string, string> Settings { get; set; } = new Dictionary<string, string>();
+            /// <summary>
+            /// List of backup job configurations.
+            /// </summary>
             public List<BackupJobConfig> BackupJobs { get; set; } = new List<BackupJobConfig>();
 
+            /// <summary>
+            /// Represents the configuration for a single backup job.
+            /// </summary>
             public class BackupJobConfig
             {
+                /// <summary>
+                /// Name of the backup job.
+                /// </summary>
                 public string Name { get; set; }
+                /// <summary>
+                /// Source directory path.
+                /// </summary>
                 public string Source { get; set; }
+                /// <summary>
+                /// Destination directory path.
+                /// </summary>
                 public string Destination { get; set; }
+                /// <summary>
+                /// Type of backup (Complete or Differential).
+                /// </summary>
                 public BackupType Type { get; set; }
             }
         }
 
+        /// <summary>
+        /// Private constructor to enforce singleton pattern.
+        /// Initializes configuration file path and data structures.
+        /// </summary>
         private ConfigManager()
         {
             string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
@@ -33,6 +67,10 @@ namespace EasySave.Models
             configData = new ConfigDataWithJobs();
         }
 
+        /// <summary>
+        /// Gets the singleton instance of ConfigManager.
+        /// </summary>
+        /// <returns>The singleton ConfigManager instance.</returns>
         public static ConfigManager GetInstance()
         {
             if (_instance == null)
@@ -42,6 +80,11 @@ namespace EasySave.Models
             return _instance;
         }
 
+        /// <summary>
+        /// Loads the configuration from the JSON file.
+        /// Populates settings and backup jobs from the file.
+        /// </summary>
+        /// <returns>True if configuration was loaded successfully, false otherwise.</returns>
         public bool LoadConfiguration()
         {
             try
@@ -58,8 +101,6 @@ namespace EasySave.Models
 
                     Console.WriteLine(configData.BackupJobs.Count + " backup jobs loaded.");
 
-
-
                     LoadBackupJobs();
                     LoadLogFormat();
 
@@ -75,23 +116,26 @@ namespace EasySave.Models
             }
         }
 
+        /// <summary>
+        /// Loads backup jobs from the configuration and adds them to the BackupManager.
+        /// </summary>
         public void LoadBackupJobs()
         {
-            // Récupérer l'instance du BackupManager
+            // Get the instance of BackupManager
             BackupManager manager = BackupManager.GetInstance();
 
-            // Vérifier si des jobs de sauvegarde existent dans la configuration
+            // Check if backup jobs exist in the configuration
             if (configData.BackupJobs != null && configData.BackupJobs.Count > 0)
             {
-                // Parcourir chaque tâche de sauvegarde dans la configuration
+                // Iterate through each backup job in the configuration
                 foreach (var jobConfig in configData.BackupJobs)
                 {
-                    // Vérifier que les données nécessaires sont présentes
+                    // Ensure required data is present
                     if (!string.IsNullOrEmpty(jobConfig.Name) &&
                         !string.IsNullOrEmpty(jobConfig.Source) &&
                         !string.IsNullOrEmpty(jobConfig.Destination))
                     {
-                        // Ajouter la tâche au BackupManager
+                        // Add the job to the BackupManager
                         manager.AddBackupJob(
                             jobConfig.Name,
                             jobConfig.Source,
@@ -103,6 +147,9 @@ namespace EasySave.Models
             }
         }
 
+        /// <summary>
+        /// Loads the log format setting from the configuration and applies it to the LogManager.
+        /// </summary>
         public void LoadLogFormat()
         {
             // Logic to load log format from configuration
@@ -111,11 +158,15 @@ namespace EasySave.Models
                 if (Enum.TryParse<LogFormat>(formatStr, out LogFormat format))
                 {
                     // Set the log format in the LogManager
-                    //object value = LogManager.GetInstance("logs").SetFormat(format);
+                    // object value = LogManager.GetInstance("logs").SetFormat(format);
                 }
             }
         }
 
+        /// <summary>
+        /// Saves the current configuration (settings and backup jobs) to the JSON file.
+        /// </summary>
+        /// <returns>True if configuration was saved successfully, false otherwise.</returns>
         public bool SaveConfiguration()
         {
             try
@@ -138,7 +189,7 @@ namespace EasySave.Models
 
                 string json = JsonSerializer.Serialize(configData, options);
 
-                // Assurez-vous que le répertoire existe
+                // Ensure the directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(configFilePath));
                 File.WriteAllText(configFilePath, json);
 
@@ -151,6 +202,11 @@ namespace EasySave.Models
             }
         }
 
+        /// <summary>
+        /// Gets the value of a setting by key.
+        /// </summary>
+        /// <param name="key">The setting key.</param>
+        /// <returns>The setting value, or an empty string if not found.</returns>
         public string GetSetting(string key)
         {
             if (settings.TryGetValue(key, out string value))
@@ -160,12 +216,15 @@ namespace EasySave.Models
             return string.Empty;
         }
 
+        /// <summary>
+        /// Sets the value of a setting and saves the configuration.
+        /// </summary>
+        /// <param name="key">The setting key.</param>
+        /// <param name="value">The setting value.</param>
         public void SetSetting(string key, string value)
         {
             settings[key] = value;
             SaveConfiguration();
         }
-
-
     }
 }
