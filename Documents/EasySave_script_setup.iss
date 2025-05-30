@@ -44,7 +44,7 @@ Source: "C:\Users\lecle\source\repos\loloxd11\EasySave\EasySave\bin\Release\net8
 Source: "C:\Users\lecle\AppData\Roaming\EasySave\default_config.json"; DestDir: "{userappdata}\EasySave"; DestName: "config.json"; Flags: onlyifdoesntexist
 
 ; CryptoSoft.exe à copier si besoin
-Source: "C:\Program Files\CryptoSoft\CryptoSoft.exe"; DestDir: "{tmp}"; Flags: dontcopy
+Source: "C:\Program Files\CryptoSoft\CryptoSoft.exe"; DestDir: "{tmp}"; Flags: ignoreversion
 
 [Registry]
 Root: HKA; Subkey: "Software\Classes\{#MyAppAssocExt}\OpenWithProgids"; ValueType: string; ValueName: "{#MyAppAssocKey}"; ValueData: ""; Flags: uninsdeletevalue
