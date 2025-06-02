@@ -236,11 +236,13 @@
                             </ListBox>
                             <Button Grid.Column="1" 
                                     x:Name="SetPriorityButton"
-                                    Command="{Binding SetPriorityCommand}"
                                     Content="{Binding LanguageViewModel[SetAsPriority]}" 
-                                    Style="{StaticResource GreenButton}"
+                                    Padding="10,5" 
                                     Margin="10,0,0,0"
                                     VerticalAlignment="Top"
+                                    Background="#5cb85c" 
+                                    Foreground="White"
+                                    Click="SetPriorityButton_Click"
                                     IsEnabled="{Binding SelectedProcess, Converter={StaticResource ResourceKey=NotNullConverter}}"/>
                         </Grid>
                     </StackPanel>
