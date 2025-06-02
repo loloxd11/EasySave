@@ -207,11 +207,17 @@
                             <Button x:Name="RefreshProcessesButton" 
                                     Command="{Binding RefreshProcessesCommand}" 
                                     Content="{Binding LanguageViewModel[RefreshProcessList]}" 
-                                    Style="{StaticResource ModernButton}"/>
+                                    Padding="10,5" 
+                                    Margin="0,0,10,0"
+                                    Background="#0275d8" 
+                                    Foreground="White"/>
+
                             <Button x:Name="ClearPriorityButton" 
-                                    Command="{Binding ClearPriorityCommand}"
                                     Content="{Binding LanguageViewModel[ClearPriority]}" 
-                                    Style="{StaticResource OrangeButton}"/>
+                                    Padding="10,5" 
+                                    Background="#f0ad4e" 
+                                    Foreground="White"
+                                    Click="ClearPriorityButton_Click"/>
                         </StackPanel>
                         <Grid>
                             <Grid.ColumnDefinitions>
